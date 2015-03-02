@@ -1,0 +1,20 @@
+module event {
+    yang-version 1;
+    namespace "http://juniper.net/ns/space/notification/event/1.0";
+    prefix ev;
+    organization "Juniper Networks";
+    description "Example YANG module for notification";
+    revision "2014-11-21" {
+        description "Initial version";
+    }
+
+    notification event {
+        leaf event-class {
+            type string;
+        }
+        anyxml reporting-entity;
+        leaf severity {
+            type string;
+        }
+    }
+}

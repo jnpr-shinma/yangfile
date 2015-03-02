@@ -1,0 +1,40 @@
+module device-inventory {
+    yang-version 1;
+    namespace "http://juniper.net/ns/space/device/inventory/1.0";
+    prefix dev-ivt;
+    import device-interface {
+        prefix dev-if;
+    }
+    organization "Juniper Networks";
+    description "Example YANG module for device inventory ";
+    revision "2014-11-24" {
+        description "Initial version";
+    }
+    grouping inventory {
+        list inventory {
+            key id;
+            leaf id { type uint32; config false; description "Inventory ID"; }
+            leaf pid { type uint32; config false; description "Inventory Parent ID"; }
+            leaf domainId { type uint32; description "Domain ID"; }
+            leaf name { type string; config false; mandatory true; description "Inventory name"; }
+            leaf partitionId { type uint32; description "Partition ID"; }
+            leaf installedDescription { type string; config false; mandatory true; description "Installed Description"; }
+            leaf installedEquipmentObjectType { type string; config false; mandatory true; description "Model number; Model-number in DMI"; }
+            leaf installedModel { type string; description "Model in DMI"; }
+            leaf installedPartNumber { type string; config false; mandatory true; description "Part-number in DMI"; }
+            leaf installedSerialNumber { type string; config false; mandatory true; description "Serial-number in DMI"; }
+            leaf installedVersion { type string; config false; mandatory true; description "Revision; Part-version in DMI"; }
+            leaf manufacturer { type string; config false; mandatory true; description "Inventory Manufacturer"; }
+            leaf path { type string; config false; mandatory true; description "Inventory Path"; }
+            leaf status { type string; description "Inventory status"; }
+            leaf holderState { type uint32; description "Inventory holder state"; }
+            leaf holderType { type uint32; description "Inventory Holder type"; }
+            leaf ordinal { type uint32; description "keep track of l2circuitNeighbors order when importing device"; }
+
+            container interfaces{
+                leaf size { type uint32; config false; description "Total number of interfaces"; }
+                uses dev-if:interface;
+            }
+        } // list inventory
+    }
+}

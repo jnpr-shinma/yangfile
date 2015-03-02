@@ -1,0 +1,57 @@
+module devmgt {
+    yang-version 1;
+    namespace "http://juniper.net/ns/space/device/management/1.0";
+    prefix devmgt;
+    import device-information {
+        prefix dev-info;
+    }
+    import device-interface {
+        prefix dev-if;
+    }
+    import device-inventory {
+        prefix dev-ivt;
+    }
+    organization "Juniper Networks";
+    description "Example YANG module for demonstration";
+    revision "2014-09-16" {
+        description "draft-ietf-netmod-yang-02 compatible.";
+    }
+    container device-management {
+        description "Device management";
+
+        container devices {
+            description "Managed Devices";
+            leaf size { type uint32; config false; description "Total number of devices"; }
+
+            list device {
+                description "Device List";
+                key id;
+
+                leaf id { type uint32; config false; mandatory true; description "Device ID"; }
+                leaf domainId { type uint32; config true; mandatory true; description "Domain ID"; }
+
+                container system{
+                    uses dev-info:system;
+                }
+                container redundancy{
+                    uses dev-info:redundancy;
+                }
+                container configInfo{
+                    uses dev-info:configInfo;
+                }
+                container mgtConnection{
+                    uses dev-info:mgtConnection;
+                }
+                container interfaces{
+                    leaf size { type uint32; config false; description "Total number of interfaces"; }
+                    uses dev-if:interface;
+                }
+                container inventories {
+                    description "Device Inventories";
+                    leaf size { type uint32; config false; description "Total number of inventories"; }
+                    uses dev-ivt:inventory;
+                } // container inventories
+            } // list device
+        } // container devices
+    }  // container devicemgt
+}  // module test

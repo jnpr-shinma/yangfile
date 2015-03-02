@@ -1,0 +1,25 @@
+module get-system-information {
+    yang-version 1;
+    namespace "http://juniper.net/ns/space/rpc/get-system-information/1.0";
+    prefix get-sys-info;
+    organization "Juniper Networks";
+    description "Example YANG module for RPC";
+    revision "2014-11-21" {
+        description "Initial version";
+    }
+    rpc get-system-information{
+        description "Send get system information request";
+
+        input{
+        }
+
+        output{
+            leaf hardware-model { type string; description "Hardware model"; }
+            leaf os-name { type string; description "OS name"; }
+            leaf os-version { type string; description "OS version"; }
+            leaf serial-name { type string; description "Serial name"; }
+            leaf host-name { type string; description "Host name"; }
+            leaf cluster-node { type string; description "Cluster node"; }
+        }
+    }
+}

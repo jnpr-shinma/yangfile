@@ -1,0 +1,43 @@
+module device-interface {
+    yang-version 1;
+    namespace "http://juniper.net/ns/space/device/interface/1.0";
+    prefix dev-if;
+    organization "Juniper Networks";
+    description "Example YANG module for device Interface ";
+    revision "2014-11-24" {
+        description "Initial version";
+    }
+    grouping interface {
+        list interface{
+            description "Physical interfaces";
+            key name;
+            leaf name { type string; config false; mandatory true; description "Interface name"; }
+            leaf id { type uint32; config false; description "Physical interface ID"; }
+            leaf desc { type string; description "Description"; }
+            leaf operationStatus { type string; description "Operation status"; }
+            leaf ip { type string; description "IP address"; }
+            leaf adminStatus { type string; description "Admin status"; }
+            leaf interfaceIndex { type uint32; description "Interface index"; }
+            leaf linkLevelType { type string; description "Link level type"; }
+            leaf linkType { type string; description "Link type"; }
+            leaf speed { type uint32; description "Speed"; }
+            leaf speedStr { type string; description "Speed"; }
+            leaf mtu { type string; description "MTU"; }
+            leaf mtuStr { type string; description "MTU"; }
+            leaf physAddr { type string; description "Physical hardware address"; }
+
+            container logicalInterfaces {
+                description "Logical interfaces";
+                leaf size { type uint32; config false; description "Total number of units"; }
+                list logicalInterface {
+                    key name;
+                    leaf name { type string; config false; mandatory true; description "Logical interface name"; }
+                    leaf id { type uint32; config false; description "Logical interface ID"; }
+                    leaf ip { type string; description "IP address"; }
+                    leaf desc { type string; description "Description"; }
+                    leaf encaptulation { type string; description "Encaptulation"; }
+                }
+            }
+        }
+    }
+}

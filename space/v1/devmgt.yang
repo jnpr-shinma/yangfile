@@ -1,0 +1,137 @@
+module devmgt {
+
+    namespace "http://juniper.net/ns/space/test/1.0";
+
+    prefix devmgt;
+
+    organization "Juniper Networks";
+
+    description "Example YANG module for demonstration";
+
+    revision "2014-09-16" {
+        description "draft-ietf-netmod-yang-02 compatible.";
+    }
+
+    container devicemgt {
+        description "Device management";
+
+        container devices {
+            description "Managed Devices";
+            leaf size { type uint32; config false; description "Total number of devices"; }
+
+            list device {
+                description "Device List";
+                key id;
+
+                leaf id { type uint32; config false; mandatory true; description "Device ID"; }
+                leaf domainId { type uint32; config true; mandatory true; description "Domain ID"; }
+
+                container system {
+                    description "Device system info";
+
+                    leaf hostname { type string; description "Name"; }
+                    leaf ip { type string; description "Device mgt IP"; }
+                    leaf vendor { type string; description "Vendor"; }
+                    leaf platform { type string; description "Platform"; }
+                    leaf family { type string; description "Device family"; }
+                    leaf osVersion { type string; description "OS version"; }
+                    leaf serial { type string; description "Serial Number"; }
+                    leaf lastRebootTime { type uint32; description "Last reboot timestamp"; }
+                } // container system
+
+                container redundancy {
+                  description "Redundancy info";
+
+                  leaf masterRE { type string; description "Master RE name"; }
+                  leaf status { type string; description "Redundancy Status"; }
+
+                  list peer {
+                    description "Redundancy Peers";
+                    key id;
+
+                    leaf id { type uint32; description "Peer device Id"; }
+                    leaf name { type string; description "Peer device name"; }
+                  } // list peers
+                } // container redundancy
+
+                container configInfo {
+                  description "Configuration info";
+
+                  leaf schemaVersion { type string; description "Schema version"; }
+                  leaf configStatus { type string; description "Config Status"; }
+                  leaf candidateConfigState { type string; description "Candidate Config State"; }
+                } // container configInfo
+
+                container mgtConnection {
+                  description "Device connection info";
+
+                  leaf connType { type string; description "Device connection type"; }
+                  leaf auth { type string; description "Authentication status"; }
+                  leaf status { type string; description "Device connection status"; }
+                  leaf webMgt { type string; description "Device WebUI enabled"; }
+                } // container mgtConnection
+
+                container interfaces {
+                    description "Physical interfaces";
+
+                    leaf size { type uint32; config false; description "Total number of interfaces"; }
+                    list interface {
+                        description "Physical interfaces";
+                        key name;
+
+                        leaf name { type string; config false; mandatory true; description "Interface name"; }
+                        leaf id { type uint32; config false; description "Physical interface ID"; }
+                        leaf desc { type string; description "Description"; }
+                        leaf operationStatus { type string; description "Operation status"; }
+                        leaf ip { type string; description "IP address"; }
+                        leaf adminStatus { type string; description "Admin status"; }
+                        leaf interfaceIndex { type uint32; description "Interface index"; }
+                        leaf linkLevelType { type string; description "Link level type"; }
+                        leaf linkType { type string; description "Link type"; }
+                        leaf speed { type uint32; description "Speed"; }
+                        leaf speedStr { type string; description "Speed"; }
+                        leaf mtu { type string; description "MTU"; }
+                        leaf mtuStr { type string; description "MTU"; }
+                        leaf physAddr { type string; description "Physical hardware address"; }
+
+                        container logicalInterfaces {
+                            description "Logical interfaces";
+
+                            leaf size { type uint32; config false; description "Total number of units"; }
+                            list logicalInterface {
+                                key name;
+
+                                leaf name { type string; config false; mandatory true; description "Logical interface name"; }
+                                leaf id { type uint32; config false; description "Logical interface ID"; }
+                                leaf ip { type string; description "IP address"; }
+                                leaf desc { type string; description "Description"; }
+                                leaf encaptulation { type string; description "Encaptulation"; }
+                            }
+                        }
+                    } // list interface
+                } // container interfaces
+
+                container inventories {
+                    description "Device Inventories";
+
+                    leaf size { type uint32; config false; description "Total number of inventories"; }
+
+                    list inventory {
+                        key id;
+
+                        leaf id { type uint32; config false; description "Inventory ID"; }
+                        leaf pid { type uint32; config false; description "Inventory Parent ID"; }
+                        leaf name { type string; config false; mandatory true; description "Inventory name"; }
+                        leaf installedDescription { type string; config false; mandatory true; description "Installed Description"; }
+                        leaf installedEquipmentObjectType { type string; config false; mandatory true; description "Installed Equipment Object Type"; }
+                        leaf installedPartNumber { type string; config false; mandatory true; description "Installed PartNumber"; }
+                        leaf installedSerialNumber { type string; config false; mandatory true; description "Installed SerialNumber"; }
+                        leaf installedVersion { type string; config false; mandatory true; description "Installed Version"; }
+                        leaf manufacturer { type string; config false; mandatory true; description "Inventory Manufacturer"; }
+                        leaf path { type string; config false; mandatory true; description "Inventory Path"; }
+                    } // list inventory
+                } // container inventories
+            } // list device
+        } // container devices
+    }  // container devicemgt
+}  // module test
