@@ -1,0 +1,1522 @@
+//////////////////////////////////////////////////////////////////////////
+/// @file s1MasterConfig.yang
+/// @brief Yang groups definitions for s1 Master operational commands.
+///
+/// Maintained by: HCTA
+/// History:
+///
+/// yyyymmmdd Changed by      Change Reason
+/// --------- --------------- --------------------------------------------
+/// 2014Oct01 Ajish Babu S    AGW-22627 - Small Cell/Macro X2 handover
+///                           via HeNB Gateway
+/// 2014Oct07 P Visuthisen    AGW-23943 Prop from MME7.0 to MME8.0
+///
+/// Copyright (c) 2014 HCTA. All Rights Reserved.
+///
+/// CONFIDENTIALITY AND LIMITED USE
+///
+/// This software, including any software of third parties embodied herein,
+/// contains information and concepts which are confidential to HCTA
+/// and such third parties. This software is licensed for use
+/// solely in accordance with the terms and conditions of the applicable
+/// license agreement with HCTA or its authorized distributor.
+//////////////////////////////////////////////////////////////////////////
+submodule s1MasterConfig{
+
+belongs-to hcta-epc {
+    prefix epc;
+}
+
+import tailf-common {
+    prefix tailf;
+}
+
+include mmeSgsnConfig;
+
+include fgwConfig;
+
+include cmdCommonHcta;
+import ietf-inet-types {
+    prefix inet;
+}
+
+augment "/mme-sgsn/interface" {
+    list mme-sctp-profile {
+        tailf:alt-name "sctp";
+        tailf:validate sctpValidate {
+            tailf:call-once "true";
+        }
+        key "name"; 
+        max-elements 11;
+        tailf:info "Stream Control Transmission Protocol layer";
+        leaf name {
+            tailf:info "A unique SCTP profile name.";
+            type string {
+                length "1..32";
+            }
+            mandatory true;
+        }
+        leaf rto-initial {
+            must ". >= ../rto-min and . <= ../rto-max" {
+                error-message
+                "The 'rto-initial' value should be in the range from 'rto-min' to 'rto-max'";
+            }
+            tailf:info "RTO initial. Default 500";
+            type uint32 {
+                range "1..5000";
+            }
+            default 500;
+        }
+        leaf rto-min {
+            tailf:info "RTO minimum value. Default 250";
+            type uint32 {
+                range "1..5000";
+            }
+            default 250;
+        }
+        leaf rto-max {
+            tailf:info "RTO maximum value. Default 2000";
+            type uint32 {
+                range "1..60000";
+            }
+            default 2000;
+        }
+        leaf path-max-retrans {
+            tailf:info "Path max retrans. Default 5";
+            type uint16 {
+                range "1..10";
+            }
+            default 5;
+        }
+        leaf association-init-max-transmit {
+            tailf:info "Association initial max transmit. Default 3";
+            type uint16 {
+                range "1..10";
+            }
+            default 3;
+        }
+        leaf association-max-retrans {
+            tailf:info "Association max retrans. Default 6";
+            type uint16 {
+                range "1..10";
+            }
+            default 6;
+        }
+        leaf no-delay {
+            tailf:info "No delay. Default true";
+            type boolean;
+            default true;
+        }
+        leaf max-out-stream {
+            tailf:info "Max out stream. Default 11";
+            type uint16 {
+                range "1..64";
+            }
+            default 11;
+        }
+        leaf max-in-stream {
+            tailf:info "Max in stream. Default 11";
+            type uint16 {
+                range "1..64";
+            }
+            default 11;
+        }
+        leaf hb-interval {
+            tailf:info "Heartbeat interval. Default 30";
+            type uint16 {
+                range "1..120";
+            }
+            default 30;
+        }
+        leaf rx-buffer-size {
+            tailf:info "Receive buffer size. Default 149000";
+            type uint32 {
+                range "25000..2097152";
+            }
+            default 149000;
+        }
+        leaf tx-buffer-size {
+            tailf:info "Transmit buffer size. Default 149000";
+            type uint32 {
+                range "25000..5509000";
+            }
+            default 149000;
+        }
+        leaf sack-delay {
+            type uint16 {
+                range "1 | 10..500";  
+            }
+            tailf:info "SCTP SACK delay value. Default 200";
+            default 200;
+        }
+        leaf sack-frequency {
+            type uint16 {
+                range "1..5"; 
+            }
+            tailf:info "SCTP SACK frequency value. Default 2";
+            default 2;
+        }
+    } /* mme-sctp-profile */
+    container s1 {
+        tailf:info "S1 interface to LTE access (eNodeB)";
+        container mme-s1-interface {
+            tailf:alt-name "s1-if";
+            presence "";      
+            must "(ip-address1-v6 or ip-address1-v4)" {
+                error-message
+                "Either 'ip-address1-v4' or 'ip-address1-v6' must be provisioned";
+            }
+            
+            must "(ip-address1-v6 != '::' or ip-address1-v4 != '0.0.0.0')" {
+                error-message
+                "Either of 'ip-address1-v4' or 'ip-address1-v6' must be non-zero";
+            }
+            
+            must "count(../../x/agw-x/version) = 0 or ../../x/agw-x/version != 7" {
+                error-message
+                "The 'mme-sgsn interface x x-if version' must be '9' when 'mme-sgsn interface s1 s1-if' exists";
+            }
+            
+            must "count(../../gb/gb-if) = 0 or count(../../../feature/control[name = 's4-sgsn' and status-field = 'on']) != 0" {
+                error-message
+                "If 'mme-sgsn interface gb gb-if' exists then 'mme-sgsn feature control s4-sgsn' must be 'on'";
+            }
+            
+            must "count(../../iu/iu-if) = 0 or count(../../../feature/control[name = 's4-sgsn' and status-field = 'on']) != 0" {
+                error-message
+                "The 'mme-sgsn feature control s4-sgsn' must be 'on' if 'mme-sgsn interface iu iu-if' exists";
+            }
+            must "(count(../../../service-area/mme-plmn) != 0)" {
+                error-message
+                "If 's1-if' exists then 'service-are plmn' must exist";
+            }
+            tailf:info "S1 Interface.";
+            uses routing-instance-name-multiple;
+            leaf sctp-profile {
+                tailf:info "SCTP profile name.";
+                type leafref {
+                    path "/mme-sgsn/interface/mme-sctp-profile/name";
+                }
+                mandatory true;
+            }
+            leaf ip-address1-v4 {
+                must "count(../../../fxa/mme-fxa-if) = 0 or ../../../fxa/mme-fxa-if/ip-address != . or . = '0.0.0.0'" {
+                    error-message
+                    "The 'ip-address1-v4' and 'mme-sgsn interface fxa fxa-if ip-address' must be different";
+                }
+                must "../ip-address2-v4 != . or . = '0.0.0.0'" {
+                    error-message
+                    "The 'ip-address1-v4' and 'ip-address2-v4' configured must not be same";
+                }
+                tailf:info "IP address. Default 0.0.0.0";
+                type inet:ipv4-address;
+                default 0.0.0.0;
+            }
+            leaf ip-address2-v4 {
+                must "count(../../../fxa/mme-fxa-if) = 0 or ../../../fxa/mme-fxa-if/ip-address != . or . = '0.0.0.0'" {
+                    error-message
+                    "The 'ip-address2-v4' and 'mme-sgsn interface fxa fxa-if ip-address' must be different";
+                }
+                must "((../ip-address1-v4 and ../ip-address1-v4 != '0.0.0.0' ) or  . = '0.0.0.0')" {
+                    error-message
+                    "If 'ip-address1-v4' is '0' then 'ip-address2-v4' must also be '0'";
+                }
+                tailf:info "IP address. Default 0.0.0.0";
+                type inet:ipv4-address;
+                default 0.0.0.0;
+            }
+            leaf ip-address1-v6 {
+                must "../ip-address2-v6 != . or . = '::'" {
+                    error-message
+                    "The 'ip-address1-v6' and 'ip-address2-v6' configured must not be same";
+                }
+                tailf:info "IP V6 address. Default 0:0:0:0:0:0:0:0";
+                type inet:ipv6-address;
+                default "0:0:0:0:0:0:0:0";
+            }
+            leaf ip-address2-v6 {
+                must "((../ip-address1-v6 and ../ip-address1-v6 != '::' ) or  . = '::')" {
+                    error-message
+                    "If 'ip-address1-v6' is '0' then 'ip-address2-v6' must also be '0'";
+                }
+                tailf:info "IP V6 address. Default 0:0:0:0:0:0:0:0";
+                type inet:ipv6-address;
+                default "0:0:0:0:0:0:0:0";
+            }
+            leaf port {
+                tailf:info "Port. Default 36412";
+                type uint32 {
+                    range "1..65535";
+                }
+                default 36412;
+            }
+            leaf time-to-wait {
+                tailf:info "Time to wait. Default 60";
+                type enumeration {
+                    enum 1;
+                    enum 2;
+                    enum 5;
+                    enum 10;
+                    enum 20;
+                    enum 60;
+                }
+                default 60;
+            }
+            leaf reloc-prep-timer {
+                tailf:info "Relocation prepare timer. Default 3";
+                type uint8 {
+                    range "1..30";
+                }
+                default 3;
+            }
+            leaf reloc-overall-timer {
+                tailf:info "Relocation overall timer. Default 5";
+                type uint8 {
+                    range "1..30";
+                }
+                default 5;
+            }
+            leaf indirect-tunnel-hold-timer {
+                tailf:info "Relocation indirect forwarding tunnel holding timer. Default 5";
+                type uint8 {
+                    range "1..30";
+                }
+                default 5;
+            }
+            leaf handover-resource-release-timer {
+                tailf:info "Source eNB or S-GW handover release timer. Default 5";
+                type uint8 {
+                    range "1..30";
+                }
+                default 5;
+            }
+            leaf ue-context-release-timer {
+                tailf:info "UE context release timer. Default 5";
+                type uint8 {
+                    range "1..30";
+                }
+                default 5;
+            }
+            leaf ue-context-modification-timer {
+                tailf:info "UE context modification timer. Default 5";
+                type uint8 {
+                    range "1..30";
+                }
+                default 5;
+            }
+            leaf wait-for-tau-timer {
+                must "(. = '0' or ../indirect-tunnel-hold-timer = '0') or . <= ../indirect-tunnel-hold-timer" {
+                    error-message
+                    "Value of 'wait-for-tau-timer' should be less than that of 'indirect-tunnel-hold-timer'.";
+                }
+                tailf:info "Wait timer for TAU. Default 5";
+                type uint8 {
+                    range "1..10";
+                }
+                default 5;
+            }
+            uses dscp; 
+            leaf inter-rat-indirect-forwarding {
+                tailf:info "Inter-RAT indirect forwarding. Default never";
+                type enumeration {
+                    enum "never" {tailf:code-name mme-s1-interface-inter-rat-indirect-forwarding-never;}
+                    enum "always" {tailf:code-name mme-s1-interface-inter-rat-indirect-forwarding-always;}
+                    enum "inter-plmn-inter-rat" {tailf:code-name mme-s1-interface-inter-rat-indirect-forwarding-inter-plmn-inter-rat;}
+                }
+                default "never";
+            }
+            leaf intra-rat-indirect-forwarding {
+                tailf:info "Intra-RAT indirect forwarding. Default enable";
+                type enumeration {
+                    enum "enable" {tailf:code-name mme-s1-interface-intra-rat-indirect-forwarding-enable;}
+                    enum "disable" {tailf:code-name mme-s1-interface-intra-rat-indirect-forwarding-disable;}
+                }
+                default "enable";
+            }
+            leaf indirect-data-fwd-ip-address {
+                tailf:info "Indirect data forwarding IP address. Default 0.0.0.0";
+                type inet:ip-address;
+                default 0.0.0.0;
+            }
+            leaf version {
+                tailf:info "3GPP spec applicable to this interface is TS36.413. Default 10.6.0";
+                type enumeration {
+                    enum "9.5.1" {tailf:code-name s1-if-version-9-5-1;}
+                    enum "10.6.0" {tailf:code-name s1-if-version-10-6-0;}
+                }
+                default "10.6.0";
+                must ". = '10.6.0' or count(../../../../feature/mme-feature-control[name = 'multimedia-priority-service' and status-field = 'on']) = 0" {
+                    error-message
+                    "The 'mme-sgsn features control multimedia-priority-service' is 'on'. The 'version' must be '10.6.0' or higher for priority calls to receive priority treatment.";
+                }
+            }
+            leaf enb-alarm-clear-time {
+                tailf:info "The number of hours after which an errant enb is removed from alarm calculation. Default 24";
+                type uint16 {
+                    range "1..168";
+                }
+                default 24;
+            }
+            leaf location-reporting-control {
+                tailf:info "Location reporting control. Default disable";
+                type enumeration {
+                    enum "enable" {tailf:code-name mme-s1-interface-location-reporting-control-enable;}
+                    enum "disable" {tailf:code-name mme-s1-interface-location-reporting-control-disable;}
+                }
+                default "disable";
+            }
+            leaf lrc-timer-direct {
+                tailf:info "LR response timer. Default 5";
+                type uint8 {
+                    range "1..30";
+                }
+                default 5;
+            }
+            leaf csg-expiration-release-timer {
+                tailf:info "CSG expiration release timer. Default 5";
+                type uint8 {
+                    range "1..30";
+                }
+                default 5;
+            }
+            leaf fgw-sctp-profile {
+                tailf:info "FGW SCTP profile name.";
+                type leafref {
+                    path "/mme-sgsn/interface/mme-sctp-profile/name";
+                }
+            }
+            leaf reset-ack-delay-timer {
+                tailf:info "ENB ACK delay timer in seconds Default 14";
+                type uint8 {
+                    range "8..14";
+                }
+                default 14;
+            }
+            leaf message-logging {
+                tailf:info "Enables generation of logs for warning message responses received from ENodeBs. Default none";
+                type enumeration {
+                    enum "write-replace-response" {
+                        tailf:info "Log Write-Replace Warning responses.";
+                        tailf:code-name mme-s1-if-message-logging-write-replace-response;
+                    }
+                    enum "none" {
+                        tailf:info "No logging of warning message responses.";
+                        tailf:code-name mme-s1-if-message-logging-none;
+                    }
+                }
+                default "none";
+            }
+            leaf warning-message-timer {
+                tailf:info "Time to wait in seconds for warning message responses. Default 5";
+                type uint8 {
+                    range "1..30";
+                }
+                default 5;
+            }
+            leaf warning-message-retry {
+                tailf:info "Number of retries for warning messages. Default 0";
+                type uint8 {
+                    range "0..5";
+                }
+                default 0;
+            }
+            leaf sgw-gtpu-dual-tla-ip-filter {
+                tailf:info "Filtering of SGW GTP-U IP version in TLA sent to eNB. Default enable";
+                type enumeration {
+                    enum "enable" {tailf:code-name mme-s1-interface-sgw-gtpu-dual-tla-ip-filter-enable;}
+                    enum "disable" {tailf:code-name mme-s1-interface-sgw-gtpu-dual-tla-ip-filter-disable;}
+                }
+                default "enable";
+            }
+        } /* mme-s1-interface */
+    } /* s1 */ 
+} /* interface */
+augment "/mme-sgsn/engineering" {
+    container mme-s1-capacity {
+        tailf:alt-name "s1-capacity";
+        presence "";      
+        tailf:info "This entity is to set S1-Listener's capacity.";
+        leaf max-enodebs {
+            tailf:info "Max number of ENodeBs to be supported. Default 668.";
+            type uint16 {
+                range 1..2800;
+            }           
+            default 668;
+        }	     
+    } /* mme-s1-capacity */
+} /* engineering */
+augment "/mme-sgsn/service-area" {
+    list mme-plmn {
+        tailf:alt-name "plmn";
+        tailf:validate serviceAreaPlmnValidate {
+            tailf:call-once "true";
+        }
+        key "plmn-id";    
+        max-elements 16;    
+        tailf:info "PLMN.";
+        leaf plmn-id {
+            type string {
+                pattern '(([0-9]{5,6}))' {
+                    tailf:info "Valid values are: numbers with 5..6 digits";
+                }  
+            }
+            
+            must "string-length(current()) != 5 or count(../../../subscriber/mme-long-mnc[mcc = substring(current(),1,3)]) = 0" {
+                error-message
+                "Entry found for this MCC - 2 digit MNC configuration is not allowed";
+            }
+            tailf:info "A unique plmn identifier.";
+            mandatory true;
+        }
+        leaf mme-pool {
+            must ". = 'none' or count(../../mme-mme-pool[name = current()]) != 0" {
+                error-message
+                "There is no 'mme-sgsn service-area mme-pool' object with this 'mme-pool'";
+            }
+            tailf:info "MME pool name. Default none";
+            type string {
+                length "1..32";
+            }
+            default "none";
+        }
+        leaf sgsn-pool {
+            
+            must ". = 'none' or count(../../mme-sgsn-pool[pool-name = current()]) != 0" {
+                error-message
+                "There is no 'mme-sgsn service-area sgsn-pool' object with this 'sgsn-pool'";
+            }
+            must "((. = 'none') or (count(../../mme-sgsn-pool[pool-name = current() and nri-bit-length != 0]) = 0) or " +
+            "(count(../../mme-sgsn-nri[pool-name = current() and nri-type = 'local-nri']) != 0))" {
+                error-message
+                "If 'nri-bit-length' is greater than zero at least one record should be of type 'local-nri'";
+            }
+            tailf:info "SGSN pool name. Default none";
+            type enumeration {
+                enum "default" {tailf:code-name mme-plmn-sgsn-pool-default;}
+                enum "none" {tailf:code-name mme-plmn-sgsn-pool-none;}
+            }
+            default "none";
+        }
+    } /* mme-plmn */
+    list mme-mme-pool {
+        tailf:alt-name "mme-pool";
+        tailf:validate mmePoolValidate {
+            tailf:call-once "true";
+        }
+        key "name";
+        max-elements 16;
+        unique mme-groupid;
+        tailf:info "MME pool.";
+        leaf name {
+            tailf:info "A unique MME pool name.";
+            type string {
+                length "1..32";
+            }
+            mandatory true;
+        }
+        leaf mme-name {
+            type string {
+                pattern "[0-9A-Za-z,.()+'-]+" {
+                    tailf:info "Valid name can contain alphabets, digits and any of these special characters(',' '.' '(' ')' '+' ''' '-')";
+                }  
+            }
+            tailf:info "MME name.";
+            mandatory true;
+        }
+        leaf mme-groupid {
+            tailf:info "MME group identifier.";
+            type uint16 {
+                range "32768..65535";
+            }
+            mandatory true;
+        }
+        leaf mme-code {
+            type string {
+                pattern '[0-9]{1,3}(,[0-9]{1,3}){0,154}' {
+                    tailf:info "Valid values are: comma separated numbers";
+                }  
+            }
+            tailf:info "List of MME codes. Default 0";
+            default "0";
+        }
+        leaf relative-capacity {
+            tailf:info "Relative capacity. Default 100";
+            type uint8 {
+                range "0..255";
+            }
+            default 100;
+        }
+    } /* mme-mme-pool */
+    list mme-forbidden-ta-list{
+        tailf:alt-name "forbidden-ta-list";
+        tailf:validate forbiddenTaListValidate {
+            tailf:call-once "true";
+        }
+        key "plmn tac-list";    
+        max-elements 1024;  
+        tailf:info "Forbidden Tracking Area List.";
+        leaf plmn {
+            type string {
+                pattern '(([0-9]{5,6}))' {
+                    tailf:info "Valid values are: numbers with 5..6 digits";
+                }  
+            }
+            tailf:info "PLMN identifier.";
+            mandatory true;
+        }
+        leaf tac-list {
+            type string {
+                pattern '0x[0-9a-f]{1,4}(,0x[0-9a-f]{1,4})*' {
+                    tailf:info "Valid values are: comma separated hexadecimal values of length 3..6 including a leading '0x'";
+                }  
+            }
+            tailf:info "List of Tracking Area Codes(TACs) in HEX format.";
+            mandatory true;
+        }
+        leaf forbidden-list {
+            type string {
+                pattern '[0-9a-zA-Z,]*' {
+                    tailf:info "Valid values are: comma separated case-sensitive alphabetical characters and digits";
+                }  
+            }
+            tailf:info "Names of forbidden lists.";
+            mandatory true;
+        }
+    } /* mme-forbidden-ta-list */
+} /* service-area */
+augment "/mme-sgsn/engineering" {
+    container mme-paging-overload {
+        tailf:alt-name "paging-overload";
+        presence "";      
+        must "critical-onset >= critical-abate and " +
+        "critical-abate >= major-onset and " +
+        "major-onset >= major-abate and " +
+        "major-abate >= minor-onset and " +
+        "minor-onset >= minor-abate" {
+            error-message
+            "The values must be in the following order. " +
+            "'critical-onset' >= 'critical-abate' >= 'major-onset' >= 'major-abate' >= 'minor-onset' >= 'minor-abate'.";
+        }
+        must "paging-delay-critical >= paging-delay-major and paging-delay-major >= paging-delay-minor" {
+            error-message
+            "The values must be in the following order. " +
+            "paging-delay-critical' >= 'paging-delay-major' >= 'paging-delay-minor'";
+        }
+        must "paging-reject-critical >= paging-reject-major and paging-reject-major >= paging-reject-minor" {
+            error-message
+            "The values must be in the following order. "+
+            "'paging-reject-critical' >= 'paging-reject-major' >= 'paging-reject-minor'";
+        }
+        
+        tailf:info "MME paging overload control configuration.";
+        leaf minor-ovld {
+            tailf:info "Minor overload level enabled or not. Default enable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-paging-overload-minor-ovld-enable;}
+                enum "disable" {tailf:code-name mme-paging-overload-minor-ovld-disable;}
+            }
+            default "enable";
+        }
+        leaf minor-onset {
+            tailf:info "Paging overload minor onset level. Default 325";
+            type uint16 {
+                range "0..5000";
+            }
+            default 325;
+        }
+        leaf minor-abate {
+            tailf:info "Paging overload minor abate level. Default 300";
+            type uint16 {
+                range "0..5000";
+            }
+            default 300;
+        }
+        leaf paging-delay-minor {
+            tailf:info "Paging delay value for minor overload. Default 10";
+            type uint16 {
+                range "0..1200";
+            }
+            default 10;
+        }
+        leaf paging-reject-minor {
+            tailf:info "Percentage of paging request to be rejected while in minor overload. Default 0";
+            type uint8 {
+                range "0..100";
+            }
+            default 0;
+        }
+        leaf major-ovld {
+            tailf:info "Major overload level enabled or not. Default enable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-paging-overload-major-ovld-enable;}
+                enum "disable" {tailf:code-name mme-paging-overload-major-ovld-disable;}
+            }
+            default "enable";
+        }
+        leaf major-onset {
+            tailf:info "Paging overload major onset level. Default 375";
+            type uint16 {
+                range "0..5000";
+            }
+            default 375;
+        }
+        leaf major-abate {
+            tailf:info "Paging overload major abate level. Default 350";
+            type uint16 {
+                range "0..5000";
+            }
+            default 350;
+        }
+        leaf paging-delay-major {
+            tailf:info "Paging delay value for major overload. Default 20";
+            type uint16 {
+                range "0..1200";
+            }
+            default 20;
+        }
+        leaf paging-reject-major {
+            tailf:info "Percentage of paging request to be rejected while in major overload. Default 0";
+            type uint8 {
+                range "0..100";
+            }
+            default 0;
+        }
+        leaf critical-ovld {
+            tailf:info "Critical overload level enabled or not. Default enable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-paging-overload-critical-ovld-enable;}
+                enum "disable" {tailf:code-name mme-paging-overload-critical-ovld-disable;}
+            }
+            default "enable";
+        }
+        leaf critical-onset {
+            tailf:info "Paging overload critical onset level. Default 425";
+            type uint16 {
+                range "0..5000";
+            }
+            default 425;
+        }
+        leaf critical-abate {
+            tailf:info "Paging overload critical abate level. Default 400";
+            type uint16 {
+                range "0..5000";
+            }
+            default 400;
+        }
+        leaf paging-delay-critical {
+            tailf:info "Paging delay value for critical overload. Default 40";
+            type uint16 {
+                range "0..1200";
+            }
+            default 40;
+        }
+        leaf paging-reject-critical {
+            tailf:info "Percentage of pagng request to be rejected while in critical overload. Default 0";
+            type uint8 {
+                range "0..100";
+            }
+            default 0;
+        }
+    } /* mme-paging-overload */
+    container mme-s1-overload {
+        tailf:alt-name "s1-overload";
+        presence "";
+        tailf:info "S1 based overload control configuration.";
+        leaf zero-rel-cap-subs-trigger {
+            tailf:info "Subscriber overload level that causes zero relative capacity. Default sub-ovld-major";
+            type enumeration {
+                enum "disable" {tailf:code-name mme-s1-overload-zero-rel-cap-subs-trigger-disable;}
+                enum "sub-ovld-minor" {tailf:code-name mme-s1-overload-zero-rel-cap-subs-trigger-sub-ovld-minor;}
+                enum "sub-ovld-major" {tailf:code-name mme-s1-overload-zero-rel-cap-subs-trigger-sub-ovld-major;}
+                enum "sub-ovld-critical" {tailf:code-name mme-s1-overload-zero-rel-cap-subs-trigger-sub-ovld-critical;}
+            }
+            default "sub-ovld-major";
+        }
+        leaf zero-rel-cap-cong-trigger {
+            tailf:info "Congestion overload level that causes zero relative capacity. Default congestion-minor";
+            type enumeration {
+                enum "disable" {tailf:code-name mme-s1-overload-zero-rel-cap-cong-trigger-disable;}
+                enum "congestion-minor" {tailf:code-name mme-s1-overload-zero-rel-cap-cong-trigger-congestion-minor;}
+                enum "congestion-major" {tailf:code-name mme-s1-overload-zero-rel-cap-cong-trigger-congestion-major;}
+                enum "congestion-critical" {tailf:code-name mme-s1-overload-zero-rel-cap-cong-trigger-congestion-critical;}
+            }
+            default "congestion-minor";
+        }
+        leaf zero-rel-cap-duration {
+            tailf:info "Time overload has abated before relative capacity updated. Default 10";
+            type uint16 {
+                range "0..300";
+            }
+            default 10;
+        }
+        leaf ovld-start-impact {
+            tailf:info "Percentage of eNodeBs that MME send overload-start message to. Default 10";
+            type uint8 {
+                range "1..100";
+            }
+            default 10;
+        }
+        leaf ovld-start-duration {
+            tailf:info "Time overload has abated before overload-stop message is sent. Default 10";
+            type uint16 {
+                range "0..300";
+            }
+            default 10;
+        }
+        leaf ovld-start-minor-cause {
+            must "count(../../../interface/s1/mme-s1-interface) = 0 or ../../../interface/s1/mme-s1-interface/version = '10.6.0' or ../ovld-start-minor-cause != 'mps-mt-services-only'" {
+                error-message
+                "If 'mme-sgsn interface s1 s1-if version' is '9.5.1', the value of 'ovld-start-minor-cause' should not be 'mps-mt-services-only'";
+            }
+            tailf:info "OverloadAction cause value in the MME Overload Start message to ENB for minor overload. Default mps-mt-services-only";
+            type enumeration {
+                enum "disable" {tailf:code-name mme-s1-overload-ovld-start-minor-cause-disable;}
+                enum "no-rrc-for-non-emg-modt" {tailf:code-name mme-s1-overload-ovld-start-minor-cause-no-rrc-for-non-emg-modt;}
+                enum "no-rrc-for-non-emg-sig" {tailf:code-name mme-s1-overload-ovld-start-minor-cause-no-rrc-for-non-emg-sig;}
+                enum "emg-only" {tailf:code-name mme-s1-overload-ovld-start-minor-cause-emg-only;}
+                enum "mps-mt-services-only" {tailf:code-name mme-s1-overload-ovld-start-minor-cause-mps-mt-services-only;}
+                enum "prio-sess-mt-srvc-only" {tailf:code-name mme-s1-overload-ovld-start-minor-cause-prio-sess-mt-srvc-only;}
+                enum "no-del-tol-access" {tailf:code-name mme-s1-overload-ovld-start-minor-cause-no-del-tol-access;}
+            }
+            default "mps-mt-services-only";
+        }
+        leaf ovld-start-major-cause {
+            must "count(../../../interface/s1/mme-s1-interface) = 0 or ../../../interface/s1/mme-s1-interface/version = '10.6.0' or ../ovld-start-major-cause != 'mps-mt-services-only'" {
+                error-message
+                "If 'mme-sgsn interface s1 s1-if version' is '9.5.1', the value of 'ovld-start-major-cause' should not be 'mps-mt-services-only'";
+            }
+            tailf:info "OverloadAction cause value in the MME Overload Start message to ENB for major overload. Default mps-mt-services-only";
+            type enumeration {
+                enum "disable" {tailf:code-name mme-s1-overload-ovld-start-major-cause-disable;}
+                enum "no-rrc-for-non-emg-modt" {tailf:code-name mme-s1-overload-ovld-start-major-cause-no-rrc-for-non-emg-modt;}
+                enum "no-rrc-for-non-emg-sig" {tailf:code-name mme-s1-overload-ovld-start-major-cause-no-rrc-for-non-emg-sig;}
+                enum "emg-only" {tailf:code-name mme-s1-overload-ovld-start-major-cause-emg-only;}
+                enum "mps-mt-services-only" {tailf:code-name mme-s1-overload-ovld-start-major-cause-mps-mt-services-only;}
+                enum "prio-sess-mt-srvc-only" {tailf:code-name mme-s1-overload-ovld-start-major-cause-prio-sess-mt-srvc-only;}
+                enum "no-del-tol-access" {tailf:code-name mme-s1-overload-ovld-start-major-cause-no-del-tol-access;}
+            }
+            default "mps-mt-services-only";
+        }
+        leaf ovld-start-critical-cause {
+            must "count(../../../interface/s1/mme-s1-interface) = 0 or ../../../interface/s1/mme-s1-interface/version = '10.6.0' or ../ovld-start-critical-cause != 'mps-mt-services-only'" {
+                error-message
+                "If 'mme-sgsn interface s1 s1-if version' is '9.5.1', the value of 'ovld-start-critical-cause' should not be 'mps-mt-services-only'";
+            }
+            tailf:info "OverloadAction cause value in the MME Overload Start message to ENB for critical overload. Default mps-mt-services-only";
+            type enumeration {
+                enum "disable" {tailf:code-name mme-s1-overload-ovld-start-critical-cause-disable;}
+                enum "no-rrc-for-non-emg-modt" {tailf:code-name mme-s1-overload-ovld-start-critical-cause-no-rrc-for-non-emg-modt;}
+                enum "no-rrc-for-non-emg-sig" {tailf:code-name mme-s1-overload-ovld-start-critical-cause-no-rrc-for-non-emg-sig;}
+                enum "emg-only" {tailf:code-name mme-s1-overload-ovld-start-critical-cause-emg-only;}
+                enum "mps-mt-services-only" {tailf:code-name mme-s1-overload-ovld-start-critical-cause-mps-mt-services-only;}
+                enum "prio-sess-mt-srvc-only" {tailf:code-name mme-s1-overload-ovld-start-critical-cause-prio-sess-mt-srvc-only;}
+                enum "no-del-tol-access" {tailf:code-name mme-s1-overload-ovld-start-critical-cause-no-del-tol-access;}
+            }
+            default "mps-mt-services-only";
+        }
+    } /* mme-s1-overload */
+} /* engineering */
+
+augment "/mme-sgsn/interface/s1" {
+    list mme-fgw-enodeb {
+        tailf:alt-name "fgw-enb";
+        key "plmn-id enodeb-id";      
+        max-elements 100;
+        unique ip-address1;
+        unique ip-address2;
+        
+        
+        must "count(../../../feature/mme-feature-control[name = 'femto-cell-support' and status-field = 'on']) != 0" {
+            error-message
+            "If 'fgw-enb' object exists then 'mme-sgsn feature control femto-cell-support' must be 'on'";
+        }
+        must "count(../mme-s1-interface/fgw-sctp-profile) != 0" {
+            error-message
+            "The 'mme-sgsn interface s1 s1-if fgw-sctp-profile' must be configured before configuring 'fgw-enb'";
+        }
+        tailf:info "Provisionable attributes of an FGW eNodeB.";
+        leaf plmn-id {
+            type string {
+                pattern '[0-9]*' {
+                    tailf:info "Valid values are: digits";
+                }  
+            }
+            tailf:info "PLMN ID.";
+            mandatory true;
+        }
+        leaf enodeb-id {
+            tailf:info "ENodeB ID.";
+            type uint32 {
+                range "0..268435455";
+            }
+            mandatory true;
+        }
+        leaf ip-address1 {
+            must "../ip-address1 != '::'" {
+                error-message
+                "The 'ip-address1' must not be '::'";
+            }
+            must "../ip-address1 != '0.0.0.0'" {
+                error-message
+                "The 'ip-address1' must not be '0.0.0.0'";
+            }
+            must "../ip-address2 != current()" {
+                error-message
+                "The 'ip-address1' and 'ip-address2' must not have same value";
+            }
+            tailf:info "IP Address1.";
+            type inet:ip-address;
+            mandatory true;
+        }
+        leaf unit-id {
+            tailf:alt-name "unit";
+            tailf:info "Unit VM identifier.";
+            type leafref {
+                path "/mme-sgsn/system/sig/unit/unit-id";
+            }
+            mandatory true;
+        }
+        leaf ip-address2 {
+            tailf:info "IP Address2. Default 0.0.0.0";
+            type inet:ip-address;
+            default 0.0.0.0;
+        }
+    } /* mme-fgw-enodeb */
+} /* s1 */
+augment "/fgw/engineering" {
+    container mme-fgw-congestion-overload {
+        tailf:alt-name "congestion-overload";
+        presence ""; 
+        tailf:info "FGW congestion overload control configuration.";
+        leaf minor-ovld {
+            tailf:info "Minor overload level enabled or not. Default enable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-fgw-congestion-overload-minor-ovld-enable;}
+                enum "disable" {tailf:code-name mme-fgw-congestion-overload-minor-ovld-disable;}
+            }
+            default "enable";
+        }
+        leaf minor-onset {
+            tailf:info "Congestion overload minor onset level. Default 70";
+            type uint8 {
+                range "0..100";
+            }
+            default 70;
+        }
+        leaf minor-abate {
+            tailf:info "Congestion overload minor abate level. Default 65";
+            type uint8 {
+                range "0..100";
+            }
+            default 65;
+        }
+        leaf minor-action {
+            tailf:info "Congestion overload minor abatement action. Default ignore-mo-normal-priority";
+            type enumeration {
+                enum "none" {tailf:code-name mme-fgw-congestion-overload-minor-action-none;}
+                enum "ignore-low-priority" {tailf:code-name mme-fgw-congestion-overload-minor-action-ignore-low-priority;}
+                enum "ignore-mo-normal-priority" {tailf:code-name mme-fgw-congestion-overload-minor-action-ignore-mo-normal-priority;}
+                enum "ignore-mt-normal-priority" {tailf:code-name mme-fgw-congestion-overload-minor-action-ignore-mt-normal-priority;}
+                enum "reject-s1-inc-ho" {tailf:code-name mme-fgw-congestion-overload-minor-action-reject-s1-inc-ho;}
+            }
+            default "ignore-mo-normal-priority";
+        }
+        leaf major-ovld {
+            tailf:info "Major overload level enabled or not. Default enable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-fgw-congestion-overload-major-ovld-enable;}
+                enum "disable" {tailf:code-name mme-fgw-congestion-overload-major-ovld-disable;}
+            }
+            default "enable";
+        }
+        leaf major-onset {
+            tailf:info "Congestion overload major onset level. Default 80";
+            type uint8 {
+                range "0..100";
+            }
+            default 80;
+        }
+        leaf major-abate {
+            tailf:info "Congestion overload major abate level. Default 75";
+            type uint8 {
+                range "0..100";
+            }
+            default 75;
+        }
+        leaf major-action {
+            tailf:info "Congestion overload major abatement action. Default ignore-mo-normal-priority";
+            type enumeration {
+                enum "none" {tailf:code-name mme-fgw-congestion-overload-major-action-none;}
+                enum "ignore-low-priority" {tailf:code-name mme-fgw-congestion-overload-major-action-ignore-low-priority;}
+                enum "ignore-mo-normal-priority" {tailf:code-name mme-fgw-congestion-overload-major-action-ignore-mo-normal-priority;}
+                enum "ignore-mt-normal-priority" {tailf:code-name mme-fgw-congestion-overload-major-action-ignore-mt-normal-priority;}
+                enum "reject-s1-inc-ho" {tailf:code-name mme-fgw-congestion-overload-major-action-reject-s1-inc-ho;}
+            }
+            default "ignore-mo-normal-priority";
+        }
+        leaf critical-ovld {
+            tailf:info "Critical overload level enabled or not. Default enable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-fgw-congestion-overload-critical-ovld-enable;}
+                enum "disable" {tailf:code-name mme-fgw-congestion-overload-critical-ovld-disable;}
+            }
+            default "enable";
+        }
+        leaf critical-onset {
+            tailf:info "Congestion overload critical onset level. Default 90";
+            type uint8 {
+                range "0..100";
+            }
+            default 90;
+        }
+        leaf critical-abate {
+            tailf:info "Congestion overload critical abate level. Default 85";
+            type uint8 {
+                range "0..100";
+            }
+            default 85;
+        }
+        leaf critical-action {
+            tailf:info "Congestion overload critical abatement action. Default ignore-mo-normal-priority";
+            type enumeration {
+                enum "none" {tailf:code-name mme-fgw-congestion-overload-critical-action-none;}
+                enum "ignore-low-priority" {tailf:code-name mme-fgw-congestion-overload-critical-action-ignore-low-priority;}
+                enum "ignore-mo-normal-priority" {tailf:code-name mme-fgw-congestion-overload-critical-action-ignore-mo-normal-priority;}
+                enum "ignore-mt-normal-priority" {tailf:code-name mme-fgw-congestion-overload-critical-action-ignore-mt-normal-priority;}
+                enum "reject-s1-inc-ho" {tailf:code-name mme-fgw-congestion-overload-critical-action-reject-s1-inc-ho;}
+            }
+            default "ignore-mo-normal-priority";
+        }
+    } /* mme-fgw-congestion-overload */
+    container mme-fgw-ue-connection-overload {
+        tailf:alt-name "ue-connection-overload";
+        presence ""; 
+        tailf:info "FGW subscriber capacity overload control configuration.";
+        leaf minor-ovld {
+            tailf:info "This attribute controls if the minor overload level and the associated actions are in use or not. Default enable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-fgw-ue-connection-overload-minor-ovld-enable;}
+                enum "disable" {tailf:code-name mme-fgw-ue-connection-overload-minor-ovld-disable;}
+            }
+            default "enable";
+        }
+        leaf minor-onset {
+            tailf:info "Connection overload minor onset level. Default 70";
+            type uint8 {
+                range "0..100";
+            }
+            default 70;
+        }
+        leaf minor-abate {
+            tailf:info "Connection overload minor abate level. Default 65";
+            type uint8 {
+                range "0..100";
+            }
+            default 65;
+        }
+        leaf minor-action {
+            tailf:info "Connection overload minor abatement action. Default ignore-mo-normal-priority";
+            type enumeration {
+                enum "none" {tailf:code-name mme-fgw-ue-connection-overload-minor-action-none;}
+                enum "ignore-low-priority" {tailf:code-name mme-fgw-ue-connection-overload-minor-action-ignore-low-priority;}
+                enum "ignore-mo-normal-priority" {tailf:code-name mme-fgw-ue-connection-overload-minor-action-ignore-mo-normal-priority;}
+                enum "ignore-mt-normal-priority" {tailf:code-name mme-fgw-ue-connection-overload-minor-action-ignore-mt-normal-priority;}
+                enum "reject-s1-inc-ho" {tailf:code-name mme-fgw-ue-connection-overload-minor-action-reject-s1-inc-ho;}
+                enum "release-low-priority" {tailf:code-name mme-fgw-ue-connection-overload-minor-action-release-low-priority;}
+                enum "release-normal-priority" {tailf:code-name mme-fgw-ue-connection-overload-minor-action-release-normal-priority;}
+            }
+            default "ignore-mo-normal-priority";
+        }
+        leaf major-ovld {
+            tailf:info "This attribute controls if the major overload level and the associated actions are in use or not. Default enable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-fgw-ue-connection-overload-major-ovld-enable;}
+                enum "disable" {tailf:code-name mme-fgw-ue-connection-overload-major-ovld-disable;}
+            }
+            default "enable";
+        }
+        leaf major-onset {
+            tailf:info "Connection overload major onset level. Default 80";
+            type uint8 {
+                range "0..100";
+            }
+            default 80;
+        }
+        leaf major-abate {
+            tailf:info "Connection overload major abate level. Default 75";
+            type uint8 {
+                range "0..100";
+            }
+            default 75;
+        }
+        leaf major-action {
+            tailf:info "Connection overload major abatement action. Default ignore-mo-normal-priority";
+            type enumeration {
+                enum "none" {tailf:code-name mme-fgw-ue-connection-overload-major-action-none;}
+                enum "ignore-low-priority" {tailf:code-name mme-fgw-ue-connection-overload-major-action-ignore-low-priority;}
+                enum "ignore-mo-normal-priority" {tailf:code-name mme-fgw-ue-connection-overload-major-action-ignore-mo-normal-priority;}
+                enum "ignore-mt-normal-priority" {tailf:code-name mme-fgw-ue-connection-overload-major-action-ignore-mt-normal-priority;}
+                enum "reject-s1-inc-ho" {tailf:code-name mme-fgw-ue-connection-overload-major-action-reject-s1-inc-ho;}
+                enum "release-low-priority" {tailf:code-name mme-fgw-ue-connection-overload-major-action-release-low-priority;}
+                enum "release-normal-priority" {tailf:code-name mme-fgw-ue-connection-overload-major-action-release-normal-priority;}
+            }
+            default "ignore-mo-normal-priority";
+        }
+        leaf critical-ovld {
+            tailf:info "This attribute controls if the critical overload level and the associated actions are in use or not. Default enable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-fgw-ue-connection-overload-critical-ovld-enable;}
+                enum "disable" {tailf:code-name mme-fgw-ue-connection-overload-critical-ovld-disable;}
+            }
+            default "enable";
+        }
+        leaf critical-onset {
+            tailf:info "Connection overload critical onset level. Default 90";
+            type uint8 {
+                range "0..100";
+            }
+            default 90;
+        }
+        leaf critical-abate {
+            tailf:info "Connection overload critical abate level. Default 85";
+            type uint8 {
+                range "0..100";
+            }
+            default 85;
+        }
+        leaf critical-action {
+            tailf:info "Connection overload critical abatement action. Default ignore-mo-normal-priority";
+            type enumeration {
+                enum "none" {tailf:code-name mme-fgw-ue-connection-overload-critical-action-none;}
+                enum "ignore-low-priority" {tailf:code-name mme-fgw-ue-connection-overload-critical-action-ignore-low-priority;}
+                enum "ignore-mo-normal-priority" {tailf:code-name mme-fgw-ue-connection-overload-critical-action-ignore-mo-normal-priority;}
+                enum "ignore-mt-normal-priority" {tailf:code-name mme-fgw-ue-connection-overload-critical-action-ignore-mt-normal-priority;}
+                enum "reject-s1-inc-ho" {tailf:code-name mme-fgw-ue-connection-overload-critical-action-reject-s1-inc-ho;}
+                enum "release-low-priority" {tailf:code-name mme-fgw-ue-connection-overload-critical-action-release-low-priority;}
+                enum "release-normal-priority" {tailf:code-name mme-fgw-ue-connection-overload-critical-action-release-normal-priority;}
+            }
+            default "ignore-mo-normal-priority";
+        }
+    } /* mme-fgw-ue-connection-overload */
+    list mme-fgw-s1-capacity {
+        tailf:alt-name "s1-capacity";
+        key "callp-service-id"; 
+        max-elements 32;
+        tailf:info "FGW S1 capacity.";
+        uses fgw-callp-service-identifier;
+        leaf max-num-enodeb {
+            tailf:info "Max number of eNodeBs to be supported per S1 service-unit. Default 10000";
+            type uint32 {
+                range "1..10000";
+            }
+            default 10000;
+        }
+    } /* mme-fgw-s1-capacity */
+    container mme-fgw-s1-overload {
+        tailf:alt-name "s1-overload";
+        presence ""; 
+        tailf:info "S1 based overload control configuration.";
+        leaf ovld-start-impact {
+            tailf:info "Percent of eNodeBs to be impacted. Default 10";
+            type uint8 {
+                range "1..100";
+            }
+            default 10;
+        }
+        leaf ovld-start-duration {
+            tailf:info "Time overload has abated before overload stop message is sent. Default 10";
+            type uint16 {
+                range "0..300";
+            }
+            default 10;
+        }
+        leaf ovld-start-minor-cause {
+            tailf:info "Cause value in the FGW overload start message to eNodeB for minor overload. Default reject-delay-tolerant";
+            type enumeration {
+                enum "disable" {tailf:code-name mme-fgw-s1-overload-ovld-start-minor-cause-disable;}
+                enum "no-rrc-for-non-emg-modt" {tailf:code-name mme-fgw-s1-overload-ovld-start-minor-cause-no-rrc-for-non-emg-modt;}
+                enum "no-rrc-sig" {tailf:code-name mme-fgw-s1-overload-ovld-start-minor-cause-no-rrc-sig;}
+                enum "permit-emg-mt-only" {tailf:code-name mme-fgw-s1-overload-ovld-start-minor-cause-permit-emg-mt-only;}
+                enum "permit-hpriority-mt-only" {tailf:code-name mme-fgw-s1-overload-ovld-start-minor-cause-permit-hpriority-mt-only;}
+                enum "reject-delay-tolerant" {tailf:code-name mme-fgw-s1-overload-ovld-start-minor-cause-reject-delay-tolerant;}
+            }
+            default "reject-delay-tolerant";
+        }
+        leaf ovld-start-major-cause {
+            tailf:info "Cause value in the FGW overload start message to eNodeB for major overload. Default permit-hpriority-mt-only";
+            type enumeration {
+                enum "disable" {tailf:code-name mme-fgw-s1-overload-ovld-start-major-cause-disable;}
+                enum "no-rrc-for-non-emg-modt" {tailf:code-name mme-fgw-s1-overload-ovld-start-major-cause-no-rrc-for-non-emg-modt;}
+                enum "no-rrc-sig" {tailf:code-name mme-fgw-s1-overload-ovld-start-major-cause-no-rrc-sig;}
+                enum "permit-emg-mt-only" {tailf:code-name mme-fgw-s1-overload-ovld-start-major-cause-permit-emg-mt-only;}
+                enum "permit-hpriority-mt-only" {tailf:code-name mme-fgw-s1-overload-ovld-start-major-cause-permit-hpriority-mt-only;}
+                enum "reject-delay-tolerant" {tailf:code-name mme-fgw-s1-overload-ovld-start-major-cause-reject-delay-tolerant;}
+            }
+            default "permit-hpriority-mt-only";
+        }
+        leaf ovld-start-critical-cause {
+            tailf:info "Cause value in the FGW overload start message to eNodeB for critical overload. Default permit-emg-mt-only";
+            type enumeration {
+                enum "disable" {tailf:code-name mme-fgw-s1-overload-ovld-start-critical-cause-disable;}
+                enum "no-rrc-for-non-emg-modt" {tailf:code-name mme-fgw-s1-overload-ovld-start-critical-cause-no-rrc-for-non-emg-modt;}
+                enum "no-rrc-sig" {tailf:code-name mme-fgw-s1-overload-ovld-start-critical-cause-no-rrc-sig;}
+                enum "permit-emg-mt-only" {tailf:code-name mme-fgw-s1-overload-ovld-start-critical-cause-permit-emg-mt-only;}
+                enum "permit-hpriority-mt-only" {tailf:code-name mme-fgw-s1-overload-ovld-start-critical-cause-permit-hpriority-mt-only;}
+                enum "reject-delay-tolerant" {tailf:code-name mme-fgw-s1-overload-ovld-start-critical-cause-reject-delay-tolerant;}
+            }
+            default "permit-emg-mt-only";
+        }
+    } /* mme-fgw-s1-overload */
+    list mme-fgw-sc-capacity {
+        tailf:alt-name "sc-capacity";
+        key "callp-service-id"; 
+        max-elements 32;
+        tailf:info "SC capacity.";
+        uses fgw-callp-service-identifier; 
+        leaf connections-per-su {
+            tailf:info "SC capacity per service-unit in thousand of subscribers. Default 455";
+            type uint16 {
+                range "150..455";
+            }
+            default 455;
+        }
+    } /* mme-fgw-sc-capacity */
+    container mme-fgw-sc-engineering {
+        tailf:alt-name "sc-engineering";
+        presence ""; 
+        tailf:info "SC capacity provisioning.";
+        leaf bearer-average {
+            tailf:info "Average bearers per connection. Default 300";
+            type uint16 {
+                range "0..800";
+            }
+            default 300;
+        }
+    } /* mme-fgw-sc-engineering */
+} /* engineering */
+
+augment "/fgw/status" {
+    container mme-fgw-health-profile {
+        tailf:alt-name "profile";
+        presence ""; 
+        tailf:info "Health reporting configuration.";
+        leaf update-period {
+            tailf:info "Update period for health alarms and health status. Default 3";
+            type enumeration {
+                enum "1" {tailf:code-name mme-fgw-health-profile-update-period-1;}
+                enum "3" {tailf:code-name mme-fgw-health-profile-update-period-3;}
+                enum "5" {tailf:code-name mme-fgw-health-profile-update-period-5;}
+                enum "15" {tailf:code-name mme-fgw-health-profile-update-period-15;}
+            }
+            default 3;
+        }
+        leaf window {
+            tailf:info "Window for health alarms and health status. Default 15";
+            type enumeration {
+                enum "15" {tailf:code-name mme-fgw-health-profile-window-15;}
+                enum "30" {tailf:code-name mme-fgw-health-profile-window-30;}
+            }
+            default 15;
+        }
+        leaf min-data-threshold {
+            tailf:info "Minimun attempts in window. Default 100";
+            type uint16 {
+                range "0..1000";
+            }
+            default 100;
+        }
+        leaf connection-major-threshold {
+            tailf:info "Threshold for connect major alarm. Default 90";
+            type uint8 {
+                range "0..100";
+            }
+            default 90;
+        }
+        leaf connection-minor-threshold {
+            tailf:info "Threshold for connect minor alarm. Default 95";
+            type uint8 {
+                range "0..100";
+            }
+            default 95;
+        }
+        leaf connection-clear-threshold {
+            tailf:info "Threshold for clearing connect alarm. Default 98";
+            type uint8 {
+                range "0..100";
+            }
+            default 98;
+        }
+    } /* mme-fgw-health-profile */
+} /* fgw/status */
+augment "/fgw/interface" {
+    container s1 {
+        tailf:info "S1 objects";
+        presence ""; 
+        list mme-fgw-s1-interface {
+            tailf:alt-name "s1-if";
+            key "callp-service-id";
+            max-elements 32;
+            tailf:info "S1 Interface towards eNodeB specific to service group.";
+            uses fgw-callp-service-identifier;
+            uses routing-instance-name-multiple;
+            leaf ip-address1-v4 {
+                tailf:info "IPv4 address. Default 0.0.0.0";
+                type inet:ipv4-address;
+                default 0.0.0.0;
+            }
+            leaf ip-address2-v4 {
+                tailf:info "IPv4 address. Default 0.0.0.0";
+                type inet:ipv4-address;
+                default 0.0.0.0;
+            }
+            leaf ip-address1-v6 {
+                tailf:info "IPv6 address. Default 0:0:0:0:0:0:0:0";
+                type inet:ipv6-address;
+                default "0:0:0:0:0:0:0:0";
+            }
+            leaf ip-address2-v6 {
+                tailf:info "IPv6 address. Default 0:0:0:0:0:0:0:0";
+                type inet:ipv6-address;
+                default "0:0:0:0:0:0:0:0";
+            }
+            leaf port {
+                tailf:info "Port. Default 36412";
+                type uint32 {
+                    range "1..65535";
+                }
+                default 36412;
+            }
+        } /* mme-fgw-s1-interface */
+        container mme-fgw-s1-interface-profile {
+            presence ""; 
+            tailf:alt-name "profile";
+            tailf:info "S1 interface towards eNodeB common to all service groups.";
+            leaf sctp-profile {
+                tailf:info "SCTP profile name.";
+                type string {
+                    length "1..32";
+                }
+                mandatory true;
+            }
+            leaf version {
+                tailf:info "Standard version of interface. Default 10.6.0";
+                type enumeration {
+                    enum "10.6.0" {tailf:code-name mme-fgw-s1-interface-profile-version-10-6-0;}
+                }
+                default "10.6.0";
+            }
+            leaf time-to-wait {
+                tailf:info "Time to wait. Default 60";
+                type enumeration {
+                    enum 1;
+                    enum 2;
+                    enum 5;
+                    enum 10;
+                    enum 20;
+                    enum 60;
+                }
+                default 60;
+            }
+            leaf reloc-prep-timer {
+                tailf:info "Relocation prepare timer. Default 5";
+                type uint8 {
+                    range "1..30";
+                }
+                default 5;
+            }
+            leaf reloc-overall-timer {
+                tailf:info "Relocation overall timer. Default 5";
+                type uint8 {
+                    range "1..30";
+                }
+                default 5;
+            }
+            leaf handover-resource-release-timer {
+                tailf:info "Source eNodeB or S-GW handover release timer. Default 5";
+                type uint8 {
+                    range "1..30";
+                }
+                default 5;
+            }
+            leaf ue-release-complete-timer {
+                tailf:info "UE context release timer. Default 5";
+                type uint8 {
+                    range "1..30";
+                }
+                default 5;
+            }
+            uses dscp;
+            leaf enb-alarm-clear-time {
+                tailf:info "The number of hours after which an errant eNodeB is removed from alarm calculation. Default 24";
+                type uint8 {
+                    range "1..168";
+                }
+                default 24;
+            }
+            leaf initial-context-setup-res-timer {
+                tailf:info "Initial context setup response. Default 5";
+                type uint8 {
+                    range "1..30";
+                }
+                default 5;
+            }
+            leaf erab-setup-response-timer {
+                tailf:info "E RAB setup response. Default 5";
+                type uint8 {
+                    range "1..30";
+                }
+                default 5;
+            }
+            leaf erab-modify-response-timer {
+                tailf:info "E RAB modify response. Default 5";
+                type uint8 {
+                    range "1..30";
+                }
+                default 5;
+            }
+            leaf erab-release-response-timer {
+                tailf:info "E RAB delete response. Default 5";
+                type uint8 {
+                    range "1..30";
+                }
+                default 5;
+            }
+        } /* mme-fgw-s1-interface-profile */
+    }  /* s1 */
+} /* interface */
+augment "/fgw/service-area" {
+    list mme-mme-area {
+        tailf:alt-name "mme-area";
+        key "index";      
+        max-elements 1000;
+        tailf:info "MME area.";
+        leaf index {
+            tailf:info "Index of entry in table.";
+            type uint8 {
+                range "1..100";
+            }
+            mandatory true;
+        }
+        leaf mme-area-name {
+            tailf:info "MME area name.";
+            type string {
+                length 1..32; 
+            } 
+            tailf:alt-name "name";
+        }
+        leaf tac-range-list {
+            type string {
+                pattern '0x[0-9a-f]+(-0x[0-9a-f]+)?(,0x[0-9a-f]+(-0x[0-9a-f]+)?)*' {
+                    tailf:info "Valid values are: comma separated hexadecimal values, each of length 3..6 including a leading '0x'";
+                }  
+            }
+            tailf:info "List of Tracking Area Codes (TACs).";
+            mandatory true;
+        }
+        leaf plmn-list {
+            type string {
+                pattern '[0-9,]*' {
+                    tailf:info "Valid values are: comma separated digits";
+                }  
+            }
+            tailf:info "List of PLMNs.";
+            mandatory true;
+        }
+    } /* mme-mme-area */
+} /* service-area */
+augment "/mme-sgsn/interface/s1" {
+    container mme-fgw-u-if {
+        tailf:alt-name "u-if";
+        presence ""; 
+        tailf:info "FGW bearer-plane - local endpoint";
+        uses routing-instance-name;
+        leaf ip-address {
+            tailf:info "IP address.";
+            type inet:ip-address;
+            mandatory true;
+        }
+    } /* mme-fgw-u-if */
+    list mme-fgw-u-peer {
+        tailf:alt-name "u-peer";
+        key "name";
+        max-elements 16;
+        tailf:info "FGW bearer plane - remote peer";
+        leaf name {
+            tailf:info "Name.";
+            type string {
+                length "1..32";
+            }
+            mandatory true;
+        }
+        leaf ip-address {
+            tailf:info "Peer IP address.";
+            type inet:ip-address;
+            mandatory true;
+        }
+        leaf port {
+            tailf:info "Peer Port.";
+            type uint16 {
+                range "1..65535";
+            }
+            mandatory true;
+        }
+    } /* mme-fgw-u-peer */
+}  /*  s1  */
+augment "/fgw" {
+    container trace {
+        tailf:info "Trace objects";
+        presence ""; 
+        list mme-fgw-std {
+            tailf:alt-name "session";
+            key "enodeb-plmn-id enodeb-id";
+            max-elements 10;
+            tailf:info "Trace.";
+            leaf enodeb-plmn-id {
+                tailf:info "ENodeB PLMN identifier.";
+                type string {
+                    length "5..6";
+                }
+                mandatory true;
+            }
+            leaf enodeb-id {
+                tailf:info "ENodeB identifier.";
+                type uint32 {
+                    range "0..268435455";
+                }
+                mandatory true;
+            }
+            leaf reference-id {
+                tailf:info "Trace reference id.";
+                type string {
+                    length "1..13";
+                }
+                mandatory true;
+            }
+            leaf fgw-s1-interface-mask {
+                tailf:info "Trace target interfaces for FGW. Default s1Andx2";
+                type enumeration {
+                    enum "s1" {tailf:code-name mme-fgw-std-fgw-s1-interface-mask-s1;}
+                    enum "x2" {tailf:code-name mme-fgw-std-fgw-s1-interface-mask-x2;}
+                    enum "s1Andx2" {tailf:code-name mme-fgw-std-fgw-s1-interface-mask-s1Andx2;}
+                }
+                default "s1Andx2";
+            }
+            leaf trace-depth {
+                tailf:info "Defines the trace information level for all the interfaces to be collected. Default med";
+                type enumeration {
+                    enum "min" {tailf:code-name mme-fgw-std-trace-depth-min;}
+                    enum "med" {tailf:code-name mme-fgw-std-trace-depth-med;}
+                    enum "max" {tailf:code-name mme-fgw-std-trace-depth-max;}
+                }
+                default "med";
+            }
+            leaf nms-ip {
+                tailf:info "Destination address for Trace data transmission. Default 0.0.0.0";
+                type inet:ipv4-address;
+                default 0.0.0.0;
+            }
+        } /* mme-fgw-std */
+    } /* trace */
+} /* fgw */
+} /*submodule*/
+

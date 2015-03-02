@@ -1,0 +1,281 @@
+//////////////////////////////////////////////////////////////////////////
+/// @file scCommonCli.yang
+/// @brief Yang groups definitions for SC operational commands.
+///
+/// Maintained by: HCTA
+/// History:
+///
+/// yyyymmmdd Changed by      Change Reason
+/// --------- --------------- --------------------------------------------
+/// 2014Jan15 Hardik W        AGW-21104 - Initial development
+/// 2014Apr01 Adam Floyd      AGW-21104 - Make bucket-full-ratio type match app
+/// 2014Sep15 Lakshmi Priya   AGW-22082 - Schema upgrade
+/// 2014May07 HArdik W        AGW-21104 - UT fix: updated fields type for 
+///                                       sndcp-session
+///
+/// Copyright (c) 2014 HCTA. All Rights Reserved.
+///
+/// CONFIDENTIALITY AND LIMITED USE
+///
+/// This software, including any software of third parties embodied herein,
+/// contains information and concepts which are confidential to HCTA
+/// and such third parties. This software is licensed for use
+/// solely in accordance with the terms and conditions of the applicable
+/// license agreement with HCTA or its authorized distributor.
+//////////////////////////////////////////////////////////////////////////
+submodule scCommonCli {
+   belongs-to hcta-epc {
+      prefix epc;
+   }
+
+   import tailf-common {
+      prefix tailf;
+   }
+
+   /* This defines tags for fields shared by subscriber-llc-context and
+      subscriber-summary.
+   */
+   grouping SUBSCRIBER_LLC_CONTEXT_TAGS {
+      leaf llc-tlli {
+         tailf:info "Temporary Logical Link Identity (TLLI) currently in use.";
+         type string;
+         tailf:display-groups "detail";
+      }
+      leaf new-tlli {
+         tailf:info "New value of TLLI.";
+         type string;
+         tailf:display-groups "detail";
+      }
+      leaf bucket-leak-rate {
+         tailf:info "Flow control bucket leak rate in 100 bits per second.";
+         type uint32;
+         tailf:display-groups "detail";
+      }
+      leaf bucket-full-ratio {
+         tailf:info "Percentage of the bucket that is filled with data for a mobile.";
+         type string;
+         tailf:display-groups "detail";
+      }
+      leaf bucket-size {
+         tailf:info "Flow control bucket size.";
+         type uint32;
+         tailf:display-groups "detail";
+      }
+      leaf data-saps-utilized {
+         tailf:info "Indicates which Service Access Points (SAPs) have been used by this MS since being attached.";
+         type uint16;
+         tailf:display-groups "detail";
+      }
+      leaf ui-frames-to-ms {
+         tailf:info "Unconfirmed Information (UI) frames sent to the Mobile Station (MS).";
+         type uint32;
+         tailf:display-groups "detail";
+      }
+      leaf ui-frames-from-ms {
+         tailf:info "Unconfirmed Information (UI) frames received from the Mobile Station (MS).";
+         type uint32;
+         tailf:display-groups "detail";
+      }
+      leaf i-frames-to-ms {
+         tailf:info "Confirmed Information (I) frames sent to the Mobile Station (MS).";
+         type uint32;
+         tailf:display-groups "detail";
+      }
+      leaf i-frames-from-ms {
+         tailf:info "Confirmed Information (I) frames received from the Mobile Station (MS).";
+         type uint32;
+         tailf:display-groups "detail";
+      }
+      leaf i-frames-retransmitted-to-ms {
+         tailf:info "Confirmed Information (I) frames retransmitted to the Mobile Station (MS).";
+         type uint32;
+         tailf:display-groups "detail";
+      }
+      leaf frames-protected-to-ms {
+         tailf:info "Protected frames sent to the Mobile Station (MS).";
+         type uint32;
+         tailf:display-groups "detail";
+      }
+      leaf frames-protected-from-ms {
+         tailf:info "Protected frames sent from the Mobile Station (MS).";
+         type uint32;
+         tailf:display-groups "detail";
+      }
+      leaf gea1-frames-ciphered-to-ms {
+         tailf:info "Frames sent to the Mobile Station (MS) ciphered using the GEA1 algorithm.";
+         type uint32;
+         tailf:display-groups "detail";
+      }
+      leaf gea2-frames-ciphered-to-ms {
+         tailf:info "Frames sent to the Mobile Station (MS) ciphered using the GEA2 algorithm.";
+         type uint32;
+         tailf:display-groups "detail";
+      }
+      leaf gea3-frames-ciphered-to-ms {
+         tailf:info "Frames sent to the Mobile Station (MS) ciphered using the GEA3 algorithm.";
+         type uint32;
+         tailf:display-groups "detail";
+      }
+      leaf gea1-frames-ciphered-from-ms {
+         tailf:info "Frames sent from the Mobile Station (MS) ciphered using the GEA1 algorithm.";
+         type uint32;
+         tailf:display-groups "detail";
+      }
+      leaf gea2-frames-ciphered-from-ms {
+         tailf:info "Frames sent from the Mobile Station (MS) ciphered using the GEA2 algorithm.";
+         type uint32;
+         tailf:display-groups "detail";
+      }
+      leaf gea3-frames-ciphered-from-ms {
+         tailf:info "Frames sent from the Mobile Station (MS) ciphered using the GEA3 algorithm.";
+         type uint32;
+         tailf:display-groups "detail";
+      }
+      leaf crc-errors-from-ms {
+         tailf:info "Frames received from Mobile Station (MS) that contained Cyclic Redundancy Check (CRC) errors.";
+         type uint32;
+         tailf:display-groups "detail";
+      }
+      leaf frames-buffered-to-ms {
+         tailf:info "Current number of frames which are buffered in a Logical Link Control (LLC) retransmission window.";
+         type uint32;
+         tailf:display-groups "detail";
+      }
+      leaf congestion-discards-to-ms {
+         tailf:info "PDU that have been discarded due to MS Flow Control, BVC blockage, or there not being any available room in the sliding window of the LLE to service the PDU.";
+         type uint32;
+         tailf:display-groups "detail";
+      }
+   }
+
+   /* This defines tags for fields shared by subscriber-sndcp-session and
+      subscriber-summary.
+   */
+   grouping SUBSCRIBER_SNDCP_SESSION_TAGS{
+      leaf discarded-npdus-from-ms {
+         tailf:info "N-PDUs that originated from the MS which could not be re-assembled. This could result from N-PDUs lost or re-ordered.";
+         type uint32;
+         tailf:display-groups "detail";
+      }
+      leaf sn-pdus-to-ms {
+         tailf:info "SN-PDUs transferred to the LLC layer to be sent to the MS.";
+         type uint32;
+         tailf:display-groups "detail";
+      }
+      leaf sn-pdus-from-ms {
+         tailf:info "SN-PDUs transferred to the LLC layer to be sent from the MS.";
+         type uint32;
+         tailf:display-groups "detail";
+      }
+      leaf octets-to-ms {
+         tailf:info "Payload octets sent to the MS (after compression is applied). The SNDCP header is also included as a part of payload.";
+         type string;
+         tailf:display-groups "detail";
+      }
+      leaf octets-from-ms {
+         tailf:info "Payload octets sent from the MS (after compression is applied). The SNDCP header is also included as a part of payload.";
+         type string;
+         tailf:display-groups "detail";
+      }
+      leaf octets-to-network {
+         tailf:info "Payload octets sent to the network.";
+         type string;
+         tailf:display-groups "detail";
+      }
+      leaf octets-from-network {
+         tailf:info "Payload octets sent from the network.";
+         type string;
+         tailf:display-groups "detail";
+      }
+      leaf neg-type-of-header-compression {
+         tailf:info "Type of header compression that is negotiated between the MS and the SGSN. If the value is none, RFC 1144 is not selected to negotiate.";
+         type string;
+         tailf:display-groups "detail";
+      }
+      leaf v42bis-protocol-mode-encoder {
+         tailf:info "Current mode of the V.42bis encoder.";
+         type string;
+         tailf:display-groups "detail";
+      }
+      leaf v42bis-protocol-mode-decoder {
+         tailf:info "Current mode of the V.42bis decoder.";
+         type string;
+         tailf:display-groups "detail";
+      }
+      leaf v42bis-compression-direction {
+         tailf:info "Direction in which V.42bis is active, negotiated at link setup by the data link protocol through XID negotiation of parameter P0 (compression direction).";
+         type string;
+         tailf:display-groups "detail";
+      }
+      leaf v42bis-dictionary {
+         tailf:info "Maximum number of V.42bis codewords in the dictionary, as determined by the XID negotiation of parameter P1 (number of codewords).";
+         type uint32;
+         tailf:display-groups "detail";
+      }
+      leaf v42bis-max-string-size {
+         tailf:info "Maximum number of characters allowed in a string represented by a codeword, as determined by the XID negotiation of parameter P2 (maximum string size).";
+         type uint32;
+         tailf:display-groups "detail";
+      }
+      leaf last-decode-error {
+         tailf:info "Last error found by the decoder.";
+         type string;
+         tailf:display-groups "detail";
+      }
+      leaf comp-ratio-encoder {
+         tailf:info "Number of uncompressed bytes divided by the number of compressed bytes.";
+         type string;
+         tailf:display-groups "detail";
+      }
+      leaf comp-ratio-decoder {
+         tailf:info "Number of uncompressed bytes divided by the number of compressed bytes.";
+         type string;
+         tailf:display-groups "detail";
+      }
+      leaf rfc1144-neg-slots {
+         tailf:info "Negotiated TCP state slots being used by the RFC1144 compression entity for the MS.";
+         type uint16;
+         tailf:display-groups "detail";
+      }
+      leaf rfc1144-uncompressed-tcp-sent {
+         tailf:info "UNCOMPRESSED_TCP packets sent to the MS by the compressor.";
+         type uint32;
+         tailf:display-groups "detail";
+      }
+      leaf rfc1144-compressed-tcp-sent {
+         tailf:info "COMPRESSED_TCP packets sent to the MS by the compressor.";
+         type uint32;
+         tailf:display-groups "detail";
+      }
+      leaf rfc1144-outbound-searches {
+         tailf:info "Outbound searches of a compression state for a MS.";
+         type uint32;
+         tailf:display-groups "detail";
+      }
+      leaf rfc1144-outbound-misses {
+         tailf:info "Misses while searching for a compression state for the MS.";
+         type uint32;
+         tailf:display-groups "detail";
+      }
+      leaf rfc1144-uncompress-tcp-received {
+         tailf:info "UNCOMPRESSED_TCP packets received from the MS by the decompressor.";
+         type uint32;
+         tailf:display-groups "detail";
+      }
+      leaf rfc1144-compressed-tcp-received {
+         tailf:info "COMPRESSED_TCP packets received from the MS by the decompressor.";
+         type uint32;
+         tailf:display-groups "detail";
+      }
+      leaf rfc1144-errors-received {
+         tailf:info "Errored packets received from the MS by the decompressor.";
+         type uint32;
+         tailf:display-groups "detail";
+      }
+      leaf rfc1144-tossed-pkts-received {
+         tailf:info "Packets discarded by the decompressor because of an error that occurred before this packet.";
+         type uint32;
+         tailf:display-groups "detail";
+      }
+   }
+}

@@ -1,0 +1,13 @@
+module juniper {
+    namespace "http://www.juniper.net/ns/vnc";
+    prefix "juniper";
+    include ems;
+    include sd;
+    include device;
+    include image;
+    organization "juniper";
+    revision "2015-01-01" {
+        description "Initial revision. ";
+    }
+    // definitions follow. . .
+}

@@ -1,0 +1,690 @@
+//////////////////////////////////////////////////////////////////////////
+/// @file upmCli.yang
+/// @brief Yang definitions for operational commands.
+///        "show mme-sgsn interface gn path"
+///        "show mme-sgsn interface gtp path"
+///        "show mme-sgsn interface s10 path"
+///        "show mme-sgsn interface s11 path"
+///        "show mme-sgsn interface s16 path"
+///        "show mme-sgsn interface s3 path"
+///        "show mme-sgsn interface s4 path"
+///        "show mme-sgsn interface sv path"
+///        "show mme-sgsn interface s102 iws"
+///        "show mme-sgsn status upm"
+///        "request mme-sgsn interface gtp path relocate"
+///        "request mme-sgsn interface gtp path unassign"
+///        "request mme-sgsn interface s102 iws relocate"
+///        "request mme-sgsn interface s102 iws unassign" 
+///
+/// Maintained by: HCTA
+/// History:
+///
+/// yyyymmmdd Changed by      Change Reason
+/// --------- --------------- --------------------------------------------
+/// 2014Jan20 Nimesh D        AGW-21104 - Initial development
+/// 2014Feb28 Adam Floyd      AGW-21104 - Updated callpoint info
+/// 2014Mar03 Hardik W        AGW-21104 - Updated gn model 
+/// 2014Mar27 Akshay Wani     AGW-21104 - Changed data type of path-version.
+/// 2014Apr17 Adam Floyd      AGW-21104 - Add sort-flag; mark upm status as TBD
+/// 2014Jun06 Sujay R         AGW-21104 - Updated fields in status upm model
+/// 2014Jun18 Sujay R         AGW-22082 - Added relocate/unassign command.
+/// 2014Aug15 Adam Floyd      AGW-23534 - Remove fake-key kludge
+/// 2014Sep15 Lakshmi Priya   AGW-22082 - Schema upgrade
+/// 2014Sep24 Irina Pershwitz AGW-23781 - Iws container conflict
+/// 2014Oct06 Aziz Motiwala   AGW-24144 - s4 container conflict
+/// 2014Sep15 Gauri C         AGW-22104 - Added plmn attribute in gn path
+///                                       and gtp path show commands 
+///
+/// Copyright (c) 2014 HCTA. All Rights Reserved.
+///
+/// CONFIDENTIALITY AND LIMITED USE
+///
+/// This software, including any software of third parties embodied herein,
+/// contains information and concepts which are confidential to HCTA
+/// and such third parties. This software is licensed for use
+/// solely in accordance with the terms and conditions of the applicable
+/// license agreement with HCTA or its authorized distributor.
+//////////////////////////////////////////////////////////////////////////
+submodule upmCli{
+    belongs-to hcta-epc {
+        prefix epc;
+    }
+    import tailf-common {
+        prefix tailf;
+    }
+   import ietf-inet-types {
+      prefix inet;
+   }
+   include mmeSgsnConfig;
+   include cmdCommonHcta;
+   include upmConfig;
+   include scConfig;
+
+    augment "/mme-sgsn/interface/gn" {
+        list path {
+            tailf:info "Gn Path";
+            config false;
+            ordered-by user; // not for use with keyed lists
+
+            tailf:cli-no-key-completion;
+            //key "ip-address";
+
+            tailf:callpoint cli_oper_show
+            {
+                // Callpoint Opaque Data Format (255 chars max):
+                // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+                tailf:opaque '0:mme-sgsn interface gn path::1';
+            }
+
+            leaf ip-address {
+                tailf:info "Path IP address.";
+                type inet:ip-address;
+                tailf:display-groups "none detail";
+            }
+            leaf routing-instance {
+                tailf:info "";
+                type string;
+                tailf:display-groups "none detail";
+            }
+            leaf status {
+                tailf:info "Path status.";
+                type string;
+                tailf:display-groups "none detail";
+            }
+            leaf location {
+                tailf:info "";
+                type string;
+                tailf:display-groups "detail";
+            }
+            leaf service {
+                tailf:info "";
+                type string;
+                tailf:display-groups "detail";
+            }
+            leaf plmn {
+                tailf:info "The first detected PLMN stored in the path.";
+                type string;
+                tailf:display-groups "none detail";
+            }
+            leaf path-version {
+                tailf:info "The path version.";
+                type string;
+                tailf:display-groups "none detail";
+            }
+         } /*path*/
+      } /*gn*/
+    
+    
+      augment "/mme-sgsn/interface/gtp" {
+         list path-oper {
+            tailf:alt-name path;
+            tailf:info "GTP Path";
+            config false;
+            ordered-by user; // not for use with keyed lists
+
+            tailf:cli-no-key-completion;
+            //key "ip-address";
+
+            tailf:callpoint cli_oper_show
+            {
+                // Callpoint Opaque Data Format (255 chars max):
+                // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+                tailf:opaque '0:mme-sgsn interface gtp path::1';
+            }
+
+            leaf ip-address {
+                tailf:info "Path IP address.";
+                type inet:ip-address;
+                tailf:display-groups "none detail";
+            }
+            leaf routing-instance {
+                tailf:info "";
+                type string;
+                tailf:display-groups "none detail";
+            }
+            leaf type {
+                tailf:info "Path type.";
+                type string;
+                tailf:display-groups "none detail";
+            }
+            leaf status {
+                tailf:info "Path status.";
+                type string;
+                tailf:display-groups "none detail";
+            }
+            leaf location {
+                tailf:info "";
+                type string;
+                tailf:display-groups "none detail";
+            }
+            leaf service {
+                tailf:info "";
+                type string;
+                tailf:display-groups "none detail";
+            }
+            leaf plmn {
+                tailf:info "The first detected PLMN stored in the path.";
+                type string;
+                tailf:display-groups "none detail";
+            }
+            leaf path-version {
+                tailf:info "The path version.";
+                type string;
+                tailf:display-groups "detail";
+            }
+            leaf inc-pdu {
+                tailf:info "Incoming PDU count.";
+                type uint32;
+                tailf:display-groups "none detail";
+            }
+            leaf out-pdu {
+                tailf:info "Outgoing PDU count.";
+                type uint32;
+                tailf:display-groups "none detail";
+            }
+            leaf pending-trans {
+                tailf:info "Pending transactions.";
+                type uint32;
+                tailf:display-groups "none detail";
+            }
+        } /*path*/
+    } /*gtp*/
+
+    augment "/mme-sgsn/interface/s11" {
+        list path {
+            tailf:info "S11 Path";
+            config false;
+            ordered-by user; // not for use with keyed lists
+
+            tailf:cli-no-key-completion;
+            //key "ip-address";
+
+            tailf:callpoint cli_oper_show
+            {
+                // Callpoint Opaque Data Format (255 chars max):
+                // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+                tailf:opaque '0:mme-sgsn interface s11 path::1';
+            }
+
+            leaf ip-address {
+                tailf:info "Path IP address.";
+                type inet:ip-address;
+                tailf:display-groups "none detail";
+            }
+            leaf routing-instance {
+                tailf:info "";
+                type string;
+                tailf:display-groups "none detail";
+            }
+            leaf status {
+                tailf:info "Path status.";
+                type string;
+                tailf:display-groups "none detail";
+            }
+            leaf location {
+                tailf:info "";
+                type string;
+                tailf:display-groups "none detail";
+            }
+            leaf service {
+                tailf:info "";
+                type string;
+                tailf:display-groups "none detail";
+            }
+            leaf path-version {
+                tailf:info "Path version.";
+                type string;
+                tailf:display-groups "detail";
+            }
+            leaf load-status {
+                tailf:info "Load feedback from adjacent node.";
+                type string;
+                tailf:display-groups "none detail";
+            }
+        } /*path*/
+    } /*s11*/
+  
+    augment "/mme-sgsn/interface/s102"{ 
+       list iws-oper {
+         tailf:alt-name "iws";
+         tailf:info "Interworking System to support 1XRTT CSFB";
+         config false;
+         ordered-by user; // not for use with keyed lists
+
+         tailf:cli-no-key-completion;
+         //key iws-id;
+
+         tailf:callpoint cli_oper_show
+         {
+            // Callpoint Opaque Data Format (255 chars max):
+            // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+            tailf:opaque '0:mme-sgsn interface s102 iws::1';
+         }
+
+         leaf iws-id {
+            tailf:info "The identifier of the IWS in hex format.";
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf ip-address {
+            tailf:info "IP address of the IWS.";
+            type inet:ip-address;
+            tailf:display-groups "none detail";
+         }
+         leaf port {
+            tailf:info "Remote port number.";
+            type uint16;
+            tailf:display-groups "none detail";
+         }
+         leaf status-str {
+            tailf:alt-name "status";
+            tailf:info "The status of the IWS.";
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf location {
+            tailf:info "Location in MME reporting this peer.";
+            type string;
+            tailf:display-groups "none detail";
+         } 
+         leaf inc-pdu {
+            tailf:info "Incoming PDU count.";
+            type uint32;
+            tailf:display-groups "none detail";
+         }
+         leaf out-pdu {
+            tailf:info "Outgoing PDU count.";
+            type uint32;
+            tailf:display-groups "none detail";
+         }
+         leaf pending-trans {
+            tailf:info "Pending transactions.";
+            type uint32;
+            tailf:display-groups "none detail";
+         }
+      } /* iws-oper */
+   } /* s102 */
+ 
+   augment "/mme-sgsn/interface"{
+    container s10{
+        tailf:info "S10 interface to MME";
+        list path {
+            tailf:info "S10 Path";
+            config false;
+            ordered-by user; // not for use with keyed lists
+
+            tailf:cli-no-key-completion;
+            //key "ip-address";
+
+            tailf:callpoint cli_oper_show
+            {
+                // Callpoint Opaque Data Format (255 chars max):
+                // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+                tailf:opaque '0:mme-sgsn interface s10 path::1';
+            }
+
+            leaf ip-address {
+                tailf:info "Path IP address.";
+                type inet:ip-address;
+                tailf:display-groups "none detail";
+            }
+            leaf routing-instance {
+                tailf:info "";
+                type string;
+                tailf:display-groups "none detail";
+            }
+            leaf status {
+                tailf:info "Path status.";
+                type string;
+                tailf:display-groups "none detail";
+            }
+            leaf location {
+                tailf:info "";
+                type string;
+                tailf:display-groups "none detail";
+            }
+            leaf service {
+                tailf:info "";
+                type string;
+                tailf:display-groups "none detail";
+            }
+            leaf path-version {
+                tailf:info "Path version.";
+                type string;
+                tailf:display-groups "detail";
+            }
+        } /*path*/
+    } /*s10*/
+    
+     container s16 {
+        tailf:info "S16 interface to SGSN";
+        list path {
+            tailf:info "S16 interface to SGSN";
+            config false;
+            ordered-by user; // not for use with keyed lists
+
+            tailf:cli-no-key-completion;
+            //key "ip-address";
+
+            tailf:callpoint cli_oper_show
+            {
+                // Callpoint Opaque Data Format (255 chars max):
+                // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+                tailf:opaque '0:mme-sgsn interface s16 path::1';
+            }
+
+            leaf ip-address {
+                tailf:info "Path IP address.";
+                type inet:ip-address;
+                tailf:display-groups "none detail";
+            }
+            leaf routing-instance {
+                tailf:info "";
+                type string;
+                tailf:display-groups "none detail";
+            }
+            leaf status {
+                tailf:info "Path status.";
+                type string;
+                tailf:display-groups "none detail";
+            }
+            leaf location {
+                tailf:info "";
+                type string;
+                tailf:display-groups "none detail";
+            }
+            leaf service {
+                tailf:info "";
+                type string;
+                tailf:display-groups "none detail";
+            }
+            leaf path-version {
+                tailf:info "Path version.";
+                type string;
+                tailf:display-groups "detail";
+            }
+        } /*path*/
+    } /*s16*/
+
+    container s3 {
+        tailf:info "S3 interface to MME/SGSN";
+        list path {
+            tailf:info "S3 Path";
+            config false;
+            ordered-by user; // not for use with keyed lists
+
+            tailf:cli-no-key-completion;
+            //key "ip-address";
+
+            tailf:callpoint cli_oper_show
+            {
+                // Callpoint Opaque Data Format (255 chars max):
+                // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+                tailf:opaque '0:mme-sgsn interface s3 path::1';
+            }
+
+            leaf ip-address {
+                tailf:info "Path IP address.";
+                type inet:ip-address;
+                tailf:display-groups "none detail";
+            }
+            leaf routing-instance {
+                tailf:info "";
+                type string;
+                tailf:display-groups "none detail";
+            }
+            leaf status {
+                tailf:info "Path status.";
+                type string;
+                tailf:display-groups "none detail";
+            }
+            leaf location {
+                tailf:info "";
+                type string;
+                tailf:display-groups "none detail";
+            }
+            leaf service {
+                tailf:info "";
+                type string;
+                tailf:display-groups "none detail";
+            }
+            leaf path-version {
+                tailf:info "Path version.";
+                type string;
+                tailf:display-groups "detail";
+            }
+        } /*path*/
+    } /*s3*/
+
+    container s4-oper {
+        tailf:alt-name "s4";
+        tailf:info "S4 interface to GGSN/S-GW";
+        list path {
+            tailf:info "S4 Path";
+            config false;
+            ordered-by user; // not for use with keyed lists
+
+            tailf:cli-no-key-completion;
+            //key "ip-address";
+
+            tailf:callpoint cli_oper_show
+            {
+                // Callpoint Opaque Data Format (255 chars max):
+                // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+                tailf:opaque '0:mme-sgsn interface s4 path::1';
+            }
+
+            leaf ip-address {
+                tailf:info "Path IP address.";
+                type inet:ip-address;
+                tailf:display-groups "none detail";
+            }
+            leaf routing-instance {
+                tailf:info "";
+                type string;
+                tailf:display-groups "none detail";
+            }
+            leaf status {
+                tailf:info "Path status.";
+                type string;
+                tailf:display-groups "none detail";
+            }
+            leaf location {
+                tailf:info "";
+                type string;
+                tailf:display-groups "none detail";
+            }
+            leaf service {
+                tailf:info "";
+                type string;
+                tailf:display-groups "none detail";
+            }
+            leaf path-version {
+                tailf:info "Path version.";
+                type string;
+                tailf:display-groups "detail";
+            }
+        } /*path*/
+    } /*s4*/
+
+    container sv {
+        tailf:info "Sv interface to MSC";
+        list path {
+            tailf:info "SV Path";
+            config false;
+            ordered-by user; // not for use with keyed lists
+
+            tailf:cli-no-key-completion;
+            //key "ip-address";
+
+            tailf:callpoint cli_oper_show
+            {
+                // Callpoint Opaque Data Format (255 chars max):
+                // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+                tailf:opaque '0:mme-sgsn interface sv path::1';
+            }
+
+            leaf ip-address {
+                tailf:info "Path IP address.";
+                type inet:ip-address;
+                tailf:display-groups "none detail";
+            }
+            leaf routing-instance {
+                tailf:info "";
+                type string;
+                tailf:display-groups "none detail";
+            }
+            leaf status {
+                tailf:info "Path status.";
+                type string;
+                tailf:display-groups "none detail";
+            }
+            leaf location {
+                tailf:info "";
+                type string;
+                tailf:display-groups "none detail";
+            }
+            leaf service {
+                tailf:info "";
+                type string;
+                tailf:display-groups "none detail";
+            }
+            leaf path-version {
+                tailf:info "Path version.";
+                type string;
+                tailf:display-groups "detail";
+            }
+         } /*path*/
+      } /*sv*/
+   } /* interface */
+
+   augment "/mme-sgsn/status" {
+      list upm-load-status {
+         tailf:alt-name "upm";
+         tailf:info "UDP path manager load status.";
+         config false;
+         ordered-by user; // not for use with keyed lists
+
+         tailf:cli-no-key-completion;
+
+         tailf:callpoint cli_oper_show
+         {
+            // Callpoint Opaque Data Format (255 chars max):
+            // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+            tailf:opaque '0:mme-sgsn status upm::1';
+         }
+
+         leaf location {
+            tailf:info "Location in the MME/SGSN system";
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf service {
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf unit-id {
+            type uint16;
+            tailf:display-groups "none detail";
+         }
+         leaf paths {
+            tailf:info "Total number of paths on the UPM";
+            type uint32;
+            tailf:display-groups "none detail";
+         }
+         leaf weight {
+            tailf:info "Total weight of all the paths currently allocated to the UPM";
+            type uint32;
+            tailf:display-groups "none detail";
+         }
+         leaf tps {
+            tailf:info "Transactions per second  on the UPM ((incPdu+outPdu)/2)";
+            type uint32;
+            tailf:display-groups "none detail";
+         }
+         leaf pending-trans {
+            tailf:info "Number of pending transactions on the UPM (GTP, s101, s102, fxa)";
+            type uint32;
+            tailf:display-groups "none detail";
+         }
+      } /* upm-load-status */
+   }
+
+   augment "/mme-sgsn/interface/gtp" {
+      container path {
+         tailf:info "GTP Path.";
+         tailf:action relocate {
+            tailf:info "Operator initiated relocation of a gtp path.";
+            tailf:actionpoint cli-request-command;
+            input {
+               leaf ip-address {
+                  type inet:ip-address;
+                  tailf:info "IP address of the peer to relocate";
+                  mandatory true;
+               }
+               leaf location {
+                  type string;
+                  tailf:info "Destination location.";
+                  mandatory true;
+               }
+            }
+            output {
+               uses request-cmd-output;
+            }
+         }
+         tailf:action unassign {
+         tailf:info "Unassign GTP path.";
+         tailf:actionpoint cli-request-command;
+         input {
+            leaf ip-address {
+               type inet:ip-address;
+               tailf:info "IP address of the peer to unassign.";
+               mandatory true;
+            }  
+         }
+         output {
+            uses request-cmd-output;
+         }
+       }
+     }
+   } 
+   augment "/mme-sgsn/interface/s102" {
+      container iws-action {
+        tailf:info "Interworking System to support 1XRTT CSFB.";
+        tailf:alt-name "iws";
+        tailf:action relocate {
+          tailf:info "Relocate IWS path.";
+          tailf:actionpoint cli-request-command;
+          input {
+             leaf ip-address {
+               type inet:ip-address;
+               tailf:info "IP address of the peer to relocate";
+               mandatory true;
+             }
+             leaf location {
+               type string;
+               tailf:info "Destination location.";
+               mandatory true;
+            }
+         }
+         output {
+             uses request-cmd-output;
+         } 
+      }
+      tailf:action unassign {
+        tailf:info "Unassign IWS path.";
+        tailf:actionpoint cli-request-command;
+        input {
+          leaf ip-address {
+            type inet:ip-address;
+            tailf:info "IP address of the peer to unassign.";
+            mandatory true;
+          } 
+        }
+        output {
+            uses request-cmd-output;
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,290 @@
+//////////////////////////////////////////////////////////////////////////
+/// @file cmdCommonHcta.yang
+/// @brief Common typedefs for use by other yang files as needed.
+///
+/// Maintained by: HCTA
+/// History:
+///
+/// yyyymmmdd Changed by      Change Reason
+/// --------- --------------- --------------------------------------------
+/// 2014Jan15 Mike Lesko      AGW-21104 - Initial development
+/// 2014Jan29 Hardik W        AGW-21104 - Added suffix -t in typedefs
+/// 2014Feb25 Lakshmi Priya   AGW-21103  - Added code to group routing-
+///                           instance,dscp-mark,callp-service-id,multiple 
+///                           routing instance attributes.
+/// 2014Mar19 Hardik W        AGW-21104 - Added new register-group for 
+///                           statistics commands.
+/// 2014May15 Revathy R       AGW-21597 - Added enum type for ueState 
+/// 2014Apr24 Nimesh D        AGW-22259 - Removed reliability and
+/// 2014Mar25 Anuja Chaudhari AGW-21596 - Added enb-type-t in typedefs
+///                           group-reliability fields.
+/// 2014Jun06 Irina Pershwitz AGW-21105 - Load Balancer VM
+/// 2014Sep15 Lakshmi Priya   AGW-22082 - Schema upgrade
+/// 2014Aug14 Ajit Singh      AGW-23505 - Incorrect imsi digits
+/// 2014Oct31 Adam Floyd      AGW-24110 - Pre-filter stats command on service
+///
+/// Copyright (c) 2014 HCTA. All Rights Reserved.
+///
+/// CONFIDENTIALITY AND LIMITED USE
+///
+/// This software, including any software of third parties embodied herein,
+/// contains information and concepts which are confidential to HCTA
+/// and such third parties. This software is licensed for use
+/// solely in accordance with the terms and conditions of the applicable
+/// license agreement with HCTA or its authorized distributor.
+//////////////////////////////////////////////////////////////////////////
+
+submodule cmdCommonHcta{
+
+  belongs-to hcta-epc {
+     prefix epc; 
+  }
+
+  import hcta-routing {
+    prefix routing;
+  }
+  
+  include mmeSgsnConfig;
+  include fgwConfig;
+  import tailf-common {
+     prefix tailf;
+  }
+  typedef imsi-t {
+    type string {
+      pattern '[0-9]{6,15}' {
+        tailf:info "imsi: Valid values are digits of length 6..15";
+      }          
+    }
+  }
+
+  typedef imei-t {
+    type string {
+      pattern '[0-9]{14,15}' {
+        tailf:info "imei: Valid values are digits of length 14..15";
+      }          
+    }
+  }
+
+  typedef enb-type-enum {
+     type enumeration {
+       enum macro;
+       enum home;
+    }
+  }
+
+  typedef imeisv-t {
+    type string {
+      pattern '[0-9]{16,16}' {
+        tailf:info "imeisv: Valid values are digits of length 16";
+      }          
+    }
+  }
+
+  typedef msisdn-t {
+    type string {
+      pattern '[0-9]{9,15}' {
+        tailf:info "msisdn: Valid values are digits of length 9..15";
+      }          
+    }
+  }
+
+  grouping imsi-key{
+    leaf imsi{
+      type imsi-t;
+    }
+  }
+
+  grouping imei-key{
+    leaf imei{
+      type imei-t;
+    }
+  }
+
+  grouping imeisv-key{
+    leaf imeisv{
+      type imeisv-t;
+    }
+  }
+
+  grouping msisdn-key{
+    leaf msisdn{
+      type msisdn-t;
+    }
+  }
+
+  grouping subscriber-all-keys{
+    uses imsi-key;
+    uses imei-key;
+    uses imeisv-key;
+    uses msisdn-key;
+  }
+
+  grouping request-cmd-output {
+    leaf Success {
+      type string;
+    }
+    leaf Error {
+      type string;
+    }
+  }
+
+  grouping routing-instance-name {
+    leaf routing-instance {
+      tailf:info "Routing Instance associated with 'ip-address-v4' or 'ip-address-v6'";
+      type string {
+        length "1..64";
+      }
+      must "((count(/routing:routing-instances/routing:instance[routing:name = current()]) != 0) or
+             (count(/mme-sgsn) != 0 and (/mme-sgsn/system/steering != 'load-balancer') ) or
+	     (count(/fgw) != 0 and (/fgw/system/steering != 'load-balancer')))"            
+      {
+        error-message "There is no 'routing-instances instance' object with this 'routing-instance'";
+                  tailf:dependency "/routing:routing-instances/routing:instance/routing:name";
+      }
+      
+      mandatory true;
+    }
+  } 
+
+  grouping routing-instance-name-multiple {
+    leaf routing-instance1 {
+      tailf:info "Routing Instance1 associated with 'ip-address1-v4' or 'ip-address1-v6'";
+      type string {
+        length "1..64";
+      }
+      must "((count(/routing:routing-instances/routing:instance[routing:name = current()]) != 0) or
+             (count(/mme-sgsn) != 0 and (/mme-sgsn/system/steering != 'load-balancer') ) or
+	     (count(/fgw) != 0 and (/fgw/system/steering != 'load-balancer')))"            
+      {
+        error-message "There is no 'routing-instances instance' object with this 'routing-instance'";
+                  tailf:dependency "/routing:routing-instances/routing:instance/routing:name";
+      }
+      mandatory true;
+    }
+    leaf routing-instance2 {
+      tailf:info "Routing Instance2 associated with 'ip-address2-v4' or 'ip-address2-v6'";
+       type string {
+        length "1..64";
+      }
+      must "((count(/routing:routing-instances/routing:instance[routing:name = current()]) != 0) or
+             (count(/mme-sgsn) != 0 and (/mme-sgsn/system/steering != 'load-balancer') ) or
+	     (count(/fgw) != 0 and (/fgw/system/steering != 'load-balancer')))"            
+      {
+        error-message "There is no 'routing-instances instance' object with this 'routing-instance'";
+                  tailf:dependency "/routing:routing-instances/routing:instance/routing:name";
+      }
+    }
+  }
+
+  grouping callp-service-identifier {
+    leaf callp-service-id {
+      tailf:info "Call Processing VM identifier.";
+      type leafref {
+        path "/mme-sgsn/system/callp/service-id";
+      }
+      mandatory true;
+    }
+  }
+
+  grouping fgw-callp-service-identifier {
+    leaf callp-service-id {
+      tailf:info "Call Processing VM identifier.";
+      type leafref {
+        path "/fgw/system/callp/service-id";
+      }
+      mandatory true;
+    }    
+  }
+  
+  grouping dscp {
+    leaf dscp-mark {
+      tailf:info "DSCP mark. Valid values are: 0..63, de, af11, af12, af13, af21, af22, af23, af31, af32, af33, af41, af42, af43, cs1, cs2, cs3, cs4, cs5, cs6, cs7, ef";
+      type string {
+        pattern '([0-9]|[1-5][0-9]|[6][0-3])|de|af[1-4][1-3]|cs[1-7]|ef' {
+        tailf:info "Valid values are: 0..63, de, af11, af12, af13, af21, af22, af23, af31, af32, af33, af41, af42, af43, cs1, cs2, cs3, cs4, cs5, cs6, cs7, ef";
+        }
+     }
+     default "de";
+    }
+  }
+
+  typedef enable-disable-enum {
+    type enumeration {
+      enum enable;
+      enum disable;
+    }          
+  }
+
+  typedef connectedActionTypes-enum {
+    type enumeration {
+      enum passive;
+      enum offload-user-inactivity;
+      enum offload-all;
+      enum detach;
+    }
+  }
+
+  typedef idleActionTypes-enum {
+    type enumeration {
+      enum passive;
+      enum offload-after-tau-or-sr;
+      enum offload-after-tau;
+      enum offload-after-rau;
+      enum offload-with-paging;
+      enum implicit-detach;
+    }
+  }
+
+  typedef ueStateTypes-enum {
+    type enumeration {
+      enum both;
+      enum connected;
+      enum idle;
+    }
+  }
+
+  typedef dnsRecordTypes-enum {
+    type enumeration {
+      enum A;
+      enum AAAA;
+      enum NAPTR;
+      enum SRV;
+    }
+  }
+
+  grouping register-group {
+    leaf service {
+      tailf:cli-completion-actionpoint cli_completion {
+        tailf:cli-completion-id "multiple-service-unit-completion";
+      }
+      type string;
+      tailf:display-groups "detail";
+      tailf:info "VM name";
+    }
+    leaf ref-entity-type {
+      type string;
+      tailf:display-groups "detail";
+      tailf:info "Reference entity type";
+    }
+    leaf ref-entity-tag {
+      type string;
+      tailf:display-groups "none detail";
+      tailf:info "Reference entity tag";
+    }
+    leaf ref-subentity-info {
+      type string;
+      tailf:display-groups "detail";
+      tailf:info "Reference subentity info";
+    }
+    leaf register-name {
+      type string;
+      tailf:display-groups "none detail";
+      tailf:info "Register name";
+    }
+    leaf register-value {
+      type string;
+      tailf:display-groups "none detail";
+      tailf:info "Register value";
+    }
+  }
+}

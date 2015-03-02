@@ -1,0 +1,2022 @@
+//////////////////////////////////////////////////////////////////////////
+/// @file scCli.yang
+/// @brief Yang definitions for operational commands.
+///        "request mme-sgsn subscriber list save"
+///        "request mme-sgsn subscriber move"
+///        "show mme-sgsn status combo"
+///        "show mme-sgsn status lte"
+///        "show mme-sgsn subscriber apn-profile"
+///        "show mme-sgsn subscriber bearer"
+///        "show mme-sgsn subscriber csg-subscription-data"
+///        "show mme-sgsn subscriber gs-context"
+///        "show mme-sgsn subscriber list"
+///        "show mme-sgsn subscriber negotiated-qos"
+///        "show mme-sgsn subscriber offload"
+///        "show mme-sgsn subscriber requested-qos"
+///        "show mme-sgsn subscriber session"
+///        "show mme-sgsn subscriber subscribed-qos"
+///        "show mme-sgsn subscriber summary"
+///
+/// Maintained by: HCTA
+/// History:
+///
+/// yyyymmmdd Changed by      Change Reason
+/// --------- --------------- --------------------------------------------
+/// 2014Jan15 Mike Lesko      AGW-21104 - Initial development
+/// 2014Jan17 Sayali Dani     AGW-21104 - Added show commands.
+/// 2014Feb14 Akshay Wani     AGW-21104 - Added Imsi list.
+/// 2014Feb26 Hardik W        AGW-21104 - Modified eps-bearer-id to 
+///                               nsapi-or-bearer-id for apn-profile
+/// 2014Feb28 Adam Floyd      AGW-21104 - Updated action/callpoint info
+/// 2014Mar15 Mike Lesko      AGW-21104 - Modified "subscriber list"
+/// 2014Mar05 Sayali D        AGW-21104 - Leaf Reordering
+/// 2014Mar25 Sujay R         AGW-21104 - Added leafs for offload command.
+/// 2014Apr05 Mike Lesko      AGW-21104 - Modified various types to coincide 
+///                                       with app handlers
+/// 2014Apr17 Adam Floyd      AGW-21104 - Add sort-flag; group common leaves
+///                                       from mobile-context and summary
+/// 2014May10 Mike Lesko      AGW-22255 - remove nsapi-or-bearer-id from 
+///                                       APN Information. Use context-id 
+///                                       as a key in show ... apn-profile
+/// 2014May15 Revathy R       AGW-21597 - Added support for subscriber
+///                           offload new attributes and subscriber move
+/// 2014Aug15 Adam Floyd      AGW-23534 - Remove fake-key kludge; add
+///                           table-footer for summary string
+/// 2014Aug22 Sagarika Raju   AGW-16101 - LCS Support
+/// 2014Sep15 Lakshmi Priya   AGW-22082 - Schema upgrade
+/// 2014Sep02 Ajit Singh      AGW-23353 - Rnc-id not displayed.
+/// 2014Aug27 Ajit Singh      AGW-23337 - Added description for missing fields.
+/// 2014May02 Hardik W        AGW-21104 - UT fix - updated fields for status 
+///                                       combo, req-qos, neg-qos and sub-qos 
+///                                       commands
+///
+/// Copyright (c) 2014 HCTA. All Rights Reserved.
+///
+/// CONFIDENTIALITY AND LIMITED USE
+///
+/// This software, including any software of third parties embodied herein,
+/// contains information and concepts which are confidential to HCTA
+/// and such third parties. This software is licensed for use
+/// solely in accordance with the terms and conditions of the applicable
+/// license agreement with HCTA or its authorized distributor.
+//////////////////////////////////////////////////////////////////////////
+submodule scCli{
+  belongs-to hcta-epc {
+     prefix epc;
+  }
+
+  import tailf-common {
+     prefix tailf;
+  }
+
+  import ietf-inet-types {
+     prefix inet;
+  }
+
+  include mmeSgsnConfig;
+  include cmdCommonHcta;
+  include scCommonCli;
+  include scConfig;
+
+   /* This defines grouping for fields shared by subscriber-mobile-context and 
+      subscriber-summary.
+      Additional tags are shared but are handled by subscriber-summary in a 
+      special manner and so are not in this list.
+    */
+   grouping SUBSCRIBER_MOBILE_CONTEXT_CONTENT {
+      leaf system-type {
+        type string;
+        tailf:display-groups "none detail";
+        tailf:info "System type.";
+      }
+      leaf mm-state {
+        type string;
+        tailf:display-groups "none detail";
+        tailf:info "Mobility management state.";
+      }
+      leaf attach-duration {
+        type uint32;
+        tailf:display-groups "none detail";
+        tailf:info "Attached time.";
+      }
+      leaf service {
+        type string;
+        tailf:display-groups "none detail";
+        tailf:info "VM Service ID.";
+      }
+      leaf unit-id {
+        type uint8;
+        tailf:display-groups "none detail";
+        tailf:info "Unit ID.";
+      }
+      leaf location {
+        type string;
+        tailf:display-groups "none detail";
+        tailf:info "Location.";
+      }
+      leaf sc-instance {
+        type uint16;
+        tailf:display-groups "none detail";
+        tailf:info "SC process instance number.";
+      }
+      leaf sc-pid {
+        type uint32;
+        tailf:display-groups "none detail";
+        tailf:info "SC process pid.";
+      }
+      leaf enodeb-name {
+        type string;
+        tailf:display-groups "none detail";
+        tailf:info "EnodeB name.";
+      }
+      leaf enodeb-plmn-id {
+        type string;
+        tailf:display-groups "none detail";
+        tailf:info "EnodeB PLMN identifier.";
+      }
+      leaf enodeb-id {
+        type uint32;
+        tailf:display-groups "none detail";
+        tailf:info "EnodeB id.";
+      }
+      leaf enodeb-type {
+        type string;
+        tailf:display-groups "none detail";
+        tailf:info "EnodeB id type.";
+      }
+      leaf enodeb-ip {
+        type inet:ip-address;
+        tailf:display-groups "none detail";
+        tailf:info "EnodeB IP address.";
+      }
+      leaf cell-id {
+        type string;
+        tailf:display-groups "none detail";
+        tailf:info "Cell identifier.";
+      }
+      leaf cell-entry-time {
+        type string;
+        tailf:display-groups "none detail";
+        tailf:info "Cell entry time.";
+      }
+      leaf nse-id {
+        type uint16;
+        tailf:display-groups "none detail";
+        tailf:info "A unique NSE identifier.";
+      }
+      leaf sd-instance {
+        type uint16;
+        tailf:display-groups "none detail";
+        tailf:info "SD process instance number.";
+      }
+      leaf rnc-id {
+        type uint16;
+        tailf:display-groups "none detail";
+        tailf:info "ID of the radio network controller.";
+      }
+      leaf drx { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "Discontinuous reception.";
+      } 
+      leaf ciphering-status { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "Ciphering status.";
+      } 
+      leaf ms-network-capability { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "MS network capability.";
+      } 
+      leaf guti { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "GUTI.";
+      } 
+      leaf old-guti { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "Old GUTI.";
+      } 
+      leaf last-known-tai { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "Last known tracking area id.";
+      } 
+      leaf last-known-eutran-cell-id { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "Last known E-Utran global cell identity.";
+      } 
+      leaf nas-algorithms { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "Selected NAS algorithms.";
+      } 
+      leaf ue-network-capability { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "UE network capability.";
+      } 
+      leaf tai-list { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "TAI list.";
+      } 
+      leaf csfb-status { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "CSFB status.";
+      } 
+      leaf ptmsi { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "PTMSI.";
+      } 
+      leaf rai { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "RAI.";
+      } 
+      leaf paging-proceed-flag { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "Paging proceed flag.";
+      } 
+      leaf service-area-code { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "Service area code.";
+      } 
+      leaf mc-tlli {
+         tailf:alt-name "tlli";
+         type string;
+         tailf:display-groups "detail";
+         tailf:info "TLLI.";
+      } 
+      leaf ready-timer { 
+         type uint32; 
+         tailf:display-groups "detail";
+         tailf:info "Ready timer.";
+      } 
+      leaf subscriber-type { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "Indicates type of the subscriber.";
+      } 
+      leaf ms-classmark2 { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "General mobile station characteristics.";
+      } 
+      leaf ms-classmark3 { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "General mobile station characteristics.";
+      } 
+      leaf supported-codec { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "Supported speech codecs for CS speech.";
+      } 
+      leaf csg-id { 
+         type uint32;
+         tailf:display-groups "detail";
+         tailf:info "Closed subscriber group ID.";
+      } 
+      leaf cell-access-mode { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "Cell access mode.";
+      } 
+      leaf csg-membership-status { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "CSG membership status.";
+      }
+      leaf geographical-coordinates {
+         type string;
+         tailf:display-groups "detail";
+         tailf:info "Geographical coordinates.";
+      }
+   }
+
+   /* This defines grouping for fields shared by subscriber-session-context and 
+      subscriber-summary.
+    */
+   grouping  SUBSCRIBER_SESSION_CONTENT  {
+      leaf apn-subscribed { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "APN subscribed.";
+      } 
+      leaf apn-in-use { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "APN in use.";
+      } 
+      leaf charging-id { 
+         type uint32; 
+         tailf:display-groups "detail";
+         tailf:info "Charging identity.";
+      } 
+      leaf link-bearer-ids { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "IDs of associated dedicated bearers.";
+      } 
+      leaf ue-ipv4-address { 
+         type inet:ipv4-address; 
+         tailf:display-groups "detail";
+         tailf:info "IPV4 addresses of the UE.";
+      } 
+      leaf ue-ipv6-address { 
+         type inet:ipv6-address; 
+         tailf:display-groups "detail";
+         tailf:info "IPV6 addresses of the UE.";
+      } 
+      leaf session-pdn-type { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "Session PDN type.";
+      } 
+      leaf session-charging-characteristics { 
+         type uint16; 
+         tailf:display-groups "detail";
+         tailf:info "Session charging characteristics.";
+      } 
+      leaf pgw-control-teid-or-grekey { 
+         type uint32; 
+         tailf:display-groups "detail";
+         tailf:info "PGW GW control TEID or GRE key.";
+      } 
+      leaf pgw-control-ip-address { 
+         type inet:ip-address; 
+         tailf:display-groups "detail";
+         tailf:info "PGW GW control IP address.";
+      } 
+      leaf session-pgw-logical-name { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "Session PGW logical name.";
+      } 
+      leaf sgw-control-teid { 
+         type uint32; 
+         tailf:display-groups "detail";
+         tailf:info "sgw-control-teid";
+      } 
+      leaf sgw-control-ip-address { 
+         type inet:ip-address; 
+         tailf:display-groups "detail";
+         tailf:info "sgw-control-ip-address";
+      } 
+      leaf session-sgw-logical-name { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "Session SGW logical name.";
+      } 
+      leaf apn-ul-ambr-in-use { 
+         type uint32; 
+         tailf:display-groups "detail";
+         tailf:info "APN uplink AMBR in use.";
+      } 
+      leaf apn-dl-ambr-in-use { 
+         type uint32; 
+         tailf:display-groups "detail";
+         tailf:info "APN downlink AMBR in use.";
+      } 
+      leaf apn-restriction { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "APN restriction.";
+      } 
+      leaf local-control-teid { 
+         type uint32; 
+         tailf:display-groups "detail";
+         tailf:info "Local control TEID.";
+      } 
+      leaf session-s5-s8-protocoltype { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "Session S5 - S8 protocol type.";
+      } 
+      leaf datapath-ggsn-address { 
+         type inet:ip-address; 
+         tailf:display-groups "detail";
+         tailf:info "Datapath GGSN address.";
+      } 
+      leaf signaling-ggsn-address { 
+         type inet:ip-address; 
+         tailf:display-groups "detail";
+         tailf:info "Signalling GGSN address.";
+      } 
+      leaf session-subscription-context-identifier { 
+         type uint32; 
+         tailf:display-groups "detail";
+         tailf:info "Session subscription context identifier.";
+      } 
+      leaf pdp-type { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "PDP type.";
+      } 
+      leaf ggsn-remote-teid { 
+         type uint32; 
+         tailf:display-groups "detail";
+         tailf:info "GGSN remote TEID.";
+      } 
+      leaf ggsn-local-teid { 
+         type uint32; 
+         tailf:display-groups "detail";
+         tailf:info "GGSN local TEID.";
+      } 
+      leaf signaling-ggsn-teid { 
+         type uint32; 
+         tailf:display-groups "detail";
+         tailf:info "Signaling GGSN TEID.";
+      } 
+      leaf datapath-ran-address { 
+         type inet:ip-address; 
+         tailf:display-groups "detail";
+         tailf:info "Datapath RAN address.";
+      } 
+      leaf ran-remote-teid { 
+         type uint32; 
+         tailf:display-groups "detail";
+         tailf:info "RAN remote TEID.";
+      } 
+      leaf ran-local-teid { 
+         type uint32; 
+         tailf:display-groups "detail";
+         tailf:info "RAN local TEID.";
+      } 
+      leaf session-packet-flow-identifier { 
+         type uint32; 
+         tailf:info "Session packet flow identifier.";
+         tailf:display-groups "detail";
+      } 
+      leaf session-llc-sapi { 
+         type uint32; 
+         tailf:display-groups "detail";
+         tailf:info "Session Logical Link Control Service Access Point Identifier.";
+      } 
+      leaf mvno { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "Mobile virtual network operator user.";
+      } 
+      leaf local-eps-qos-entry { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "The local EPS QoS entry name.";
+      } 
+      leaf lipa-session { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "LIPA session.";
+      } 
+   }
+
+   /* This defines grouping for fields shared by subscriber-requested-qos and 
+      subscriber-summary.
+    */
+   grouping SUBSCRIBER_REQ_QOS_CONTENT {
+      leaf delivery-order {
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "Delivery order.";
+      } 
+      leaf delivery-of-erroneous-sdus { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "Delievery of SDUs.";
+      } 
+      leaf traffic-class { 
+         type string;
+         tailf:display-groups "none detail";
+         tailf:info "Traffic class.";
+      } 
+      leaf max-sdu-size { 
+         type uint32; 
+         tailf:display-groups "detail";
+         tailf:info "Max SDU size.";
+      } 
+      leaf traffic-handling-priority { 
+         type uint8; 
+         tailf:display-groups "none detail";
+         tailf:info "Traffic handling priority.";
+      } 
+      leaf sdu-error-ratio { 
+         type uint8; 
+         tailf:display-groups "detail";
+         tailf:info "SDU ratio.";
+      } 
+      leaf residual-biterror-rate { 
+         type uint8; 
+         tailf:display-groups "detail";
+         tailf:info "Residual bit error rate.";
+      } 
+      leaf max-bitrate-uplink { 
+         type uint32; 
+         tailf:display-groups "none detail";
+         tailf:info "Max uplink bit rate.";
+      } 
+      leaf max-bitrate-downlink { 
+         type uint32; 
+         tailf:display-groups "none detail";
+         tailf:info "Max downlink bit rate.";
+      } 
+      leaf guaranteed-bitrate-uplink { 
+         type uint32; 
+         tailf:display-groups "none detail";
+         tailf:info "Guaranteed uplink bit rate.";
+      } 
+      leaf guaranteed-bitrate-downlink { 
+         type uint32; 
+         tailf:display-groups "none detail";
+         tailf:info "Guaranteed downlink bit rate.";
+      } 
+      leaf transfer-delay { 
+         type uint32; 
+         tailf:display-groups "detail";
+         tailf:info "Transfer delay.";
+      }
+   }
+
+   /* This defines grouping for fields shared by subscriber-negotiated-qos and
+      subscriber-summary.
+    */
+   grouping  SUBSCRIBER_NEG_QOS_CONTENT {
+      leaf delivery-order { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "Delivery order.";
+      } 
+      leaf delivery-of-erroneous-sdus { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "Delivery of erroneous SDUs.";
+      } 
+      leaf traffic-class { 
+         type string; 
+         tailf:display-groups "none detail";
+         tailf:info "Traffic class.";
+      } 
+      leaf max-sdu-size { 
+         type uint32; 
+         tailf:display-groups "detail";
+         tailf:info "Max SDU size.";
+      } 
+      leaf traffic-handling-priority { 
+         type uint8; 
+         tailf:display-groups "none detail";
+         tailf:info "Traffic handling priority.";
+      } 
+      leaf sdu-error-ratio { 
+         type uint8; 
+         tailf:display-groups "detail";
+         tailf:info "SDU error ratio.";
+      } 
+      leaf residual-biterror-rate { 
+         type uint8; 
+         tailf:display-groups "detail";
+         tailf:info "Residual bit rate.";
+      } 
+      leaf max-bitrate-uplink { 
+         type uint32; 
+         tailf:display-groups "none detail";
+         tailf:info "Max uplink bit rate.";
+      } 
+      leaf max-bitrate-downlink { 
+         type uint32; 
+         tailf:display-groups "none detail";
+         tailf:info "Max downlink bit rate.";
+      } 
+      leaf guaranteed-bitrate-uplink { 
+         type uint32; 
+         tailf:display-groups "none detail";
+         tailf:info "Guaranteed uplink bit rate.";
+      } 
+      leaf guaranteed-bitrate-downlink { 
+         type uint32; 
+         tailf:display-groups "none detail";
+         tailf:info "Guaranteed downlink bit rate.";
+      } 
+      leaf allocation-retention { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "Allocation retention priority.";
+      } 
+      leaf transfer-delay { 
+         type uint32; 
+         tailf:display-groups "detail";
+         tailf:info "Transfer delay.";
+      } 
+      leaf local-qos-profile { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "Local QoS for SGSN subscriber.";
+      }
+   }
+
+   /* This defines grouping for fields shared by subscriber-subscribed-qos and
+      subscriber-summary.
+    */
+   grouping  SUBSCRIBER_SUB_QOS_CONTENT {
+      leaf delivery-order { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "Delivery order.";
+      } 
+      leaf delivery-of-erroneous-sdus { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "Delivery of erroneous SDUs.";
+      } 
+      leaf traffic-class { 
+         type string; 
+         tailf:display-groups "none detail";
+         tailf:info "Traffic class.";
+      } 
+      leaf max-sdu-size { 
+         type uint32; 
+         tailf:display-groups "detail";
+         tailf:info "Max SDU size.";
+      } 
+      leaf traffic-handling-priority { 
+         type uint8; 
+         tailf:display-groups "none detail";
+         tailf:info "Traffic handling priority.";
+      } 
+      leaf sdu-error-ratio { 
+         type uint8; 
+         tailf:display-groups "detail";
+         tailf:info "SDU error ratio.";
+      } 
+      leaf residual-biterror-rate { 
+         type uint8; 
+         tailf:display-groups "detail";
+         tailf:info "Residual bit rate.";
+      } 
+      leaf max-bitrate-uplink { 
+         type uint32; 
+         tailf:display-groups "none detail";
+         tailf:info "Max uplink bit rate.";
+      } 
+      leaf max-bitrate-downlink { 
+         type uint32; 
+         tailf:display-groups "none detail";
+         tailf:info "Max downlink bit rate.";
+      } 
+      leaf guaranteed-bitrate-uplink { 
+         type uint32; 
+         tailf:display-groups "none detail";
+         tailf:info "Guaranteed uplink bit rate.";
+      } 
+      leaf guaranteed-bitrate-downlink { 
+         type uint32; 
+         tailf:display-groups "none detail";
+         tailf:info "Guaranteed downlink bit rate.";
+      } 
+      leaf transfer-delay { 
+         type uint32; 
+         tailf:display-groups "detail";
+         tailf:info "Transfer delay.";
+      } 
+      leaf allocation-retention { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "Allocation retention priority.";
+      } 
+   }
+
+   /* This defines grouping for fields shared by subscriber-session-context and 
+      subscriber-summary.
+    */
+   grouping  SUBSCRIBER_BEARER_CONTENT {
+      leaf link-bearer-id { 
+         type uint8; 
+         tailf:display-groups "none detail";
+         tailf:info "Link bearer identity.";
+      } 
+      leaf eps-qos-in-use { 
+         type string; 
+         tailf:display-groups "none detail";
+         tailf:info "EPS QoS in use.";
+      } 
+      leaf pgw-data-teid-or-grekey { 
+         type uint32; 
+         tailf:display-groups "detail";
+         tailf:info "PGW GW data TEID or GRE Key.";
+      } 
+      leaf pgw-data-ip-address { 
+         type inet:ip-address; 
+         tailf:display-groups "detail";
+         tailf:info "PGW GW data IP address.";
+      } 
+      leaf bearer-pgw-logical-name { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "PGW GW logical name.";
+      } 
+      leaf sgw-data-teid { 
+         type uint32; 
+         tailf:display-groups "detail";
+         tailf:info "SGW GW data TEID";
+      } 
+      leaf sgw-data-ip-address { 
+         type inet:ip-address; 
+         tailf:display-groups "detail";
+         tailf:info "SGW GW data IP address .";
+      } 
+      leaf bearer-sgw-logical-name { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "SGW logical name.";
+      } 
+      leaf enb-data-teid { 
+         type uint32; 
+         tailf:display-groups "detail";
+         tailf:info "EnodeB data TEID.";
+      } 
+      leaf enb-data-ip-address { 
+         type inet:ip-address; 
+         tailf:display-groups "detail";
+         tailf:info "EnodeB data IP address.";
+      } 
+      leaf is-default-bearer { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "Default bearer flag.";
+      } 
+      leaf bearer-s5-s8-protocoltype { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "Protocol type for P-GW.";
+      } 
+      leaf eps-arp-priority-level { 
+         type uint8; 
+         tailf:display-groups "none detail";
+         tailf:info "EPS ARP Priority level.";
+      }
+   }
+
+   /* This defines grouping  for fields shared by subscriber-subscription and 
+      subscriber-summary.
+    */
+   grouping SUBSCRIBER_SUBSCRIPTION_CONTENT {
+      leaf access-restrict-data { 
+         type string; 
+         tailf:display-groups "none detail";
+         tailf:info "Access restriction data.";
+      } 
+      leaf apn-oi { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "APN-OI.";
+      } 
+      leaf subscription-charging-characteristics { 
+         type uint16; 
+         tailf:display-groups "none detail";
+         tailf:info "Charging characteristics.";
+      } 
+      leaf ul-ambr { 
+         type uint32; 
+         tailf:display-groups "detail";
+         tailf:info "Uplink AMBR.";
+      } 
+      leaf dl-ambr { 
+         type uint32; 
+         tailf:display-groups "detail";
+         tailf:info "Downlink AMBR.";
+      } 
+      leaf rat-freq-selection-priority-id { 
+         type uint32; 
+         tailf:display-groups "detail";
+         tailf:info "RAT-Frequency-Selection priority id.";
+      } 
+      leaf subscriber-status { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "Subscriber status.";
+      } 
+      leaf hss-realm { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "HSS realm.";
+      } 
+      leaf hss-host-identity { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "HSS host identity.";
+      } 
+      leaf location-confirm-flag { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "Location confirm flag.";
+      } 
+      leaf subscription-type { 
+         type string; 
+         tailf:display-groups "none detail";
+         tailf:info "Subscription type.";
+      } 
+      leaf hlr-number { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "HLR number.";
+      } 
+      leaf stn-sr { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "Session transfer number for SRVCC.";
+      } 
+      leaf ics-indicator { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "IMS centralized support indicator.";
+      } 
+      leaf mps-eps-priority { 
+         type uint8; 
+         tailf:display-groups "none detail";
+         tailf:info "MPS EPS Priority.";
+      } 
+      leaf mps-cs-priority { 
+         type uint8; 
+         tailf:display-groups "none detail";
+         tailf:info "MPS CS Priority.";
+      } 
+      leaf vplmn-lipa-allowed { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "Access type of UE to use LIPA in the VPLMN where UE is roaming.";
+      }
+   }
+
+   /* This defines grouping for fields shared by subscriber-apn-profile and 
+      subscriber-summary.
+    */
+   grouping  SUBSCRIBER_APN_PROFILE_CONTENT {
+      leaf apn-name { 
+         type string; 
+         tailf:display-groups "none detail";
+         tailf:info "APN name.";
+      } 
+      leaf apn-profile-pdn-type { 
+         type string; 
+         tailf:display-groups "none detail";
+         tailf:info "PDN type.";
+      } 
+      leaf service-selection { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "Service-selection (APN).";
+      } 
+      leaf eps-sub-qos { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "EPS subscribed QoS.";
+      } 
+      leaf apn-ul-ambr { 
+         type uint32; 
+         tailf:display-groups "detail";
+         tailf:info "APN uplink AMBR.";
+      } 
+      leaf apn-dl-ambr { 
+         type uint32; 
+         tailf:display-groups "detail";
+         tailf:info "APN downlink AMBR.";
+      } 
+      leaf is-vplmn-allowed { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "VPLMN allowed.";
+      } 
+      leaf mip6-agent-info { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "MIP6 Agent Info.";
+      } 
+      leaf pgw-allocation-type { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "PDN-GW-allocation type.";
+      } 
+      leaf sessions { 
+         type uint32; 
+         tailf:display-groups "detail";
+         tailf:info "Number of sessions using this profile.";
+      } 
+      leaf apn-charging-characteristics { 
+         type uint16; 
+         tailf:display-groups "detail";
+         tailf:info "APN charging characteristics.";
+      } 
+      leaf ipv4-pdp-address { 
+         type inet:ip-address; 
+         tailf:display-groups "detail";
+         tailf:info "IPv4 PDP address.";
+      }
+      leaf qos-profile {
+         type string;
+         tailf:display-groups "detail";
+         tailf:info "QOS profile.";
+      }  
+      leaf lipa-permission { 
+         type string; 
+         tailf:display-groups "detail";
+         tailf:info "Access type of APN.";
+      }
+   }
+
+   /* This defines grouping for fields shared by subscriber-gs-context and
+      subscriber-summary.
+    */
+   grouping  SUBSCRIBER_GS_CONTEXT_CONTENT {
+      leaf vlr-number { 
+         type string; 
+         tailf:display-groups "none detail";
+         tailf:info "VLR address.";
+      } 
+      leaf gs-state { 
+         type string; 
+         tailf:display-groups "none detail";
+         tailf:info "State of the Gs interface.";
+      } 
+      leaf vlr-reliable { 
+         type string; 
+         tailf:display-groups "none detail";
+         tailf:info "Reset status of the VLR.";
+      } 
+      leaf non-gprs-alert-flag { 
+         type string; 
+         tailf:display-groups "none detail";
+         tailf:info "Non-gprs alert flag.";
+      }
+   }
+
+/***************************************************************************/
+  augment "/mme-sgsn/subscriber" {
+    container list {
+      tailf:info "Subscriber list";
+      tailf:action save {
+        tailf:info "Save list of subscriber entries to file";
+        tailf:actionpoint cli-request-command;
+        input {
+          container csv {
+            presence "";
+          }
+        }
+        output {
+          uses request-cmd-output;
+        }
+      }
+    }
+
+    tailf:action clear {
+      tailf:info "Clear a subscriber from the SGSN-MME";
+      tailf:actionpoint cli-request-command;
+      input {
+        uses subscriber-all-keys;
+        container force {
+          presence "";
+        }
+      }
+      output {
+        uses request-cmd-output;
+      }
+    }
+    tailf:action page {
+      tailf:info "Page an LTE subscriber";
+      tailf:actionpoint cli-request-command;
+      input {
+        uses subscriber-all-keys;
+      }
+      output {
+        uses request-cmd-output;
+      }
+    }
+
+    tailf:action modify {
+      tailf:info "Modify an LTE subscriber's ciphering";
+      tailf:actionpoint cli-request-command;
+      input {
+         leaf ciphering-status {
+           type enable-disable-enum;
+           mandatory true;
+         }
+         leaf imsi {
+           type imsi-t;
+           mandatory true;
+         }
+      }
+      output {
+        uses request-cmd-output;
+      }
+    }
+
+    tailf:action move {
+      tailf:info "Move a subscriber to target MME-SGSN";
+      tailf:actionpoint cli-request-command;
+      input {
+         leaf imsi {
+           type imsi-t;
+           mandatory true;
+         }
+         leaf target-mme-ip-address {
+           type inet:ip-address;
+           tailf:info "Target MME IP address.";
+         }
+         leaf target-sgsn-ip-address{
+           type inet:ip-address;
+           tailf:info "Target SGSN IP address.";
+         }
+      }
+      output {
+        uses request-cmd-output;
+      }
+    }
+
+    container offload {
+      tailf:info "MME subscriber offload command";
+      tailf:action start {
+        tailf:info "Start offload";
+        tailf:actionpoint cli-request-command;
+
+        // The app will enforce the arg combinations of
+        // [service] [connected-mode-action <value> idle-mode-action <value>
+        // [finish-in <value> hold-duration <value>]]
+
+        input {
+           leaf service {
+             type string;
+           }
+           leaf connected-mode-action {
+             type connectedActionTypes-enum;
+           }
+           leaf idle-mode-action {
+             type idleActionTypes-enum;
+           }
+           leaf finish-in {
+             type uint16;
+           }
+           leaf hold-duration {
+             type uint16;
+           }
+	   leaf target-mme-ip-address {
+             type inet:ip-address;
+             tailf:info "Target MME IP address.";
+           }
+           leaf target-sgsn-ip-address {
+             type inet:ip-address;
+             tailf:info "Target SGSN IP address.";
+           }
+           leaf ue-qty {
+             type uint16;
+             tailf:info "Total number of UEs to be offloaded.";
+           }
+           leaf ue-state {
+             type ueStateTypes-enum;
+             tailf:info "State of the UEs to be offloaded. Default both.";
+           }
+	   container force {
+             presence "";
+           }
+        }
+        output {
+           uses request-cmd-output;
+        }
+      }
+
+      tailf:action stop {
+        tailf:info "Stop offload";
+        tailf:actionpoint cli-request-command;
+        input {
+           leaf service {
+             type string;
+             mandatory true;
+           }
+        }
+        output {
+           uses request-cmd-output;
+        }
+      }
+    }
+
+    list subscriber-list-oper {
+      tailf:info "Subscriber list";
+      tailf:alt-name "list";
+      config false;
+      ordered-by user; // not for use with keyed lists
+
+      tailf:cli-no-key-completion;
+
+      tailf:callpoint cli_oper_show
+      {
+        // Callpoint Opaque Data Format (255 chars max):
+        // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+        tailf:opaque '0:mme-sgsn subscriber list::1';
+      }
+
+      tailf:cli-table-footer "$(/mme-sgsn/summary)";
+
+      leaf imsi {
+        type imsi-t;
+        tailf:display-groups "none detail";
+        tailf:info "IMSI.";
+      }
+      leaf imeisv {
+        type imeisv-t;
+        tailf:display-groups "none detail";
+        tailf:info "IMEISV.";
+      }
+      leaf msisdn {
+        type msisdn-t;
+        tailf:display-groups "none detail";
+        tailf:info "MSISDN.";
+      }
+      leaf service {
+        type string;
+        tailf:display-groups "none detail";
+        tailf:info "Service.";
+      }
+      leaf sc-instance {
+        type uint16;
+        tailf:display-groups "detail";
+        tailf:info "SC process instance number.";
+      }
+      leaf sc-component-id {
+        type uint8;
+        tailf:display-groups "detail";
+        tailf:info "SC process component id.";
+      }
+    } 
+
+    /********************************************************************
+     * Mobile Context
+     *********************************************************************/
+    container mobile-context {
+      tailf:info "Mobile context";
+      list imsi {
+        tailf:info "Mobile context by IMSI";
+        config false;
+//        ordered-by user; // not for use with keyed lists
+
+        tailf:cli-no-key-completion;
+        key "imsi"; //msisdn imei imeisv
+
+        tailf:cli-incomplete-show-path
+        {
+          tailf:cli-min-keys "1";
+        }
+
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '1:mme-sgsn subscriber mobile-context:imsi/imsi-t:1';
+        }
+
+        leaf imsi {
+          type imsi-t;
+          tailf:display-groups "none detail";
+          tailf:info "IMSI.";
+        }
+        leaf msisdn {
+          type msisdn-t;
+          tailf:display-groups "none detail";
+          tailf:info "MSISDN.";
+        }
+        leaf imei {
+          type imei-t;
+          tailf:display-groups "none detail";
+          tailf:info "IMEI.";
+        }
+        leaf imeisv {
+          type imeisv-t; 
+          tailf:display-groups "none detail";
+          tailf:info "IMEISV.";
+        }
+        uses SUBSCRIBER_MOBILE_CONTEXT_CONTENT;
+      }
+    } /* subscriber-mobile-context */
+
+    /***********************************************************************
+      session-context
+     ************************************************************************/
+    container session {
+      tailf:info "Session";
+      list imsi{
+         tailf:info "IMSI";
+         config false;
+//      ordered-by user; // not for use with keyed lists
+
+         tailf:cli-no-key-completion;
+         key "imsi  nsapi-or-bearer-id"; //msisdn imei imeisv
+
+         tailf:cli-incomplete-show-path
+         {
+           tailf:cli-min-keys "1";
+         }
+
+         tailf:callpoint cli_oper_show
+         {
+           // Callpoint Opaque Data Format (255 chars max):
+           // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+           tailf:opaque '1:mme-sgsn subscriber session:imsi/imsi-t nsapi-or-bearer-id/uint32:1';
+         }
+
+         leaf imsi {
+           type imsi-t;
+           tailf:display-groups "none detail";
+           tailf:info "IMSI.";
+         }
+         leaf nsapi-or-bearer-id {
+            tailf:info "NSAPI or EPS bearer identity";
+            type uint8;
+            tailf:display-groups "none detail";
+         }
+         leaf msisdn {
+           type msisdn-t;
+           tailf:display-groups "none detail";
+           tailf:info "MSISDN.";
+         }
+         leaf imei {
+           type imei-t;
+           tailf:display-groups "none detail";
+           tailf:info "IMEI.";
+         }
+         leaf imeisv {
+           type imeisv-t;
+           tailf:display-groups "none detail";
+           tailf:info "IMEISV.";
+         }
+         uses SUBSCRIBER_SESSION_CONTENT;
+       }
+    } /* subscriber-session */
+
+    /*************************************************************************
+      requested-qos
+     ************************************************************************/
+    container requested-qos {
+      tailf:info "Requested QOS";
+      list imsi{
+         tailf:info "IMSI";
+         config false;
+//      ordered-by user; // not for use with keyed lists
+
+         tailf:cli-no-key-completion;
+         key "imsi nsapi";
+
+         tailf:cli-incomplete-show-path
+         {
+           tailf:cli-min-keys "1";
+         }
+
+         tailf:callpoint cli_oper_show
+         {
+           // Callpoint Opaque Data Format (255 chars max):
+           // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+           tailf:opaque '1:mme-sgsn subscriber requested-qos:imsi/imsi-t nsapi/uint8:1';
+         }
+
+         leaf imsi {
+          type imsi-t;
+          tailf:display-groups "none detail";
+          tailf:info "IMSI.";
+         }
+         leaf nsapi {
+           type uint8;
+           tailf:display-groups "none detail";
+           tailf:info "NSAPI.";
+         }
+         uses SUBSCRIBER_REQ_QOS_CONTENT;
+      }
+    } /* subscriber-requested-qos */
+
+    /***********************************************************************
+      negotiated-qos
+     ************************************************************************/
+    container negotiated-qos {
+      tailf:info "Negotiated  QOS";
+      list imsi{
+        tailf:info "IMSI";
+        config false;
+//      ordered-by user; // not for use with keyed lists
+
+        tailf:cli-no-key-completion;
+        key "imsi nsapi";
+
+        tailf:cli-incomplete-show-path
+        {
+          tailf:cli-min-keys "1";
+        }
+
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '1:mme-sgsn subscriber negotiated-qos:imsi/imsi-t nsapi/uint8:1';
+        }
+
+        leaf imsi {
+          type imsi-t;
+          tailf:display-groups "none detail";
+          tailf:info "IMSI.";
+        }
+        leaf nsapi {
+          type uint8;
+          tailf:display-groups "none detail";
+          tailf:info "NSAPI.";
+        }
+        uses SUBSCRIBER_NEG_QOS_CONTENT;
+      }
+    } /* subscriber-negotiated-qos */
+
+    /*************************************************************************
+      subscribed-qos
+    ************************************************************************/
+    container subscribed-qos {
+      tailf:info "Subscribed  QOS";
+      list imsi{
+        tailf:info "IMSI";
+        config false;
+//      ordered-by user; // not for use with keyed lists
+
+        tailf:cli-no-key-completion;
+        key "imsi subscription-context-id";
+
+        tailf:cli-incomplete-show-path
+        {
+          tailf:cli-min-keys "1";
+        }
+
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '1:mme-sgsn subscriber subscribed-qos:imsi/imsi-t subscription-context-id/uint32:1';
+        }
+
+        leaf imsi {
+           type imsi-t;
+           tailf:display-groups "none detail";
+           tailf:info "IMSI.";
+         }
+         leaf subscription-context-id {
+            type uint32;
+            tailf:display-groups "none detail";
+            tailf:info "Subscription context identifier.";
+         }
+         uses SUBSCRIBER_SUB_QOS_CONTENT;
+      }
+    } /* subscriber-subscribed-qos */
+
+    /***********************************************************************
+      bearer
+     ************************************************************************/
+    container bearer {
+      tailf:info "Bearer";
+      list imsi{
+        tailf:info "IMSI";
+        config false;
+//      ordered-by user; // not for use with keyed lists
+
+        tailf:cli-no-key-completion;
+        key "imsi eps-bearer-id"; //imei
+
+        tailf:cli-incomplete-show-path
+        {
+          tailf:cli-min-keys "1";
+        }
+
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '1:mme-sgsn subscriber bearer:imsi/imsi-t eps-bearer-id/uint8:1';
+        }
+
+        leaf imsi {
+          type imsi-t;
+          tailf:display-groups "none detail";
+          tailf:info "IMSI.";
+        }
+        leaf eps-bearer-id {
+           type uint8;
+           tailf:display-groups "none detail";
+           tailf:info "EPS bearer identity.";
+        }
+        leaf imei {
+          type imei-t;
+          tailf:display-groups "none detail";
+          tailf:info "IMEI.";
+        }
+        leaf imeisv {
+          type imeisv-t;
+          tailf:display-groups "none detail";
+          tailf:info "IMEISV.";
+        }
+        leaf msisdn {
+          type msisdn-t;
+          tailf:display-groups "none detail";
+          tailf:info "MSISDN.";
+        }
+        uses SUBSCRIBER_BEARER_CONTENT;
+      }
+    } /* subscriber-bearer */
+
+    /***********************************************************************
+      subscription
+     ************************************************************************/
+    container  subscription {
+      tailf:info "Subscription";
+      list imsi{
+        tailf:info "IMSI";
+        config false;
+//      ordered-by user; // not for use with keyed lists
+
+        tailf:cli-no-key-completion;
+        key "imsi"; //msisdn imei imeisv"; 
+
+        tailf:cli-incomplete-show-path
+        {
+          tailf:cli-min-keys "1";
+        }
+
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '1:mme-sgsn subscriber subscription:imsi/imsi-t:1';
+        }
+
+        leaf imsi {
+          type imsi-t;
+          tailf:display-groups "none detail";
+          tailf:info "IMSI.";
+        }
+        leaf msisdn {
+          type msisdn-t;
+          tailf:display-groups "none detail";
+          tailf:info "MSISDN.";
+        }
+        leaf imei {
+          type imei-t;
+          tailf:display-groups "none detail";
+          tailf:info "IMEI.";
+        }
+        leaf imeisv {
+          type imeisv-t;
+          tailf:display-groups "none detail";
+          tailf:info "IMEISV.";
+        }
+        uses SUBSCRIBER_SUBSCRIPTION_CONTENT;
+      }
+    } /* subscriber-subscription */
+
+    /**********************************************************************
+      apn-profile
+     ************************************************************************/
+    container  apn-profile {
+      tailf:info "APN Profile";
+      list imsi{
+        tailf:info "IMSI";
+        config false;
+//      ordered-by user; // not for use with keyed lists
+
+        tailf:cli-no-key-completion;
+        key "imsi context-id"; // msisdn imei imeisv"; 
+
+        tailf:cli-incomplete-show-path
+        {
+          tailf:cli-min-keys "1";
+        }
+
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '1:mme-sgsn subscriber apn-profile:imsi/imsi-t context-id/uint32:1';
+        }
+
+        leaf imsi {
+          type imsi-t;
+          tailf:display-groups "none detail";
+          tailf:info "IMSI.";
+        }
+        leaf context-id { 
+          type uint32; 
+          tailf:display-groups "none detail";
+          tailf:info "APN profile context identity.";
+        } 
+        leaf imei {
+          type imei-t;
+          tailf:display-groups "none detail";
+          tailf:info "IMEI.";
+        }
+        leaf imeisv {
+          type imeisv-t;
+          tailf:display-groups "none detail";
+          tailf:info "IMEISV.";
+        }
+        leaf msisdn {
+          type msisdn-t;
+          tailf:display-groups "none detail";
+          tailf:info "MSISDN.";
+        }
+        uses SUBSCRIBER_APN_PROFILE_CONTENT;
+      }
+    } /* subscriber-apn-profile */
+
+    /***********************************************************************
+      gs-context
+     ************************************************************************/
+    list gs-context {
+      tailf:info "Gs context";
+      config false;
+//      ordered-by user; // not for use with keyed lists
+
+      tailf:cli-no-key-completion;
+      key "imsi";
+
+      tailf:cli-incomplete-show-path
+      {
+        tailf:cli-min-keys "1";
+      }
+
+      tailf:callpoint cli_oper_show
+      {
+        // Callpoint Opaque Data Format (255 chars max):
+        // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+        tailf:opaque '1:mme-sgsn subscriber gs-context:imsi/imsi-t:1';
+      }
+
+      leaf imsi {
+        type imsi-t;
+        tailf:display-groups "none detail";
+        tailf:info "IMSI.";
+      }
+      uses SUBSCRIBER_GS_CONTEXT_CONTENT;
+    } /* subscriber-gs-context */
+
+    /***********************************************************************
+      csg-subscription-data
+     ************************************************************************/
+    list csg-subscription-data {
+      tailf:info "CSG subscription data";
+      config false;
+//      ordered-by user; // not for use with keyed lists
+
+      tailf:cli-no-key-completion;
+      key "imsi";
+
+      tailf:cli-incomplete-show-path
+      {
+        tailf:cli-min-keys "1";
+      }
+
+      tailf:callpoint cli_oper_show
+      {
+        // Callpoint Opaque Data Format (255 chars max):
+        // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+        tailf:opaque '1:mme-sgsn subscriber csg-subscription-data:imsi/imsi-t:1';
+      }
+
+      leaf imsi {
+        type imsi-t;
+        tailf:display-groups "none detail";
+        tailf:info "IMSI.";
+      }
+      leaf csg-id {
+        type uint32;
+        tailf:display-groups "none detail";
+        tailf:info "Closed subscriber group ID.";
+      }
+      leaf expiration-date {
+        type string;
+        tailf:display-groups "none detail";
+        tailf:info "Expiration date.";
+      }
+      leaf lipa-apn {
+        type string;
+        tailf:display-groups "none detail";
+        tailf:info "A list of subscribed APNs in use.";
+      }
+    } /* subscriber-csg-subscription-data */
+
+    /***********************************************************************
+      offload-oper
+     ************************************************************************/
+    list offload-oper {
+      tailf:alt-name "offload";
+      tailf:info "MME subscriber offload command";
+      config false;
+      ordered-by user; // not for use with keyed lists
+
+      tailf:cli-no-key-completion;
+      //key "service";
+
+      tailf:callpoint cli_oper_show
+      {
+        // Callpoint Opaque Data Format (255 chars max):
+        // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+        tailf:opaque '0:mme-sgsn subscriber offload::1';
+      }
+
+      leaf service {
+        type string;
+        tailf:display-groups "none detail";
+        tailf:info "Service.";
+      }
+      leaf location {
+        type string;
+        tailf:display-groups "detail";
+        tailf:info "Location.";
+      }
+      leaf connected-mode-action{
+        type string;
+        tailf:display-groups "none detail";
+        tailf:info "Action on connected subscribers.";
+      }     
+      leaf idle-mode-action {
+        type string;
+        tailf:display-groups "none detail";
+        tailf:info "Action on idle subscribers.";
+      }
+      leaf finish-in {
+        type uint32;
+        tailf:display-groups "none detail";
+        tailf:info "Duration in which the offload has to be completed.";
+      }
+      leaf hold-duration {
+        type uint32;
+        tailf:display-groups "none detail";
+        tailf:info "Duration in which the service group holds any new mobiles.";
+      }
+      leaf current-active-subscribers {
+        type uint32;
+        tailf:display-groups "detail";
+        tailf:info "Current active subscribers in the service group.";
+      }
+      leaf current-idle-subscribers {
+        type uint32;
+        tailf:display-groups "detail";
+        tailf:info "Current idle subscribers in the service group.";
+      }
+      leaf finish-in-remaining {
+        type uint32;
+        tailf:display-groups "detail";
+        tailf:info "Time remaining before offload has to be completed.";
+      }
+      leaf hold-duration-remaining {
+        type uint32;
+        tailf:display-groups "detail";
+        tailf:info "Time remaining for holding new mobiles.";
+      }
+      leaf offload-type {
+        type string;
+        tailf:display-groups "none detail";
+        tailf:info "Type of offload initiated in the service group.";
+      }
+      leaf target-mme-ip-address {
+        type inet:ip-address;
+        tailf:display-groups "detail";
+        tailf:info "Target MME IP address.";
+      }
+      leaf target-sgsn-ip-address {
+        type inet:ip-address;
+        tailf:display-groups "detail";
+        tailf:info "Target SGSN IP address.";
+      }
+      leaf ue-qty {
+        type uint32;
+        tailf:display-groups "detail";
+        tailf:info "Number of UEs to be offloaded.";
+      }
+      leaf ue-state {
+        type string;
+        tailf:display-groups "detail";
+        tailf:info "State of the UEs to be offloaded.";
+      } 
+    } /* offload */
+
+    /***********************************************************************
+      subscriber summary command -- TO DO LATER
+     ************************************************************************/
+/*    list summary {
+      tailf:info "Subscriber summary info";
+      config false;
+//      ordered-by user; // not for use with keyed lists
+
+      tailf:cli-no-key-completion;
+      key "imsi";
+
+      tailf:cli-incomplete-show-path
+      {
+        tailf:cli-min-keys "1";
+      }
+
+      tailf:callpoint cli_oper_show
+      {
+        // Callpoint Opaque Data Format (255 chars max):
+        // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+        tailf:opaque '1:mme-sgsn subscriber summary:imsi/imsi-t:1';
+      }
+
+      leaf imsi {
+        type imsi-t;
+        tailf:display-groups "none detail";
+        tailf:info "IMSI.";
+      }
+      leaf imei {
+        type imei-t;
+        tailf:display-groups "none detail";
+        tailf:info "IMEI.";
+      }
+      leaf msisdn {
+        type msisdn-t;
+        tailf:display-groups "none detail";
+        tailf:info "MSISDN.";
+      }
+      uses SUBSCRIBER_MOBILE_CONTEXT_CONTENT {
+        refine "ciphering-status" {
+          tailf:display-groups "none detail";
+        }
+        refine "last-known-tai" {
+          tailf:display-groups "none detail";
+        }
+        refine "last-known-eutran-cell-id" {
+          tailf:display-groups "none detail";
+        }
+        refine "ptmsi" {
+          tailf:display-groups "none detail";
+        }
+        refine "rai" {
+          tailf:display-groups "none detail";
+        }
+        refine "mc-tlli" {
+          tailf:display-groups "none detail";
+        }
+      }
+      uses SUBSCRIBER_SUBSCRIPTION_CONTENT;
+      leaf nsapi-or-bearer-id {
+         tailf:info "NSAPI or EPS bearer identity";
+         type uint8;
+         tailf:display-groups "none detail";
+      }
+      uses SUBSCRIBER_SESSION_CONTENT {
+        refine "apn-subscribed" {
+          tailf:display-groups "none detail";
+        }
+        refine "apn-in-use" {
+          tailf:display-groups "none detail";
+        }
+        refine "link-bearer-ids" {
+          tailf:display-groups "none detail";
+        }
+      }
+      leaf default-bearer-flag {
+        type string;
+        tailf:display-groups "none detail";
+      }
+      leaf dedicated-bearer-flag {
+        type string;
+        tailf:display-groups "none detail";
+      }
+      leaf eps-bearer-id {
+         type uint8;
+         tailf:display-groups "none detail";
+         tailf:info "EPS bearer identity.";
+      }
+      uses SUBSCRIBER_BEARER_CONTENT {
+        refine "link-bearer-id" {
+          tailf:display-groups "none detail";
+        }
+        refine "eps-qos-in-use" {
+          tailf:display-groups "none detail";
+        }
+        refine "eps-arp-priority-level" {
+          tailf:display-groups "none detail";
+        }
+      }
+      leaf context-id { 
+         type uint32; 
+         tailf:display-groups "none detail";
+         tailf:info "Context ID.";
+      } 
+      uses SUBSCRIBER_APN_PROFILE_CONTENT {
+        refine "apn-name" {
+          tailf:display-groups "none detail";
+        }
+        refine "apn-profile-pdn-type" {
+          tailf:display-groups "none detail";
+        }
+      }
+      uses SUBSCRIBER_GS_CONTEXT_CONTENT;
+      uses SUBSCRIBER_SUB_QOS_CONTENT;
+      leaf sub-subscription-context-identifier {
+         type uint32;
+         tailf:display-groups "detail";
+         tailf:info "Subscription context identifier.";
+      }
+      leaf req-nsapi {
+         type uint8;
+         tailf:display-groups "none detail";
+         tailf:info "NSAPI.";
+      }
+      uses SUBSCRIBER_REQ_QOS_CONTENT;
+      leaf neg-nsapi {
+         type uint8;
+         tailf:display-groups "detail";
+         tailf:info "NSAPI.";
+      }
+      uses SUBSCRIBER_NEG_QOS_CONTENT;
+      leaf sd-service {
+        type string;
+        tailf:display-groups "detail";
+      }
+      leaf sd-location {
+        type string;
+        tailf:display-groups "detail";
+      }
+      uses SUBSCRIBER_LLC_CONTEXT_TAGS;
+      leaf sndcp-nsapi {
+        tailf:info "NSAPI.";
+        type uint8;
+        tailf:display-groups "none detail";
+      }
+      uses SUBSCRIBER_SNDCP_SESSION_TAGS;
+    } */  /* summary */
+  } /* subscriber */
+
+  /***********************************************************************
+      status combo
+  ************************************************************************/
+  augment "/mme-sgsn/status" {
+    list combo {
+      tailf:info "Health check for GPRS, UMTS, LTE combined";
+      config false;
+      ordered-by user; // not for use with keyed lists
+
+      tailf:cli-no-key-completion;
+      //key "service";
+
+      tailf:callpoint cli_oper_show
+      {
+        // Callpoint Opaque Data Format (255 chars max):
+        // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+        tailf:opaque '0:mme-sgsn status combo::1';
+      }
+
+      leaf service {
+        type string;
+        tailf:display-groups "none detail";
+      }
+      leaf location {
+        type string;
+        tailf:display-groups "none detail";
+      }
+      leaf current-subscribers {
+        type uint32;
+        tailf:display-groups "none detail";
+        tailf:info "Current number of subscribers.";
+      }
+      leaf current-bearers {
+        type uint32;
+        tailf:display-groups "none detail";
+        tailf:info "Current number of bearers.";
+      }
+      leaf current-sessions {
+        type uint32;
+        tailf:display-groups "none detail";
+        tailf:info "Current number of sessions.";
+      }
+      leaf current-pdp-contexts {
+        type uint32;
+        tailf:display-groups "none detail";
+        tailf:info "Current number of PDP contexts.";
+      }
+      leaf lte-attach-success-rate {
+        type uint32;
+        tailf:display-groups "none detail";
+        tailf:info "LTE attach success rate.";
+      }
+      leaf gprs-attach-success-rate {
+        type uint32;
+        tailf:display-groups "none detail";
+        tailf:info "GPRS attach success rate.";
+      }
+      leaf umts-attach-success-rate {
+        type uint32;
+        tailf:display-groups "none detail";
+        tailf:info "UMTS attach success rate.";
+      }
+      leaf lte-sess-act-success-rate {
+        type uint32;
+        tailf:display-groups "none detail";
+        tailf:info "LTE session activation success rate.";
+      }
+      leaf gprs-sess-act-success-rate {
+        type uint32;
+        tailf:display-groups "none detail";
+        tailf:info "GPRS session activation success rate.";
+      }
+      leaf umts-sess-act-success-rate {
+        type uint32;
+        tailf:display-groups "none detail";
+        tailf:info "UMTS Session activation success rate.";
+      }
+    } /* list combo */
+    
+    /***********************************************************************
+      status lte
+    ************************************************************************/ 
+    list lte {
+      tailf:info "LTE health check";
+      config false;
+      ordered-by user; // not for use with keyed lists
+
+      tailf:cli-no-key-completion;
+      //key "service";
+
+      tailf:callpoint cli_oper_show
+      {
+        // Callpoint Opaque Data Format (255 chars max):
+        // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+        tailf:opaque '0:mme-sgsn status lte::1';
+      }
+
+      leaf service {
+        type string;
+        tailf:display-groups "none detail";
+      }
+      leaf location {
+        type string;
+        tailf:display-groups "none detail";
+      }
+      leaf current-subscribers {
+        type uint32;
+        tailf:display-groups "none detail";
+        tailf:info "Current number of subscribers.";
+      }
+      leaf current-sessions {
+        type uint32;
+        tailf:display-groups "none detail";
+        tailf:info "Current number of sessions.Current number of sessions.";
+      }
+      leaf current-bearers {
+        type uint32;
+        tailf:display-groups "none detail";
+        tailf:info "Current number of bearers.";
+      }
+      leaf attach-success-rate-nwk {
+        type uint32;
+        tailf:display-groups "none detail";
+        tailf:info "Network attach success rate.";
+      }
+      leaf attach-success-rate-nodal {
+        type uint32;
+        tailf:display-groups "none detail";
+        tailf:info "Nodal attach success rate.";
+      }
+      leaf session-act-success-rate-nwk {
+        type uint32;
+        tailf:display-groups "none detail";
+        tailf:info "Network session activation success rate.";
+      }
+      leaf session-act-success-rate-nodal {
+        type uint32;
+        tailf:display-groups "none detail";
+        tailf:info "Nodal session activation success rate nodal.";
+      }
+      leaf bearer-act-success-rate-nwk {
+        type uint32;
+        tailf:display-groups "none detail";
+        tailf:info "Network bearer activation success rate.";
+      }
+      leaf bearer-act-success-rate-nodal {
+        type uint32;
+        tailf:display-groups "none detail";
+        tailf:info "Nodal bearer activation success rate nodal.";
+      }
+      leaf tau-success-rate-nwk {
+        type uint32;
+        tailf:display-groups "none detail";
+        tailf:info "Network TAU success rate.";
+      }
+      leaf itau-success-rate-nwk {
+        type uint32;
+        tailf:display-groups "none detail";
+        tailf:info "Network ITAU success rate.";
+      }
+      leaf paging-success-rate-nwk {
+        type uint32;
+        tailf:display-groups "none detail";
+        tailf:info "Network paging success rate.";
+      }
+    } /* list lte */
+  } /* status */
+}
+
+

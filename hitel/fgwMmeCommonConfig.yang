@@ -1,0 +1,227 @@
+submodule fgwMmeCommonConfig{
+
+belongs-to hcta-epc {
+    prefix epc;
+}
+
+import tailf-common {
+    prefix tailf;
+}
+
+include mmeSgsnConfig;
+
+include fgwConfig;
+
+augment "/fgw/interface" {
+    list mme-sctp-profile {
+        tailf:alt-name "sctp";
+        key "name"; 
+        max-elements 11;
+        tailf:info "SCTP profile.";
+        leaf name {
+            tailf:info "A unique SCTP profile name.";
+            type string {
+                length "1..32";
+            }
+            mandatory true;
+        }
+        leaf rto-initial {
+            tailf:info "RTO initial. Default 500";
+            type uint32 {
+                range "1..5000";
+            }
+            default 500;
+        }
+        leaf rto-min {
+            tailf:info "RTO minimum value. Default 250";
+            type uint32 {
+                range "1..5000";
+            }
+            default 250;
+        }
+        leaf rto-max {
+            tailf:info "RTO maximum value. Default 2000";
+            type uint32 {
+                range "1..60000";
+            }
+            default 2000;
+        }
+        leaf path-max-retrans {
+            tailf:info "Path max retrans. Default 5";
+            type uint16 {
+                range "0..10";
+            }
+            default 5;
+        }
+        leaf association-init-max-transmit {
+            tailf:info "Association initial max transmit. Default 3";
+            type uint16 {
+                range "0..10";
+            }
+            default 3;
+        }
+        leaf association-max-retrans {
+            tailf:info "Association max retrans. Default 6";
+            type uint16 {
+                range "0..10";
+            }
+            default 6;
+        }
+        leaf no-delay {
+            tailf:info "No delay. Default true";
+            type boolean;
+            default true;
+        }
+        leaf max-out-stream {
+            tailf:info "Max out stream. Default 11";
+            type uint16 {
+                range "1..64";
+            }
+            default 11;
+        }
+        leaf max-in-stream {
+            tailf:info "Max in stream. Default 11";
+            type uint16 {
+                range "1..64";
+            }
+            default 11;
+        }
+        leaf hb-interval {
+            tailf:info "Heartbeat interval. Default 30";
+            type uint16 {
+                range "1..120";
+            }
+            default 30;
+        }
+        leaf rx-buffer-size {
+            tailf:info "Receive buffer size. Default 149000";
+            type uint32 {
+                range "25000..2097152";
+            }
+            default 149000;
+        }
+        leaf tx-buffer-size {
+            tailf:info "Transmit buffer size. Default 149000";
+            type uint32 {
+                range "25000..5509000";
+            }
+            default 149000;
+        }
+        leaf sack-delay {
+            type uint16 {
+                range "1 | 10..500";  
+            }
+            tailf:info "SCTP SACK delay value. Default 200";
+            default 200;
+        }
+        leaf sack-frequency {
+            type uint16 {
+                range "1..5"; 
+            }
+            tailf:info "SCTP SACK frequency value. Default 2";
+            default 2;
+        }
+    } /* mme-sctp-profile */
+} /* interface */
+
+augment "/fgw/service-area" {
+    list mme-plmn {
+        tailf:alt-name "plmn";
+        key "plmn-id";	
+        max-elements 16;    
+        tailf:info "PLMN.";
+        leaf plmn-id {
+            type string {
+                pattern '([0-9]*)' {
+                    tailf:info "Valid values are: digits";
+                }  
+            }
+            tailf:info "A unique plmn identifier.";
+            mandatory true;
+        }
+        leaf mme-pool {
+            tailf:info "MME pool name. Default none";
+            type string {
+                length "1..32";
+            }
+            default "none";
+        }
+        leaf sgsn-pool {
+            tailf:info "SGSN pool name. Default none";
+            type enumeration {
+                enum "default" {tailf:code-name mme-plmn-sgsn-pool-default;}
+                enum "none" {tailf:code-name mme-plmn-sgsn-pool-none;}
+            }
+            default "none";
+        }
+    } /* mme-plmn */
+    list mme-mme-pool {
+        tailf:alt-name "mme-pool";
+        key "name";
+        max-elements 16;
+        tailf:info "MME pool.";
+        leaf name {
+            tailf:info "A unique MME pool name.";
+            type string {
+                length "1..32";
+            }
+            mandatory true;
+        }
+        leaf mme-name {
+            type string {
+                pattern "[0-9A-Za-z,.()+'-]+" {
+                    tailf:info "Valid name can contain alphabets, digits and any of these special characters(',' '.' '(' ')' '+' ''' '-')";
+                }  
+            }
+            tailf:info "MME name.";
+            mandatory true;
+        }
+        leaf mme-groupid {
+            tailf:info "MME group identifier.";
+            type uint16 {
+                range "32768..65535";
+            }
+            mandatory true;
+        }
+        leaf mme-code {
+            type string {
+                pattern '[0-9][0-9,]*' {
+                    tailf:info "Valid values are: comma separated numbers";
+                }  
+            }
+            tailf:info "List of MME codes. Default 0";
+            default "0";
+        }
+        leaf relative-capacity {
+            tailf:info "Relative capacity. Default 100";
+            type uint8 {
+                range "0..255";
+            }
+            default 100;
+        }
+    } /* mme-mme-pool */   
+} /* service-area */
+augment "/fgw" {
+    container mme-nodal-qos {
+        tailf:alt-name "nodal-qos";
+        presence ""; 
+        
+        tailf:info "Nodal Qos.";
+        leaf mps-arp-limit {
+            tailf:info "The MPS Allocation and Retention Priority (ARP) limit. Default 1";
+            type uint8 {
+                range "1..8";
+            }
+            default 1;
+        }
+        leaf single-qci1-bearer {
+            tailf:info "Restricts number of QCI=1 bearers per UE. Default disable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-nodal-qos-single-qci1-bearer-enable;}
+                enum "disable" {tailf:code-name mme-nodal-qos-single-qci1-bearer-disable;}
+            }
+            default "disable";
+        }
+    } /* mme-nodal-qos */
+} /* fgw */
+} /*submodule*/

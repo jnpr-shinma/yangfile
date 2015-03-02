@@ -1,0 +1,210 @@
+//////////////////////////////////////////////////////////////////////////
+/// @file sdCli.yang
+/// @brief Yang definitions for operational commands.
+///        "show mme-sgsn subscriber llc-context"
+///        "show mme-sgsn subscriber llc-pfc"
+///        "show mme-sgsn subscriber sndcp-session"
+///
+/// Maintained by: HCTA
+/// History:
+///
+/// yyyymmmdd Changed by      Change Reason
+/// --------- --------------- --------------------------------------------
+/// 2014Jan15 Hardik W        AGW-21104 - Initial development
+/// 2014Feb28 Adam Floyd      AGW-21104 - Updated callpoint info
+/// 2014Mar10 Hardik W        AGW-21104 - Added service field
+/// 2014Apr01 Adam Floyd      AGW-21104 - Add info strings
+/// 2014Apr17 Adam Floyd      AGW-21104 - Add sort-flag to cp opaque data
+/// 2014Aug15 Adam Floyd      AGW-23534 - Remove fake-key kludge
+/// 2014Sep15 Lakshmi Priya   AGW-22082 - Schema upgrade
+/// 2014May09 Hardik W        AGW-21104 - UT fix- updated nsapi field for 
+///                           sndcp-session
+/// 2014May23 Akshay Wani     AGW-21104 - Changed the data type of 
+///                           pfc-bucket-full-ratio
+///
+/// Copyright (c) 2014 HCTA. All Rights Reserved.
+///
+/// CONFIDENTIALITY AND LIMITED USE
+///
+/// This software, including any software of third parties embodied herein,
+/// contains information and concepts which are confidential to HCTA
+/// and such third parties. This software is licensed for use
+/// solely in accordance with the terms and conditions of the applicable
+/// license agreement with HCTA or its authorized distributor.
+//////////////////////////////////////////////////////////////////////////
+submodule sdCli{
+   belongs-to hcta-epc {
+      prefix epc;
+   }
+
+   import tailf-common {
+      prefix tailf;
+   }
+
+   include mmeSgsnConfig;
+   include cmdCommonHcta;
+   include scCommonCli;
+
+   augment "/mme-sgsn/subscriber" {
+      list llc-context {
+         tailf:info "LLC context";
+         config false;
+//         ordered-by user; // not for use with keyed lists
+
+         tailf:cli-no-key-completion;
+         key "imsi";
+
+         tailf:cli-incomplete-show-path
+         {
+            tailf:cli-min-keys "1";
+         }
+
+         tailf:callpoint cli_oper_show
+         {
+            // Callpoint Opaque Data Format (255 chars max):
+            // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+            tailf:opaque '1:mme-sgsn subscriber llc-context:imsi/imsi-t:1';
+         }
+
+         leaf imsi {
+            tailf:info "IMSI.";
+            type imsi-t;
+            tailf:display-groups "none detail";
+         }
+         leaf service {
+           tailf:info "Service";
+           type string;
+           tailf:display-groups "none detail";
+         }
+         leaf sd-location {
+            tailf:info "Location";
+            type string;
+            tailf:display-groups "none detail";
+         }
+         uses SUBSCRIBER_LLC_CONTEXT_TAGS {
+            refine "bucket-leak-rate" {
+               tailf:display-groups "none detail";
+            }
+            refine "bucket-full-ratio" {
+               tailf:display-groups "none detail";
+            }
+            refine "bucket-size" {
+               tailf:display-groups "none detail";
+            }
+            refine "data-saps-utilized" {
+               tailf:display-groups "none detail";
+            }
+         }
+      } /* llc-context */
+      
+      list llc-pfc {
+         tailf:info "The PFC information of the LLC protocol layer";
+         config false;
+//         ordered-by user; // not for use with keyed lists
+
+         tailf:cli-no-key-completion;
+         key "imsi packet-flow-identifier";
+
+         tailf:cli-incomplete-show-path
+         {
+            tailf:cli-min-keys "1";
+         }
+
+         tailf:callpoint cli_oper_show
+         {
+            // Callpoint Opaque Data Format (255 chars max):
+            // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+            tailf:opaque '1:mme-sgsn subscriber llc-pfc:imsi/imsi-t packet-flow-identifier/uint8:1';
+         }
+
+         leaf imsi {
+            tailf:info "IMSI.";
+            type imsi-t;
+            tailf:display-groups "none detail";
+         }
+         leaf packet-flow-identifier {
+            tailf:info "Packet flow control identifier.";
+            type uint8;
+            tailf:display-groups "none detail";
+         }
+         leaf service {
+            tailf:info "Service";
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf location {
+            tailf:info "Location";
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf pfc-bucket-leak-rate {
+            tailf:info "PFC flow control bucket leak rate in 100 bits per second.";
+            type uint32;
+            tailf:display-groups "none detail";
+         }
+         leaf pfc-bucket-full-ratio {
+            tailf:info "Percentage of the bucket that is filled with data for a PFC for a mobile.";
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf pfc-bucket-size {
+            tailf:info "PFC flow control bucket size.";
+            type uint32;
+            tailf:display-groups "none detail";
+         }
+      } /* llc-pfc */
+      
+      list sndcp-session {
+         tailf:info "SNDCP session";
+         config false;
+//         ordered-by user; // not for use with keyed lists
+
+         tailf:cli-no-key-completion;
+         key "imsi nsapi";
+
+         tailf:cli-incomplete-show-path
+         {
+            tailf:cli-min-keys "1";
+         }
+
+         tailf:callpoint cli_oper_show
+         {
+            // Callpoint Opaque Data Format (255 chars max):
+            // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+            tailf:opaque '1:mme-sgsn subscriber sndcp-session:imsi/imsi-t nsapi/uint8:1';
+         }
+
+         leaf imsi {
+            tailf:info "IMSI.";
+            type imsi-t;
+            tailf:display-groups "none detail";
+         }
+         leaf nsapi {
+            tailf:info "NSAPI.";
+            type uint8;
+            tailf:display-groups "none detail";
+         }
+         leaf service {
+            tailf:info "Service";
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf sd-location {
+            tailf:info "Location";
+            type string;
+            tailf:display-groups "none detail";
+         }
+         uses SUBSCRIBER_SNDCP_SESSION_TAGS {
+            refine "discarded-npdus-from-ms" {
+               tailf:display-groups "none detail";
+            }
+            refine "sn-pdus-to-ms" {
+               tailf:display-groups "none detail";
+            }
+            refine "sn-pdus-from-ms" {
+               tailf:display-groups "none detail";
+            }
+         }     
+      } /* sndcp-session */
+   } /* subscriber */
+}

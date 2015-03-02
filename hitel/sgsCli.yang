@@ -1,0 +1,65 @@
+//////////////////////////////////////////////////////////////////////////
+/// @file sgsCli.yang
+/// @brief Yang definitions for operational commands.
+///        "show mme-sgsn interface sgs vlr"
+///
+/// Maintained by: HCTA
+/// History:
+///
+/// yyyymmmdd Changed by      Change Reason
+/// --------- --------------- --------------------------------------------
+/// 2014Jan20 Nimesh D        AGW-21104 - Initial development
+/// 2014Feb28 Adam Floyd      AGW-21104 - Updated callpoint info
+/// 2014Apr17 Adam Floyd      AGW-21104 - Add sort-flag to cp opaque data
+/// 2014Aug15 Adam Floyd      AGW-23534 - Remove fake-key kludge
+/// 2014Sep15 Lakshmi Priya   AGW-22082 - Schema upgrade
+///
+/// Copyright (c) 2014 HCTA. All Rights Reserved.
+///
+/// CONFIDENTIALITY AND LIMITED USE
+///
+/// This software, including any software of third parties embodied herein,
+/// contains information and concepts which are confidential to HCTA
+/// and such third parties. This software is licensed for use
+/// solely in accordance with the terms and conditions of the applicable
+/// license agreement with HCTA or its authorized distributor.
+//////////////////////////////////////////////////////////////////////////
+submodule sgsCli{
+    belongs-to hcta-epc {
+        prefix epc;
+    }
+    import tailf-common {
+        prefix tailf;
+    }
+    include mmeSgsnConfig;
+    include sgsConfig;
+
+    augment "/mme-sgsn/interface/sgs" {
+        list vlr {
+            tailf:info "VLR table";
+            config false;
+            ordered-by user; // not for use with keyed lists
+
+            tailf:cli-no-key-completion;
+            //key "vlr-name";
+
+            tailf:callpoint cli_oper_show
+            {
+                // Callpoint Opaque Data Format (255 chars max):
+                // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+                tailf:opaque '0:mme-sgsn interface sgs vlr::1';
+            }
+
+            leaf vlr-name {
+                tailf:info "Name of VLR";
+                type string;
+                tailf:display-groups "none detail";
+            }
+            leaf sctp-status {
+                tailf:info "SCTP status.";
+                type string;
+                tailf:display-groups "none detail";
+            }
+        } /*vlr*/
+    } /*sgs*/
+}/*sgsCli*/

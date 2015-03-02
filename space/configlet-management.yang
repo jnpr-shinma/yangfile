@@ -1,0 +1,24 @@
+submodule configlet-management {
+    yang-version 1;
+    belongs-to "juniper"{
+        prefix "juniper";
+    }
+    import ietf-inet-types { prefix "inet"; }
+    import ietf-yang-types { prefix "yang"; }
+    import iq-ifmap-types { prefix "ifmap"; }
+    contact "JUNOS Space <jspace@juniper.net>";
+    organization "Juniper Networks";
+    description
+        "YANG definition of the configlet-management";
+    revision "2014-07-26" {
+        description "draft.";
+    }
+
+    list configlet {
+       description "Configlet";
+       uses ifmap:Identity;
+       key uuid;
+    }
+
+
+}

@@ -1,0 +1,63 @@
+//////////////////////////////////////////////////////////////////////////
+/// @file hcta-ntp.yang
+/// @brief Yang definitions ntp config.
+///
+/// Maintained by: HCTA
+/// History:
+///
+/// yyyymmmdd Changed by      Change Reason
+/// --------- --------------- --------------------------------------------
+/// 2014Jan15 Irina Pershwitz AGW-21103 - Initial development
+/// 2014Sep15 Lakshmi Priya   AGW-22082 - Schema upgrade.
+/// 2014Oct24 Irina Pershwitz AGW-24023 - NTP config - oam ip
+///
+/// Copyright (c) 2014 HCTA. All Rights Reserved.
+///
+/// CONFIDENTIALITY AND LIMITED USE
+///
+/// This software, including any software of third parties embodied herein,
+/// contains information and concepts which are confidential to HCTA
+/// and such third parties. This software is licensed for use
+/// solely in accordance with the terms and conditions of the applicable
+/// license agreement with HCTA or its authorized distributor.
+//////////////////////////////////////////////////////////////////////////
+
+module hcta-ntp {
+  namespace "http://hitachi-cta.com/ns/ntp";
+  prefix ntp;
+
+  import tailf-common {
+    prefix tailf;
+  }
+
+  import ietf-inet-types {
+    prefix inet;
+  }
+
+  organization "Hitachi-CTA";
+  description
+       "The module ntp.";
+
+  revision 2014-09-18 {
+    description  "EPC8.0";
+  }
+
+  container ntp {
+    tailf:info "Network Time Protocol services.";
+    list server {     
+      max-elements 3;
+      key "name";
+      unique ip-address;        
+      tailf:info "Server parameters"; 
+      leaf name {
+         tailf:info "Name of server.";
+         type string;
+      } 	  
+      leaf ip-address {
+         tailf:info "IP address of server.";
+         type inet:ip-address;
+         mandatory true;
+      } 	  
+    }
+  } //ntp container
+}

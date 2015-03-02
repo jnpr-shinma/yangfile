@@ -1,0 +1,180 @@
+//////////////////////////////////////////////////////////////////////////
+/// @file rncCli.yang
+/// @brief Yang definitions for operational commands.
+///        "show mme-sgsn interface iu rnc"
+///        "show mme-sgsn interface iu fgw-rnc"
+///
+/// Maintained by: HCTA
+/// History:
+///
+/// yyyymmmdd Changed by      Change Reason
+/// --------- --------------- --------------------------------------------
+/// 2014Jan21 Hardik W        AGW-21104 - Initial development
+/// 2014Feb28 Adam Floyd      AGW-21104 - Updated callpoint info
+/// 2014Mar03 Hardik W        AGW-21104 - Leaves order updated.
+/// 2014Apr17 Adam Floyd      AGW-21104 - Add sort-flag to cp opaque data
+/// 2014Aug15 Adam Floyd      AGW-23534 - Remove fake-key kludge
+/// 2014Sep15 Lakshmi Priya   AGW-22082 - Schema upgrade
+/// 2014May27 Akshay Wani     AGW-22268 - Changed display group of state in rnc.
+///
+/// Copyright (c) 2014 HCTA. All Rights Reserved.
+///
+/// CONFIDENTIALITY AND LIMITED USE
+///
+/// This software, including any software of third parties embodied herein,
+/// contains information and concepts which are confidential to HCTA
+/// and such third parties. This software is licensed for use
+/// solely in accordance with the terms and conditions of the applicable
+/// license agreement with HCTA or its authorized distributor.
+//////////////////////////////////////////////////////////////////////////
+submodule rncCli{
+   belongs-to hcta-epc {
+      prefix epc;
+   }
+
+   import tailf-common {
+      prefix tailf;
+   }
+
+   include mmeSgsnConfig;
+   include rncConfig;
+   include cmdCommonHcta;
+
+   augment "/mme-sgsn/interface/iu" {
+      list mme-rnc-oper {
+         tailf:alt-name "rnc";
+         tailf:info "Attributes of RNC";
+         config false;
+         ordered-by user; // not for use with keyed lists
+
+         tailf:cli-no-key-completion;
+         /* If we support these keys, leaf order needs to be rearranged, 
+            decide if config order should match */
+         //key "rnc-id service";
+
+         tailf:callpoint cli_oper_show
+         {
+            // Callpoint Opaque Data Format (255 chars max):
+            // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+            tailf:opaque '0:mme-sgsn interface iu rnc::1';
+         }
+
+         leaf rnc-id {
+            type uint32;
+            tailf:display-groups "none detail";
+            tailf:info "ID of the radio network controller.";
+         }
+         leaf service {
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf destination-point-code {
+            type string;
+            tailf:display-groups "none detail";
+            tailf:info "Specifies the RNC point code.";
+         }
+         leaf direct-tunnel {
+            type string;
+            tailf:display-groups "none detail";
+            tailf:info "Support direct tunnel functionality.";
+         }
+         leaf max-iu-connections {
+            type uint32;
+            tailf:display-groups "none detail";
+            tailf:info "Total number of SCCP connections supported per RNC.";
+         }
+         leaf state {
+            type string;
+            tailf:display-groups "none detail";
+            tailf:info "State of the rnc-process.";
+         }
+         leaf active-sig-connections {
+            type uint32;
+            tailf:display-groups "detail";
+            tailf:info "The current active signaling connections.";
+         }
+         leaf rejected-connections {
+            type uint32;
+            tailf:display-groups "detail";
+            tailf:info "Number of SC rejects signaling connection requests.";
+         }
+         leaf rnc-connect-failures {
+            type uint32;
+            tailf:display-groups "detail";
+            tailf:info "Number of times a connection request to the RNC failed.";
+         }
+         leaf location {
+            type string;
+            tailf:display-groups "detail";
+         }
+      } /* list mme-rnc-oper */        
+
+      list fgw-rnc-oper {
+         tailf:alt-name "fgw-rnc"; 
+         tailf:info "Attributes of FGW-RNC";
+         config false;
+         ordered-by user; // not for use with keyed lists
+
+         tailf:cli-no-key-completion;
+         /* If we support these keys, leaf order needs to be rearranged, 
+            decide if config order should match */
+         //key "rnc-id service";
+
+         tailf:callpoint cli_oper_show
+         {
+            // Callpoint Opaque Data Format (255 chars max):
+            // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+            tailf:opaque '0:mme-sgsn interface iu fgw-rnc::1';
+         }
+
+         leaf rnc-id {
+            type uint32;
+            tailf:display-groups "none detail";
+            tailf:info "FGW ID of the RNC.";
+         }
+         leaf service {
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf destination-point-code {
+            type string;
+            tailf:display-groups "none detail";
+            tailf:info "Specifies the RNC point code.";
+         }
+         leaf direct-tunnel {
+            type string;
+            tailf:display-groups "none detail";
+            tailf:info "Support direct tunnel functionality.";
+         }
+         leaf max-iu-connections {
+            type uint32;
+            tailf:display-groups "none detail";
+            tailf:info "Total number of SCCP connections supported per RNC.";
+         }
+         leaf state {
+            type string;
+            tailf:display-groups "detail";
+            tailf:info "State of the rnc-process.";
+         }
+         leaf active-sig-connections {
+            type uint32;
+            tailf:display-groups "detail";
+            tailf:info "The current active signaling connections.";
+         }
+         leaf rejected-connections {
+            type uint32;
+            tailf:display-groups "detail";
+            tailf:info "Number of SC rejected signaling connection requests.";
+         }
+         leaf rnc-connect-failures {
+            type uint32;
+            tailf:display-groups "detail";
+            tailf:info "Number of times a connection request to the RNC failed.";
+         }
+         leaf location {
+            type string;
+            tailf:display-groups "detail";
+         }
+      } /* list fgw-rnc-oper */
+   } /* iu */
+}

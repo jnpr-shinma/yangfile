@@ -1,0 +1,194 @@
+//////////////////////////////////////////////////////////////////////////
+/// @file agwLiCli.yang
+/// @brief Yang definitions for operational commands.
+///        "show mme-sgsn interface x x1"
+///        "show mme-sgsn interface x x2"
+///        "show mme-sgsn interface x x3"
+///
+/// Maintained by: HCTA
+/// History:
+///
+/// yyyymmmdd Changed by      Change Reason
+/// --------- --------------- --------------------------------------------
+/// 2014Jan15 Akshay Wani     AGW-21104 - Initial development
+/// 2014Feb28 Mike Lesko      AGW-21104 - Updated callpoint info
+/// 2014Apr17 Adam Floyd      AGW-21104 - Add sort-flag to cp opaque data
+/// 2014Aug15 Adam Floyd      AGW-23534 - Remove fake-key kludge
+/// 2014Sep15 Lakshmi Priya   AGW-22082 - Schema upgrade
+///
+/// Copyright (c) 2014 HCTA. All Rights Reserved.
+///
+/// CONFIDENTIALITY AND LIMITED USE
+///
+/// This software, including any software of third parties embodied herein,
+/// contains information and concepts which are confidential to HCTA
+/// and such third parties. This software is licensed for use
+/// solely in accordance with the terms and conditions of the applicable
+/// license agreement with HCTA or its authorized distributor.
+//////////////////////////////////////////////////////////////////////////
+submodule agwLiCli {
+   belongs-to hcta-epc {
+      prefix epc;
+   }
+
+   include mmeSgsnConfig;
+   include agwLiConfig;
+
+   import tailf-common {
+      prefix tailf;
+   }
+
+
+   augment "/mme-sgsn/interface/x" {
+      list x1 {
+         tailf:info "LI X1 interface";
+         config false;
+         ordered-by user; // not for use with keyed lists
+
+         tailf:cli-no-key-completion;
+
+         tailf:callpoint cli_oper_show
+         {      
+           // Callpoint Opaque Data Format (255 chars max):
+           // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+           tailf:opaque '0:mme-sgsn interface x x1::0';
+         }
+
+         leaf status-str {
+            tailf:alt-name "status";
+            tailf:info "X1 interface status";
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf current-target {
+            tailf:info "The current number of targets in the LI database.";
+            type uint32;
+            tailf:display-groups "none detail";
+         }
+         leaf current-monitored-targets {
+            tailf:info "The current number of monitored targets";
+            type uint32;
+            tailf:display-groups "none detail";
+         }
+         leaf peak-targets {
+            tailf:info "The peak number of targets in the LI database";
+            type uint32;
+            tailf:display-groups "none detail";
+         }
+         leaf peak-monitored-targets {
+            tailf:info "The peak number of monitored targets";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+         leaf monitor-limit-exceeded {
+            tailf:info "The number of times that the number of monitored targets exceeds the max-active-targets configured";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+         leaf act-reqs-dropped {
+            tailf:info "The number of target activation request messages dropped";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+         leaf act-reqs-rejected {
+            tailf:info "The number of target activation requests rejected.";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+         leaf deact-reqs-dropped {
+            tailf:info "The number of target deactivation request messages dropped";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+         leaf deact-reqs-rejected {
+            tailf:info "The number of target deactivation request messages rejected";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+         leaf interro-reqs-dropped {
+            tailf:info "The number of target interrogation request messages dropped";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+         leaf interro-reqs-rejected {
+            tailf:info "The number of target interrogation request messages rejected";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+         leaf reset-reqs-dropped {
+            tailf:info "The number of reset request messages dropped";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+         leaf unknown-admf-reqs-dropped {
+            tailf:info "The number of unknown ADMF request messages dropped";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+         leaf admf-msgs-dropped-scoketfull {
+            tailf:info "The number of messages to the ADMF dropped due to socket full";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+         leaf admf-msgs-sent-success {
+            tailf:info "The number of messages sent to the ADMF successful";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+      }
+
+      list x2 {
+         tailf:info "LI X2 interface";
+         config false;
+         ordered-by user; // not for use with keyed lists
+
+         tailf:cli-no-key-completion;
+
+         tailf:callpoint cli_oper_show
+         {      
+           // Callpoint Opaque Data Format (255 chars max):
+           // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+           tailf:opaque '0:mme-sgsn interface x x2::0';
+         }
+
+         leaf status-str {
+            tailf:alt-name "status";
+            tailf:info "X2 interface status";
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf iri-msgs-dropped {
+            tailf:info "The number of discarded IRI messages";
+            type uint32;
+            tailf:display-groups "none detail";
+         }
+      }
+
+      list x3 {
+         tailf:info "LI X3 interface";
+         config false;
+         ordered-by user; // not for use with keyed lists
+
+         tailf:cli-no-key-completion;
+
+         tailf:callpoint cli_oper_show
+         {      
+           // Callpoint Opaque Data Format (255 chars max):
+           // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+           tailf:opaque '0:mme-sgsn interface x x3::0';
+         }
+
+         leaf status-str {
+            tailf:alt-name "status";
+            tailf:info "X3 interface status";
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf cc-msgs-dropped {
+            tailf:info "The number of discarded CC messages";
+            type uint32;
+            tailf:display-groups "none detail";
+         }
+      }
+   }
+}

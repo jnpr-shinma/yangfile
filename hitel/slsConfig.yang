@@ -1,0 +1,144 @@
+/* slsConfig.yang generated from slsConfig.xml */
+submodule slsConfig{
+
+belongs-to hcta-epc {
+    prefix epc;
+}
+
+import tailf-common {
+    prefix tailf;
+}
+
+include mmeSgsnConfig;
+
+include fgwConfig;
+
+include cmdCommonHcta;
+include s1MasterConfig;
+import ietf-inet-types {
+    prefix inet;
+}
+
+augment "/mme-sgsn/interface" {   
+container sls {
+    tailf:info "Interface between MME and E-SMLC";
+    container mme-sls-if {
+        tailf:alt-name "sls-if";
+        presence "";
+        tailf:info "This is the interface between MME and E-SMLC.";
+        uses routing-instance-name-multiple;
+        leaf sctp-profile {
+            tailf:info "The name of the sctp-profile used by the SLs.";
+            type leafref {
+                path "/mme-sgsn/interface/mme-sctp-profile/name";
+            }
+            mandatory true;
+        }
+        leaf local-ip-address1 {
+            tailf:info "Local IP address1 used for connection to E-SMLCs.";
+            type inet:ip-address;
+            mandatory true;
+        }
+        leaf local-ip-address2 {
+            must "../local-ip-address1 != ." {
+                error-message
+                "The 'local-ip-address1' and 'local-ip-address2' configured must not be same";
+            }
+            tailf:info "Local IP address2 used for connection to E-SMLCs for multi-homing. Default 0.0.0.0";
+            type inet:ip-address;
+            default 0.0.0.0;
+        }
+        leaf port {
+            tailf:info "Local port number for SLs Default 9082";
+            type uint16 {
+                range "1..65535";
+            }
+            default 9082;
+        }
+        leaf location-request-t3x01 {
+            tailf:info "Time to wait for the response to location request message. Default 8";
+            type uint16 {
+                range "1..300";
+            }
+            default 8;
+        }
+        leaf reset-request-t3x02 {
+            tailf:info "Time to wait for the response to reset request message Default 3";
+            type uint8 {
+                range "1..60";
+            }
+            default 3;
+        }
+        leaf reset-request-retry {
+            tailf:info "Number of retransmission of reset request message. Default 0";
+            type uint8 {
+                range "0..5";
+            }
+            default 0;
+        }
+        leaf version {
+            tailf:info "3GPP spec applicable to this interface is TS29.171. Default 10.4.0";
+            type enumeration {
+                enum "10.4.0" {tailf:code-name mme-sls-if-version-10-4-0;}
+            }
+            default "10.4.0";
+        }
+        uses dscp;
+        leaf max-transactions-per-peer {
+            tailf:info "Max transactions per peer. Default 5000";
+            type uint16 {
+                range "100..10000";
+            }
+            default 5000;
+        }
+    } /* mme-sls-if */
+    list mme-e-smlc {
+        tailf:alt-name "e-smlc";
+        key "e-smlc-id";
+        max-elements 20;   
+        unique ip-address1;
+        tailf:info "E-SMLC.";
+        leaf e-smlc-id {
+            tailf:info "An index to identify a specific E-SMLC.";
+            type uint8 {
+                range "0..255";
+            }
+            mandatory true;
+        }
+        leaf callp-service-id {
+            tailf:info "Call Processing VM identifier.";
+            type leafref {
+                path "/mme-sgsn/system/callp/service-id";
+            }
+            mandatory true;
+        }
+        leaf e-smlc-pool {
+            must "count(/mme-sgsn/service-area/mme-tracking-area[e-smlc-pool-name = current()]) != 0" {
+                error-message "Cannot perform the operation on pool name since the 'mme-sgsn interface sls e-smlc e-smlc-pool' value is referenced via 'mme-sgsn service-area tracking-area e-smlc-pool-name'";
+            }
+            
+            tailf:info "The E-SMLC pool name.";
+            type string {
+                length "1..32";
+            }
+            mandatory true;
+        }
+        leaf ip-address1 {
+            tailf:info "IP address of the E-SMLC.";
+            type inet:ip-address;
+            mandatory true;
+        }
+        leaf ip-address2 {
+            must "../ip-address1 != ." {
+                error-message
+                "The 'ip-address1' and  'ip-address2' must not have same value";
+            }
+            tailf:info "IP address of the E-SMLC for multi-homing. Default 0.0.0.0";
+            type inet:ip-address;
+            default 0.0.0.0;
+        }
+    } /* mme-e-smlc */
+} /* sls */
+} /* interface */
+} /*submodule*/
+

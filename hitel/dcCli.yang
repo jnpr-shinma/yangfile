@@ -1,0 +1,96 @@
+//////////////////////////////////////////////////////////////////////////
+/// @file dcCli.yang
+/// @brief Yang definitions for operational commands.
+///        "show mme-sgsn interface diameter peer"
+///
+/// Maintained by: HCTA
+/// History:
+///
+/// yyyymmmdd Changed by      Change Reason
+/// --------- --------------- --------------------------------------------
+/// 2014Jan15 Akshay Wani     AGW-21104 - Initial development
+/// 2014Feb28 Adam Floyd      AGW-21104 - Updated callpoint info
+/// 2014Mar15 Mike Lesko      AGW-21104 - Modify to match App Types 
+/// 2014Apr17 Adam Floyd      AGW-21104 - Add sort-flag to cp opaque data
+/// 2014Jul04 Lakshmi Priya   AGW-22082 - Replaced application-identifier 
+///                                       to negotiated-app-id
+/// 2014Sep25 Adam Floyd      AGW-23795 - Un-revert callpoint name change
+///
+/// Copyright (c) 2014 HCTA. All Rights Reserved.
+///
+/// CONFIDENTIALITY AND LIMITED USE
+///
+/// This software, including any software of third parties embodied herein,
+/// contains information and concepts which are confidential to HCTA
+/// and such third parties. This software is licensed for use
+/// solely in accordance with the terms and conditions of the applicable
+/// license agreement with HCTA or its authorized distributor.
+//////////////////////////////////////////////////////////////////////////
+submodule dcCli{
+   belongs-to hcta-epc {
+      prefix epc;
+   }
+
+   import tailf-common {
+       prefix tailf;
+   }
+
+   include mmeSgsnConfig;
+   include dcConfig;
+
+   augment "/mme-sgsn/interface/diameter" {
+      list peer-oper {
+         tailf:alt-name "peer";
+         tailf:info "Peer";
+         config false;
+         ordered-by user; // not for use with keyed lists
+
+         tailf:cli-no-key-completion;
+         //key host-identity;
+
+         tailf:callpoint cli_oper_show
+         {
+            // Callpoint Opaque Data Format (255 chars max):
+            // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+            tailf:opaque '0:mme-sgsn interface diameter peer::1';
+         }
+
+         leaf host-identity {
+            type string;
+            tailf:display-groups "none detail";
+            tailf:info "The FQDN of the peer, char";
+         }
+         leaf ip-address {
+            type string;
+            tailf:display-groups "none detail";
+            tailf:info "The IP address of the peer";
+         }
+         leaf ip-address2 {
+            type string;
+            tailf:display-groups "none detail";
+            tailf:info "Secondary IP address";
+         }
+         leaf port-number {
+            type uint32;
+            tailf:display-groups "none detail";
+            tailf:info "The port number to connect to";
+         }
+         leaf status-str {
+            tailf:alt-name "status";
+            type string;
+            tailf:display-groups "none detail";
+            tailf:info "Status.";
+         }
+         leaf process-name {
+            type string;
+            tailf:display-groups "none detail";
+            tailf:info "Process name and ID.";
+         }
+         leaf negotiated-app-id { 
+            type string;
+            tailf:display-groups "none detail";
+            tailf:info "Application type, S6 or S13";
+         }
+      }
+   }
+}

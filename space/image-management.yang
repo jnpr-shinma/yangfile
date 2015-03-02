@@ -1,0 +1,79 @@
+submodule image-management {
+    yang-version 1;
+    belongs-to "juniper"{
+        prefix "juniper";
+    }
+    import ietf-inet-types { prefix "inet"; }
+    import ietf-yang-types { prefix "yang"; }
+    import iq-ifmap-types { prefix "ifmap"; }
+    contact "JUNOS Space <jspace@juniper.net>";
+    organization "Juniper Networks";
+    description
+        "YANG definition of the image-management";
+    revision "2014-07-26" {
+        description "draft.";
+    }
+
+    list image {
+        description "image";
+        uses ifmap:Identity;
+        key uuid;
+
+        leaf domainId {
+            type uint32;
+            description "Domain ID";
+        }
+        leaf imageFileName {
+            type string;
+            description "Image file name";
+        }
+        leaf imageVersion {
+            type string;
+            description "Image version";
+        }
+        leaf imageFilePath {
+            type string;
+            description "Image file path";
+        }
+        leaf imageSize {
+            type uint32;
+            description "Image size";
+        }
+        leaf supportedPlatforms {
+            type string;
+            description "Supported platforms";
+        }
+        leaf supportedSeries {
+            type string;
+            description "Supported series";
+        }
+        leaf series {
+            type uint32;
+            description "Series";
+        }
+        leaf userNotes {
+            type string;
+            description "UserNotes";
+        }
+        leaf uploadedTime {
+            type uint32;
+            description "Uploaded time";
+        }
+        leaf uploadStatus {
+            type uint32;
+            description "Uploaded status";
+        }
+        leaf decodeCompletionStatus {
+            type string;
+            description "Decode completion status";
+        }
+        leaf checksumStatus {
+            type uint32;
+            description "Checksum status";
+        }
+        leaf lastChecksumTime {
+            type uint32;
+            description "Last checksum time";
+        }
+    }
+}

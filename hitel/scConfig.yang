@@ -1,0 +1,2993 @@
+/* scConfig.yang generated from scConfig.xml */
+submodule scConfig{
+
+belongs-to hcta-epc {
+    prefix epc;
+}
+
+import tailf-common {
+    prefix tailf;
+}
+
+include mmeSgsnConfig;
+
+include fgwConfig;
+
+
+include tcapConfig;
+include cmdCommonHcta;
+include s1MasterConfig;
+include upmConfig;
+import ietf-inet-types {
+    prefix inet;
+}
+import hcta-timezone {
+    prefix timezone;
+}
+
+
+augment "/mme-sgsn/interface" {
+    container nas {
+        tailf:info "Non-Access Stratum";
+        presence "";
+        container mme-nas-mm {
+            tailf:alt-name "emm";
+            tailf:validate nasMMValidate;
+            presence "";
+            tailf:info "NAS emm interface.";
+            leaf ue-retry-delay-t3402-value {
+                tailf:info "Attach or tracking area update retry delay timer. Default 12";
+                type uint8 {
+                    range "1..60";
+                }
+                default 12;
+            }
+            leaf ue-periodic-tau-t3412-value {
+                tailf:info "Periodic tracking area update timer. Default 54";
+                type uint16 {
+                    range "10..186";
+                }
+                default 54;
+            }
+            leaf paging-t3413-initial {
+                tailf:info "Initial paging timer. Default 5";
+                type uint8 {
+                    range "1..30";
+                }
+                default 5;
+            }
+            leaf paging-t3413-increment {
+                tailf:info "Paging increment value. Default 2";
+                type uint8 {
+                    range "0..10";
+                }
+                default 2;
+            }
+            leaf paging-retry-n3413 {
+                tailf:info "Number of paging retries. Default 2";
+                type uint8 {
+                    range "0..4";
+                }
+                default 2;
+            }
+            leaf targeted-first-page {
+                tailf:info "Last known TA or all TA. Default all-ta";
+                type enumeration {
+                    enum "last-known-ta" {tailf:code-name mme-nas-mm-targeted-first-page-last-known-ta;}
+                    enum "last-known-enb" {tailf:code-name mme-nas-mm-targeted-first-page-last-known-enb;}
+                    enum "last-known-enb-ps-only" {tailf:code-name mme-nas-mm-targeted-first-page-last-known-enb-ps-only;}
+                    enum "all-ta" {tailf:code-name mme-nas-mm-targeted-first-page-all-ta;}
+                }
+                default "all-ta";
+            }
+            leaf nwk-init-detach-t3422 {
+                tailf:info "Network initiated detach procedure timer. Default 6";
+                type uint8 {
+                    range "1..15";
+                }
+                default 6;
+            }
+            leaf nwk-init-detach-retry-n3422 {
+                tailf:info "Number of network initiated detach procedure retries. Default 2";
+                type uint8 {
+                    range "0..5";
+                }
+                default 2;
+            }
+            leaf guti-allocation-t3450 {
+                tailf:info "GUTI allocation timer. Default 6";
+                type uint8 {
+                    range "1..15";
+                }
+                default 6;
+            }
+            leaf guti-allocation-retry-n3450 {
+                tailf:info "Number of GUTI allocation retries. Default 3";
+                type uint8 {
+                    range "0..5";
+                }
+                default 3;
+            }
+            leaf guti-lifetime {
+                tailf:info "GUTI lifetime. Default 12";
+                type uint8 {
+                    range "1..168";
+                }
+                default 12;
+            }
+            leaf security-t3460 {
+                tailf:info "Authentication and security mode procedure timer. Default 6";
+                type uint8 {
+                    range "1..15";
+                }
+                default 6;
+            }
+            leaf security-retry-n3460 {
+                tailf:info "Number of authentication and security mode procedure retries. Default 2";
+                type uint8 {
+                    range "0..5";
+                }
+                default 2;
+            }
+            leaf identity-t3470 {
+                tailf:info "Identity procedure timer. Default 6";
+                type uint8 {
+                    range "1..15";
+                }
+                default 6;
+            }
+            leaf identity-retry-n3470 {
+                tailf:info "Number of identity procedure retries. Default 2";
+                type uint8 {
+                    range "0..5";
+                }
+                default 2;
+            }
+            leaf mobile-reachable-timer-str {
+                tailf:info "Mobile reachable timer.";
+                type string {
+                    pattern '(t3412plus4|t3412times2plus1|[3-9][0-9]|[1-2][0-9][0-9]|300)' {
+                        tailf:info "Valid values are: 30..300, t3412plus4, t3412times2plus1";
+                    }
+
+                }
+                tailf:alt-name "mobile-reachable-timer";
+                default "t3412plus4";
+            }
+            leaf opt-authentication-control {
+                tailf:info "Authentication control. Valid values are 'off' or one or more of the following: service-request,mme-relocation,detach,tau. Default off";
+                type string {
+                    length "1..64";
+                }
+                default "off";
+            }
+            leaf vector-retrieval-failure {
+                tailf:info "Continue procedure if retrieval of vectors fails. Default ignore";
+                type enumeration {
+                    enum "ignore" {tailf:code-name mme-nas-mm-vector-retrieval-failure-ignore;}
+                    enum "fail" {tailf:code-name mme-nas-mm-vector-retrieval-failure-fail;}
+                }
+                default "ignore";
+            }
+            leaf ciphering-algorithms {
+                type string {
+                    pattern '(eea[0-2]|eea[0],eea[1-2]|eea[1],eea[0,2]|eea[2],eea[0,1]|eea0,eea1,eea2|eea0,eea2,eea1|eea1,eea0,eea2|eea1,eea2,eea0|eea2,eea0,eea1|eea2,eea1,eea0)' {
+                        tailf:info "Valid values in any order or combination, with order indicating preference are: eea0, eea1, eea2";
+                    }
+                }
+                tailf:info "Ciphering algorithms. Valid values in any order or combination, with order indicating preference are: eea0,eea1,eea2. Default eea1,eea2,eea0";
+                default "eea1,eea2,eea0";
+            }
+            leaf integrity-algorithms {
+                type string {
+                    pattern '(null|eia[1-2]|null,eia[1-2]|eia[1-2],null|eia1,eia2|eia2,eia1|null,eia1,eia2|null,eia2,eia1|eia1,null,eia2|eia1,eia2,null|eia2,null,eia1|eia2,eia1,null)' {
+                        tailf:info "Valid values in any order or combination, with order indicating preference are: null, eia1, eia2";
+                    }
+                }
+                tailf:info "Integrity algorithms. Valid values in any order or combination, with order indicating preference are: null,eia1,eia2. Default eia1,eia2,null";
+                default "eia1,eia2,null";
+            }
+            leaf src-mme-resource-release-timer {
+                tailf:info "Old mme and bearer context release timer. Default 15";
+                type uint8 {
+                    range "0..30";
+                }
+                default 15;
+            }
+            leaf cancel-location-wait-timer {
+                tailf:info "Cancel location wait timer. Default 10";
+                type uint8 {
+                    range "10..30";
+                }
+                default 10;
+            }
+            leaf imeisv-req-sec-mode-cmd {
+                tailf:info "IMEISV request in sec mode control. Default on";
+                type enumeration {
+                    enum on;
+                    enum off;
+                }
+                default "on";
+            }
+            leaf tai-list-max {
+                tailf:info "Max number of TAI sent to UE in the TAI list. Default 1";
+                type uint8 {
+                    range "1..16";
+                }
+                default 1;
+            }
+            leaf nas-token-window {
+                tailf:info "Max number of times the token can be generated. Default 5";
+                type uint8 {
+                    range "0..10";
+                }
+                default 5;
+            }
+            leaf ue-service-reject-t3442-value {
+                tailf:info "Service timer. Default 60";
+                type uint16 {
+                    range "2..300";
+                }
+                default 60;
+            }
+            leaf ta-list-allocation {
+                tailf:info "TA list allocation method. Default unrestricted";
+                type enumeration {
+                    enum "unrestricted" {tailf:code-name mme-nas-mm-ta-list-allocation-unrestricted;}
+                    enum "within-plmn" {tailf:code-name mme-nas-mm-ta-list-allocation-within-plmn;}
+                    enum "within-la" {tailf:code-name mme-nas-mm-ta-list-allocation-within-la;}
+                }
+                default "unrestricted";
+            }
+            leaf s1-release-delay-timer {
+                type string {
+                    pattern 'disabled|[1-5]' {
+                        tailf:info "Valid values are: disabled, 1..5";
+                    }
+                }
+                tailf:info "Time the MME waits before releasing the S1-MME after completing a NAS procedure. Default disabled";
+                default "disabled";
+            }
+            leaf guti-allocation-intra-tau {
+                tailf:info "Control GUTI allocation for intra-TAU scenarios. Default enable";
+                type enumeration {
+                    enum "enable" {tailf:code-name mme-nas-mm-guti-allocation-intra-tau-enable;}
+                    enum "disable" {tailf:code-name mme-nas-mm-guti-allocation-intra-tau-disable;}
+                }
+                default "enable";
+            }
+            leaf voice-paging-t3413 {
+                type string {
+                    pattern 'disable|[1-9]|[1][0]' {
+                        tailf:info "Valid values are: disable, 1..10";
+                    }
+                }
+                tailf:info "Voice paging timer. Default disable";
+                default "disable";
+            }
+            leaf voice-paging-retry-n3413 {
+                tailf:info "Number of voice paging retries. Default 0";
+                type uint8 {
+                    range "0..2";
+                }
+                default 0;
+            }
+            leaf cancel-location-detach-cause {
+                tailf:info "Detach cause for cancel location . Default eps-service-not-allowed-7";
+                type enumeration {
+                    enum "none" {tailf:code-name mme-nas-mm-cancel-location-detach-cause-none;}
+                    enum "imsi-unknown-in-hss-2" {tailf:code-name mme-nas-mm-cancel-location-detach-cause-imsi-unknown-in-hss-2;}
+                    enum "illegal-ue-3" {tailf:code-name mme-nas-mm-cancel-location-detach-cause-illegal-ue-3;}
+                    enum "illegal-me-6" {tailf:code-name mme-nas-mm-cancel-location-detach-cause-illegal-me-6;}
+                    enum "eps-service-not-allowed-7" {tailf:code-name mme-nas-mm-cancel-location-detach-cause-eps-service-not-allowed-7;}
+                    enum "eps-and-non-eps-service-not-allowed-8" {tailf:code-name mme-nas-mm-cancel-location-detach-cause-eps-and-non-eps-service-not-allowed-8;}
+                    enum "plmn-not-allowed-11" {tailf:code-name mme-nas-mm-cancel-location-detach-cause-plmn-not-allowed-11;}
+                    enum "tracking-area-not-allowed-12" {tailf:code-name mme-nas-mm-cancel-location-detach-cause-tracking-area-not-allowed-12;}
+                    enum "roaming-not-allowed-in-this-ta-13" {tailf:code-name mme-nas-mm-cancel-location-detach-cause-roaming-not-allowed-in-this-ta-13;}
+                    enum "eps-service-not-allowed-in-this-plmn-14" {tailf:code-name mme-nas-mm-cancel-location-detach-cause-eps-service-not-allowed-in-this-plmn-14;}
+                    enum "no-suitable-cells-in-ta-15" {tailf:code-name mme-nas-mm-cancel-location-detach-cause-no-suitable-cells-in-ta-15;}
+            }
+            default "eps-service-not-allowed-7";
+          }
+        } /* mme-nas-mm */
+        list mme-emm-cause-mapping {
+            tailf:alt-name "emm-cause-mapping";
+            key "error";
+            tailf:info "MM cause code mapping.";
+            leaf error {
+                tailf:info "MM error description";
+                type enumeration {
+                    enum "user-unknown" {tailf:code-name mme-emm-cause-mapping-error-user-unknown;}
+                    enum "unknown-scptn-gprs-data" {tailf:code-name mme-emm-cause-mapping-error-unknown-scptn-gprs-data;}
+                    enum "unknown-scptn-no-gprs-data" {tailf:code-name mme-emm-cause-mapping-error-unknown-scptn-no-gprs-data;}
+                    enum "rat-not-allowed" {tailf:code-name mme-emm-cause-mapping-error-rat-not-allowed;}
+                    enum "roaming-not-allowed-odb-vplmn" {tailf:code-name mme-emm-cause-mapping-error-roaming-not-allowed-odb-vplmn;}
+                    enum "roaming-not-allowed-odb-hplmn" {tailf:code-name mme-emm-cause-mapping-error-roaming-not-allowed-odb-hplmn;}
+                    enum "roaming-not-allowed-odb-all-apn" {tailf:code-name mme-emm-cause-mapping-error-roaming-not-allowed-odb-all-apn;}
+                    enum "roaming-not-allowed" {tailf:code-name mme-emm-cause-mapping-error-roaming-not-allowed;}
+                    enum "equipment-unknown" {tailf:code-name mme-emm-cause-mapping-error-equipment-unknown;}
+                    enum "authentication-data-unavailable" {tailf:code-name mme-emm-cause-mapping-error-authentication-data-unavailable;}
+                    enum "access-restricted" {tailf:code-name mme-emm-cause-mapping-error-access-restricted;}
+                    enum "operator-determined-barring" {tailf:code-name mme-emm-cause-mapping-error-operator-determined-barring;}
+                    enum "sm-layer-failure" {tailf:code-name mme-emm-cause-mapping-error-sm-layer-failure;}
+                    enum "unknown-hss" {tailf:code-name mme-emm-cause-mapping-error-unknown-hss;}
+                    enum "dns-mapping-failure" {tailf:code-name mme-emm-cause-mapping-error-dns-mapping-failure;}
+                    enum "ta-restricted" {tailf:code-name mme-emm-cause-mapping-error-ta-restricted;}
+                    enum "authorization-rejected" {tailf:code-name mme-emm-cause-mapping-error-authorization-rejected;}
+                    enum "application-unsupported" {tailf:code-name mme-emm-cause-mapping-error-application-unsupported;}
+                    enum "command-unsupported" {tailf:code-name mme-emm-cause-mapping-error-command-unsupported;}
+                    enum "out-of-space" {tailf:code-name mme-emm-cause-mapping-error-out-of-space;}
+                    enum "too-busy" {tailf:code-name mme-emm-cause-mapping-error-too-busy;}
+                    enum "unable-to-comply" {tailf:code-name mme-emm-cause-mapping-error-unable-to-comply;}
+                    enum "unknown-serving-node" {tailf:code-name mme-emm-cause-mapping-error-unknown-serving-node;}
+                    enum "roaming-restricted-in-mme-due-to-unsupported-feature" {tailf:code-name mme-emm-cause-mapping-error-roaming-restricted-in-mme-due-to-unsupported-feature;}
+                }
+                mandatory true;
+            }
+            leaf cause-code {
+                tailf:info "MM cause code Default varies per error";
+                mandatory true;
+                type union {
+                    type string {
+                        tailf:info "MM cause code, ranged 1..255";
+                        pattern '([a-zA-Z]+(-[a-zA-Z]+)*-)?([0-9]{1,2}|1[0-9]{1,2}|2[0-4][0-9]|25[0-5])' {
+                            tailf:info "Valid values are: 1..255 or pre-defined strings";
+                        }
+                    }
+                    type enumeration {
+                        enum "congestion-22" {
+                        tailf:code-name "congestion-22";
+                    }
+                    enum "cs-domain-not-available-18" {
+                        tailf:code-name "cs-domain-not-available-18";
+                    }
+                    enum "cs-domain-temp-not-available-39" {
+                        tailf:code-name "cs-domain-temp-not-available-39";
+                    }
+                    enum "csfb-not-allowed-38" {
+                        tailf:code-name "csfb-not-allowed-38";
+                    }
+                    enum "eps-and-non-eps-service-not-allowed-8" {
+                        tailf:code-name "eps-and-non-eps-service-not-allowed-8";
+                    }
+                    enum "eps-service-not-allowed-7" {
+                        tailf:code-name "eps-service-not-allowed-7";
+                    }
+                    enum "eps-service-not-allowed-in-this-plmn-14" {
+                        tailf:code-name "eps-service-not-allowed-in-this-plmn-14";
+                    }
+                    enum "esm-failure-19" {
+                        tailf:code-name "esm-failure-19";
+                    }
+                    enum "illegal-me-6" {
+                        tailf:code-name "illegal-me-6";
+                    }
+                    enum "illegal-ue-3" {
+                        tailf:code-name "illegal-ue-3";
+                    }
+                    enum "implicitly-detach-10" {
+                        tailf:code-name "implicitly-detach-10";
+                    }
+                    enum "imsi-unknown-in-hss-2" {
+                        tailf:code-name "imsi-unknown-in-hss-2";
+                    }
+                    enum "mac-failure-20" {
+                        tailf:code-name "mac-failure-20";
+                    }
+                    enum "msc-temp-not-reachable-16" {
+                        tailf:code-name "msc-temp-not-reachable-16";
+                    }
+                    enum "network-failure-17" {
+                        tailf:code-name "network-failure-17";
+                    }
+                    enum "no-eps-bearer-context-activated-40" {
+                        tailf:code-name "no-eps-bearer-context-activated-40";
+                    }
+                    enum "no-suitable-cells-in-ta-15" {
+                        tailf:code-name "no-suitable-cells-in-ta-15";
+                    }
+                    enum "not-authorized-for-this-csg-25" {
+                        tailf:code-name "not-authorized-for-this-csg-25";
+                    }
+                    enum "plmn-not-allowed-11" {
+                        tailf:code-name "plmn-not-allowed-11";
+                    }
+                    enum "roaming-not-allowed-in-this-ta-13" {
+                        tailf:code-name "roaming-not-allowed-in-this-ta-13";
+                    }
+                    enum "security-mode-rejected-24" {
+                        tailf:code-name "security-mode-rejected-24";
+                    }
+                    enum "sync-failure-21" {
+                        tailf:code-name "sync-failure-21";
+                    }
+                    enum "tracking-area-not-allowed-12" {
+                        tailf:code-name "tracking-area-not-allowed-12";
+                    }
+                    enum "ue-id-cannot-be-derived-9" {
+                        tailf:code-name "ue-id-cannot-be-derived-9";
+                    }
+                    enum "ue-security-cap-mismatch-23" {
+                        tailf:code-name "ue-security-cap-mismatch-23";
+                    }
+                }
+            }
+        }
+    } /* mme-emm-cause-mapping */
+    list mme-emergency-number-list {
+        tailf:alt-name "emergency-number-list";
+        tailf:validate emergencyValidate {
+            tailf:call-once "true";
+        }
+        key "emergency-number";
+        max-elements 10;
+        tailf:info "Emergency numbers";
+        leaf emergency-number {
+            type string {
+                pattern '[0-9]{1,10}' {
+                    tailf:info "Valid values are: digits of length 1..10";
+                }
+            }
+            tailf:info "Emergency numbers";
+            mandatory true;
+        }
+        leaf emergency-category {
+            tailf:info "Emergency number categories, valid values are the comma separated strings: police, ambulance, fire, marine-guard, mountain-rescue, in any combination";
+            type string {
+                length "1..127";
+            }
+            mandatory true;
+        }
+    } /* mme-emergency-number-list */
+    container mme-nas-sm {
+        tailf:alt-name "esm";
+        presence "";
+        tailf:info "NAS esm interface.";
+        leaf activate-bearer-t3485 {
+            tailf:info "Activate bearer timer. Default 5";
+            type uint8 {
+                range "1..30";
+            }
+            default 5;
+        }
+        leaf activate-bearer-retry-n3485 {
+            tailf:info "Number of activate bearer retries. Default 2";
+            type uint8 {
+                range "0..5";
+            }
+            default 2;
+        }
+        leaf modify-bearer-t3486 {
+            tailf:info "Modify bearer timer. Default 5";
+            type uint8 {
+                range "1..30";
+            }
+            default 5;
+        }
+        leaf modify-bearer-retry-n3486 {
+            tailf:info "Number of modify bearer retries. Default 2";
+            type uint8 {
+                range "0..5";
+            }
+            default 2;
+        }
+        leaf esm-info-t3489 {
+            tailf:info "ESM information timer. Default 4";
+            type uint8 {
+                range "1..15";
+            }
+            default 4;
+        }
+        leaf esm-info-retry-n3489 {
+            tailf:info "Number of ESM information retries. Default 2";
+            type uint8 {
+                range "0..5";
+            }
+            default 2;
+        }
+        leaf deactivate-bearer-t3495 {
+            tailf:info "Deactivate bearer timer. Default 5";
+            type uint8 {
+                range "1..15";
+            }
+            default 5;
+        }
+        leaf deactivate-bearer-retry-n3495 {
+            tailf:info "Number of deactivate bearer retries. Default 2";
+            type uint8 {
+                range "0..5";
+            }
+            default 2;
+        }
+        leaf max-bearers-per-ue {
+            must "((count(../../../../feature/mme-feature-control[name = 'ims-emergency' and status-field = 'on']) = 0) or " +
+            " (current() >= 2))" {
+                error-message "The 'mme-sgsn feature control ims-emergency' is 'on'," +
+                " 'mme-sgsn interface nas sm max-bearers-per-ue' must be '2'" +
+                " or higher to prevent MPS dedicated bearer creations from being rejected";
+            }
+            tailf:info "Number of bearers per UE. Default 7";
+            type uint8 {
+                range "1..7";
+            }
+            default 7;
+        }
+        leaf max-pdn-conn-per-ue {
+            must "((count(../../../../feature/mme-feature-control[name = 'ims-emergency' and status-field = 'on']) = 0) or " +
+            " (current() >= 2))" {
+                error-message "The 'mme-sgsn feature control ims-emergency' is 'on'," +
+                " 'mme-sgsn interface nas sm max-pdn-conn-per-ue' must be '2'" +
+                " or higher to prevent MPS PDN Connectivity requests from being rejected";
+            }
+            tailf:info "Number of PDN connections per UE. Default 8";
+            type uint8 {
+                range "1..8";
+            }
+            default 8;
+        }
+        leaf deactivate-bearer-page-fail {
+            tailf:info "Deactivate GBR bearer upon UE page failure. Default disable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-nas-sm-deactivate-bearer-page-fail-enable;}
+                enum "disable" {tailf:code-name mme-nas-sm-deactivate-bearer-page-fail-disable;}
+            }
+            default "disable";
+        }
+        leaf pgw-ip-type {
+            tailf:info "IP type of P-GW. Default ipv4ipv6";
+            type enumeration {
+                enum "ipv4" {tailf:code-name mme-nas-sm-pgw-ip-type-ipv4;}
+                enum "ipv4ipv6" {tailf:code-name mme-nas-sm-pgw-ip-type-ipv4ipv6;}
+            }
+            default "ipv4ipv6";
+        }
+        leaf deactivate-bearer-enodeb-fail {
+            tailf:info "Deactivate GBR bearer upon eNodeB failure or reset. Default disable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-nas-sm-deactivate-bearer-enodeb-fail-enable;}
+                enum "disable" {tailf:code-name mme-nas-sm-deactivate-bearer-enodeb-fail-disable;}
+            }
+            default "disable";
+        }
+        leaf pcscf-restore-mod-fail-action {
+            tailf:info "P-CSCF Restoration for non-supported UE. Default ignore";
+            type enumeration {
+                enum "deactivate" {tailf:code-name mme-nas-sm-pcscf-restore-mod-fail-action-deactivate;}
+                enum "ignore" {tailf:code-name mme-nas-sm-pcscf-restore-mod-fail-action-ignore;}
+            }
+            default "ignore";
+        }
+    } /* mme-nas-sm */
+} /* nas */
+} /* interface */
+
+augment "/mme-sgsn/subscriber" {
+    container preferred-apn-list {
+        tailf:info "A user-ordered list of APN-NI";
+        config true;
+        presence "";
+
+        list apn {
+            ordered-by user;
+            max-elements 5;
+            key "apn-ni";
+
+            leaf apn-ni {
+                type string {
+                    length "1..63";
+                    pattern '(([a-zA-Z0-9])+((-|.)[A-Za-z0-9]+)*)' {
+                        tailf:info "Valid values are: APN network identifiers containing alphabetical characters, digits, dot and hyphen wherein continuous commas, hyphens and dots are not allowed.";
+                    }
+                }
+            }
+        }
+    }
+}
+
+augment "/mme-sgsn/subscriber" {
+    container direct-tunnel-apn-screening {
+        tailf:alt-name "direct-tunnel-apn-screening";
+        tailf:validate directTunnelValidate;
+        presence "";
+        tailf:info "APN screening list";
+        leaf group {
+            tailf:info "Group name. Default default";
+            type enumeration {
+                enum "default" {tailf:code-name direct-tunnel-apn-screening-group-default;}
+            }
+            default "default";
+        }
+        leaf apn-list {
+            type string {
+                pattern '(([a-zA-Z0-9])+((-|.|,)[A-Za-z0-9]+)*)' {
+                    tailf:info "Valid values are: comma separated APN names containing alphabetical characters, digits, dot and hyphen wherein continuous commas, hyphens and dots are not allowed.";
+                }
+            }
+            tailf:info "Comma-separated list of APN names.";
+            mandatory true;
+        }
+    } /* direct-tunnel-apn-screening */
+    list mme-equivalent-plmn {
+        tailf:alt-name "equivalent-plmn";
+        tailf:validate equivalentPlmnValidate {
+            tailf:call-once "true";
+        }
+        key "name";
+        max-elements 16;
+        tailf:info "Equivalent PLMN.";
+        leaf name {
+            tailf:info "Equivalent PLMN list name.";
+            type string {
+                length "1..32";
+            }
+            mandatory true;
+        }
+        leaf plmn-list {
+            type string {
+                pattern '[0-9,]*' {
+                    tailf:info "Valid values are: comma separated digits";
+                }
+            }
+            tailf:info "A list of PLMNs considered equivalent.";
+        }
+    } /* mme-equivalent-plmn */
+} /* subscriber */
+augment "/mme-sgsn/engineering" {
+    container mme-sc-engineering {
+        presence "";
+        tailf:alt-name "sc-engineering";
+        tailf:info "Subscriber engineering";
+        leaf pdn-average {
+            must "((current() + ../dedicated-bearer-average) <= 800)" {
+                error-message "The sum of 'pdn-average' and 'dedicated-bearer-average' cannot exceed 800";
+            }
+            tailf:info "Average number of PDN connections (for LTE) or number of primary PDP contexts (for GPRS/UMTS) per 100 subscribers. Default 105";
+            type uint16 {
+                range "100..800";
+            }
+            default 105;
+        }
+        leaf dedicated-bearer-average {
+            tailf:info "Average number of dedicated bearers (for LTE) or number of secondary PDP contexts (for GPRS/UMTS) per 100 subscribers. Default 200";
+            type uint16 {
+                range "0..700";
+            }
+            default 200;
+        }
+        leaf apn-average {
+            tailf:info "Average number of APNs or PDPs per 100 subscribers. Default 200";
+            type uint16 {
+                range "100..2000";
+            }
+            default 200;
+        }
+        leaf csg-average {
+            tailf:info "Average number of CSG subscriber data records per 100 subscribers. Default 200";
+            type uint16 {
+                range "100..1000";
+            }
+            default 200;
+        }
+    } /* mme-sc-engineering */
+} /* engineering */
+
+augment "/mme-sgsn/status" {
+    container mme-health-profile {
+        tailf:alt-name "profile";
+        presence "";
+        tailf:info "Health profile.";
+        leaf update-period {
+            tailf:info "Update period for health alarms. Default 3";
+            type enumeration {
+                enum "1" {tailf:code-name mme-health-profile-update-period-1;}
+                enum "3" {tailf:code-name mme-health-profile-update-period-3;}
+                enum "5" {tailf:code-name mme-health-profile-update-period-5;}
+                enum "15" {tailf:code-name mme-health-profile-update-period-15;}
+            }
+            default 3;
+        }
+        leaf window {
+            tailf:info "Window for health alarms. Default 15";
+            type enumeration {
+                enum "15" {tailf:code-name mme-health-profile-window-15;}
+                enum "30" {tailf:code-name mme-health-profile-window-30;}
+            }
+            default 15;
+        }
+        leaf min-data-threshold {
+            tailf:info "Minimun attempts in window. Default 100";
+            type uint16 {
+                range "0..1000";
+            }
+            default 100;
+        }
+        leaf attach-major-threshold {
+            must "(current() <= ../attach-minor-threshold)" {
+                error-message "The 'attach-minor-threshold' should be greater than 'attach-major-threshold'";
+            }
+            tailf:info "Threshold for attach major alarm. Default 90";
+            type uint8 {
+                range "0..100";
+            }
+            default 90;
+        }
+        leaf attach-minor-threshold {
+            must "(current() <= ../attach-clear-threshold)" {
+                error-message "The 'attach-clear-threshold' should be greater than 'attach-minor-threshold'";
+            }
+            tailf:info "Threshold for attach minor alarm. Default 95";
+            type uint8 {
+                range "0..100";
+            }
+            default 95;
+        }
+        leaf attach-clear-threshold {
+            tailf:info "Threshold for clearing attach alarm. Default 98";
+            type uint8 {
+                range "0..100";
+            }
+            default 98;
+        }
+        leaf act-major-threshold {
+            must "(current() <= ../act-minor-threshold)" {
+                error-message "The 'act-minor-threshold' should be greater than 'act-major-threshold'";
+            }
+            tailf:info "Threshold for session and bearer major alarms. Default 90";
+            type uint8 {
+                range "0..100";
+            }
+            default 90;
+        }
+        leaf act-minor-threshold {
+            must "(current() <= ../act-clear-threshold)" {
+                error-message "The 'act-clear-threshold' should be greater than 'act-minor-threshold'";
+            }
+            tailf:info "Threshold for session and bearer minor alarms. Default 95";
+            type uint8 {
+                range "0..100";
+            }
+            default 95;
+        }
+        leaf act-clear-threshold {
+            tailf:info "Threshold for clearing session and bearer alarms. Default 98";
+            type uint8 {
+                range "0..100";
+            }
+            default 98;
+        }
+    } /* mme-health-profile */
+} /* mme-sgsn/status */
+augment "/mme-sgsn/subscriber" {
+    container mme-nodal-qos {
+        tailf:alt-name "nodal-qos";
+        presence "";
+
+        tailf:info "Nodal Qos.";
+        leaf mps-arp-limit {
+            tailf:info "The MPS Allocation and Retention Priority (ARP) limit. Default 1";
+            type uint8 {
+                range "1..8";
+            }
+            default 1;
+        }
+        leaf single-qci1-bearer {
+            tailf:info "Restricts number of QCI=1 bearers per UE. Default disable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-nodal-qos-single-qci1-bearer-enable;}
+                enum "disable" {tailf:code-name mme-nodal-qos-single-qci1-bearer-disable;}
+            }
+            default "disable";
+        }
+    } /* mme-nodal-qos */
+    list mme-forbidden-apn-list {
+        tailf:alt-name "forbidden-apn-list";
+        tailf:validate forbiddenApnListValidate {
+            tailf:call-once "true";
+        }
+        key "apn";
+        max-elements 4096;
+        tailf:info "Forbidden APN list for UE.";
+        leaf apn {
+            type string {
+                pattern '[A-Za-z0-9]([.-]|[A-Za-z0-9])*' {
+                    tailf:info "Valid values are: 'none' or up to 40 comma-separated APN-NI labels comprised of alphabetical characters, digits, and hyphen";
+                }
+            }
+            tailf:info "APN NI identifier.";
+            mandatory true;
+        }
+        leaf forbidden-list {
+            type string {
+                pattern '[0-9a-zA-Z,]*' {
+                    tailf:info "Valid values are: comma separated case-sensitive alphabetical characters and digits";
+                }
+            }
+            tailf:info "Names of forbidden lists to which this APN belongs.";
+            mandatory true;
+        }
+    } /* mme-forbidden-apn-list */
+    list mme-subscriber-plmn {
+        tailf:alt-name "subscriber-plmn";
+        tailf:validate subscriberPlmnValidate {
+            tailf:call-once "true";
+        }
+        key "plmn";
+        max-elements 1000;
+        tailf:info "Subscriber PLMN.";
+        leaf gtp-profile {
+            /* Foreign Key */
+            must "(current() = 'none' or count(/mme-sgsn/interface/gtp/mme-gtp-profile[name = current()]) != 0)" {
+                error-message "There is no 'mme-sgsn interface gtp profile' object with this 'gtp-profile'";
+            }
+            tailf:info "GTP profile name associated with message timing on tunnel interface to peer nodes located in the associated PLMN. Default none";
+            type string {
+                length "1..32";
+            }
+            default "none";
+        }
+        leaf plmn {
+            type string {
+                pattern '(([0-9]{5,6})|(default))' {
+                    tailf:info "Valid values are: 'default' or numbers with 5..6 digits";
+                }
+            }
+            must "((string-length(current()) != 5) or (count(../../mme-long-mnc[mcc = substring(current(),1,3)]) = 0))" {
+                error-message "Two digit MNC is not allowed. This PLMN's MCC is configured in the 'mme-sgsn subscriber long-mnc' table to have three digit MNCs";
+            }
+            must "((string-length(current()) != 6) or (count(../../mme-long-mnc[mcc = substring(current(),1,3)]) != 0))" {
+                error-message "This PLMN's MNC is of three digits and there is no entry for the MCC in the 'mme-sgsn subscriber long-mnc' table";
+            }
+            tailf:info "A unique PLMN identifier.";
+            mandatory true;
+        }
+        leaf protocol-type {
+            tailf:info "Protocol type for P-GW. Default gtp";
+            type enumeration {
+            enum "gtp" {tailf:code-name mme-subscriber-plmn-protocol-type-gtp;}
+            enum "pmip" {tailf:code-name mme-subscriber-plmn-protocol-type-pmip;}
+        }
+        default "gtp";
+    }
+    leaf suppress-hss-notify {
+        tailf:info "Suppress HSS notifications. Default disable";
+        type enumeration {
+            enum "enable" {tailf:code-name mme-subscriber-plmn-suppress-hss-notify-enable;}
+            enum "disable" {tailf:code-name mme-subscriber-plmn-suppress-hss-notify-disable;}
+        }
+        default "disable";
+    }
+    leaf ims-support {
+        tailf:info "Per PLMN IMS voice over PS support. Default disable";
+        type enumeration {
+            enum "enable" {tailf:code-name mme-subscriber-plmn-ims-support-enable;}
+            enum "disable" {tailf:code-name mme-subscriber-plmn-ims-support-disable;}
+        }
+        default "disable";
+    }
+    leaf native-mme-group-ids {
+        type string {
+            pattern '(([3-6][0-9]{4})(,[3-6][0-9]{4})*)|none' {
+                tailf:info "Valid values are: 'none' or comma separated list of a maximum of 128 mme group-ids for this PLMN";
+            }
+        }
+        tailf:info "Native MME Group ID. Default none";
+        default "none";
+    }
+    leaf lgw-protocol-type {
+        tailf:info "Protocol type for L-GW. Default pmip";
+        type enumeration {
+            enum "gtp" {tailf:code-name mme-subscriber-plmn-lgw-protocol-type-gtp;}
+            enum "pmip" {tailf:code-name mme-subscriber-plmn-lgw-protocol-type-pmip;}
+        }
+        default "pmip";
+    }
+    leaf mt-lr {
+        tailf:info "Support of MT-LR. Default disable";
+        type enumeration {
+            enum "enable" {tailf:code-name mme-subscriber-plmn-mt-lr-enable;}
+            enum "disable" {tailf:code-name mme-subscriber-plmn-mt-lr-disable;}
+        }
+        default "disable";
+    }
+    leaf mo-lr {
+        tailf:info "Support of MO-LR. Default disable";
+        type enumeration {
+            enum "disable" {tailf:code-name mme-subscriber-plmn-mo-lr-disable;}
+        }
+        default "disable";
+    }
+    leaf nri-bit-length {
+        tailf:info "NRI bit length for use with DNS query. Default 0";
+        type uint8 {
+            range "0..8";
+        }
+        default 0;
+    }
+    leaf dns-preference {
+        tailf:info "DNS procedure preference. Default unknown";
+        type enumeration {
+            enum "unknown" {tailf:code-name mme-subscriber-plmn-dns-preference-unknown;}
+            enum "s-naptr" {tailf:code-name mme-subscriber-plmn-dns-preference-s-naptr;}
+            enum "address-only" {tailf:code-name mme-subscriber-plmn-dns-preference-address-only;}
+        }
+        default "unknown";
+    }
+    leaf ims-local-breakout {
+        tailf:info "Indicates if IMS local breakout is allowed. Default allow";
+        type enumeration {
+            enum allow {tailf:code-name subscriber-plmn-ims-local-breakout-allow;}
+            enum disallow {tailf:code-name subscriber-plmn-ims-local-breakout-disallow;}
+        }
+        default "allow";
+    }
+    leaf local-breakout {
+        tailf:info "Indicates if local breakout is allowed. Default allow";
+        type enumeration {
+            enum allow {tailf:code-name subscriber-plmn-local-breakout-allow;}
+            enum disallow {tailf:code-name subscriber-plmn-local-breakout-disallow;}
+        }
+        default "allow";
+    }
+        leaf-list local-breakout-apn-list {
+           tailf:info "APNs allowed for local breakout while using wildcard subscription.";
+           type string {
+               pattern '[a-zA-Z0-9*]([.-]|[A-Za-z0-9*])*';
+               length "1..63";
+           }
+           max-elements 16;
+        }
+} /* mme-subscriber-plmn */
+list mme-subscriber-class {
+    tailf:alt-name "subscriber-class";
+    tailf:validate subscriberClassValidate {
+        tailf:call-once "true";
+    }
+    key "name";
+    max-elements 256;
+    tailf:info "Subscriber class.";
+    leaf name {
+        tailf:info "Name of this set of treatments.";
+        type string {
+            length "1..32";
+        }
+        mandatory true;
+    }
+    leaf forbidden-ta-list {
+        default "";
+        tailf:info "Name of the list of forbidden TAs.";
+        type string {
+            length "0..32";
+        }
+    }
+    leaf forbidden-apn-list {
+        default "";
+        tailf:info "Name of the list of forbidden APNs.";
+        type string {
+            length "0..32";
+        }
+    }
+    leaf eq-plmn-list {
+        tailf:info "Name of the equivalent PLMN list.";
+        type leafref {
+            path "../../mme-equivalent-plmn/name";
+        }
+    }
+    leaf subscriber-type {
+        tailf:info "Indicates type of the subscriber. Default homer";
+        type enumeration {
+            enum roamer  {tailf:code-name subscriber-class-type-roamer;}
+            enum homer  {tailf:code-name subscriber-classs-type-homer;}
+            enum snr-roamer {tailf:code-name subscriber-class-type-snr-roamer;}
+        }
+        default homer;
+        must "(current() != 'homer' or ../local-qos-pdn-access-type = 'hplmn')" {
+            error-message "The 'local-qos-pdn-access-type' cannot be 'vplmn' " +
+            "or 'both' when 'subscriber-type' is 'homer'";
+        }
+        must "((current() != 'snr-roamer') or " +
+        " (count(../../../feature/mme-feature-control[name = 'seamless-national-roaming' and status-field = 'on']) != 0))" {
+            error-message "If 'subscriber-type' is 'snr-roamer' then 'mme-sgsn feature " +
+            "control seamless-national-roaming' must be 'on'";
+        }
+    }
+    leaf rfsp-index {
+        type string {
+            pattern 'use-subscribed-value|none|([1-9]|[1-9][0-9]|[1][0-9][0-9]|[2][0-4][0-9]|[2][5][0-6])' {
+                tailf:info "Valid values are: use-subscribed-value, none, 1..256";
+            }
+        }
+        tailf:info "RAT frequency selection priority index Default use-subscribed-value";
+        default "use-subscribed-value";
+    }
+    leaf local-qos-profile {
+        must "(count(../../mme-local-qos-profile[name = current()]) != 0)" {
+            error-message "There is no 'mme-sgsn subscriber local-qos-profile' object with this 'local-qos-profile'";
+        }
+        tailf:info "Local Quality of service for SGSN subscriber.";
+        type string {
+            length "1..9";
+        }
+    }
+    leaf csfb {
+        tailf:info "Indicates if allowed to perform CSFB. Default true";
+        type boolean;
+        default true;
+    }
+    leaf snr-apn-operator-id {
+        type string {
+            pattern '([A-Za-z0-9]+)[.]([A-Za-z0-9]+)[.]([A-Za-z0-9]+)|none' {
+                tailf:info "Valid values are: 'none' or n.n.n where n can be case-sensitive alphabetical characters and/or digits";
+            }
+        }
+            tailf:info "APN-OI used for SNR subscribers to identify PGW/GGSN.";
+            default "none";
+    }
+    leaf snr-reject-cause-code {
+        tailf:info "Reject cause code to be sent to the UE.";
+        type union {
+            type string {
+                tailf:info "snr reject cause code, ranged 1..255";
+                pattern '([a-zA-Z]+(-[a-zA-Z]+)*-)?([0-9]{1,2}|1[0-9]{1,2}|2[0-4][0-9]|25[0-5])' {
+                    tailf:info "Valid values are: 1..255 or pre-defined strings";
+                }
+            }
+            type enumeration {
+                enum "undefined-gmm-cause-0" {tailf:code-name subscriber-class-snr-reject-cause-code-undefined-gmm-cause-0;}
+                enum "gprs-service-not-allowed-7" {tailf:code-name subscriber-class-snr-reject-cause-code-gprs-service-not-allowed-7;}
+                enum "gprs-and-non-gprs-service-not-allowed-8" {tailf:code-name subscriber-class-snr-reject-cause-code-gprs-and-non-gprs-service-not-allowed-8;}
+                enum "ms-id-not-derived-by-network-9" {tailf:code-name subscriber-class-snr-reject-cause-code-ms-id-not-derived-by-network-9;}
+                enum "plmn-not-allowed-11" {tailf:code-name subscriber-class-snr-reject-cause-code-plmn-not-allowed-11;}
+                enum "location-area-not-allowed-12" {tailf:code-name subscriber-class-snr-reject-cause-code-location-area-not-allowed-12;}
+                enum "roaming-not-allowed-in-la-13" {tailf:code-name subscriber-class-snr-emm-reject-cause-code-roaming-not-allowed-in-la-13;}
+                enum "gprs-not-allowed-in-this-plmn-14" {tailf:code-name subscriber-class-snr-reject-cause-code-gprs-not-allowed-in-this-plmn-14;}
+                enum "no-suitable-cells-in-la-15" {tailf:code-name subscriber-class-snr-reject-cause-code-no-suitable-cells-in-la-15;}
+                enum "network-failure-17" {tailf:code-name subscriber-class-snr-reject-cause-code-network-failure-17;}
+                
+            }
+        } 
+    }
+    leaf snr-emm-reject-cause-code {
+        tailf:info "Reject cause code to be sent to the UE. Default ignore";
+        type union {
+            type string {
+                tailf:info "snr emm reject cause code, ranged 1..255";
+                pattern '([a-zA-Z]+(-[a-zA-Z]+)*-)?([0-9]{1,2}|1[0-9]{1,2}|2[0-4][0-9]|25[0-5])' {
+                    tailf:info "Valid values are: 1..255 or pre-defined strings";        
+                }
+            }
+            type enumeration {
+                enum "undefined-emm-cause-0" {tailf:code-name subscriber-class-snr-emm-reject-cause-code-undefined-emm-cause-0;}
+                enum "eps-service-not-allowed-7" {tailf:code-name subscriber-class-snr-emm-reject-cause-code-eps-service-not-allowed-7;}
+                enum "eps-and-non-eps-service-not-allowed-8" {tailf:code-name subscriber-class-snr-emm-reject-cause-code-eps-and-non-eps-service-not-allowed-8;}
+                enum "ue-id-cannot-be-derived-from-network-9" {tailf:code-name subscriber-class-snr-emm-reject-cause-code-ue-id-cannot-be-derived-from-network-9;}
+                enum "plmn-not-allowed-11" {tailf:code-name subscriber-class-snr-emm-reject-cause-code-plmn-not-allowed-11;}
+                enum "tracking-area-not-allowed-12" {tailf:code-name subscriber-class-snr-emm-reject-cause-code-tracking-area-not-allowed-12;}
+                enum "roaming-not-allowed-in-this-ta-13" {tailf:code-name subscriber-class-snr-emm-reject-cause-code-roaming-not-allowed-in-this-ta-13;}
+                enum "eps-service-not-allowed-in-this-plmn-14" {tailf:code-name subscriber-class-snr-emm-reject-cause-code-eps-service-not-allowed-in-this-plmn-14;}
+                enum "no-suitable-cells-in-ta-15" {tailf:code-name subscriber-class-snr-emm-reject-cause-code-no-suitable-cells-in-ta-15;}
+                enum "network-failure-17" {tailf:code-name subscriber-class-snr-emm-reject-cause-code-network-failure-17;}
+                enum "esm-failure-19" {tailf:code-name subscriber-class-snr-emm-reject-cause-code-esm-failure-19;}
+            }
+        }
+    }
+    leaf voice-domain-profile {
+        tailf:info "The name of the voice domain profile.";
+        type leafref {
+            path "/mme-sgsn/subscriber/mme-voice-domain-profile/name";
+        }
+    }
+    leaf local-eps-qos-entry {
+        tailf:info "The name of the local EPS QoS entry.";
+        type leafref {
+            path "/mme-sgsn/subscriber/mme-local-eps-qos-entry/name";
+        }
+    }
+    leaf local-qos-pdn-access-type {
+        tailf:info "The type of pdn access. Default hplmn";
+        type enumeration {
+            enum hplmn {tailf:code-name local-qos-pdn-access-type-hplmn;}
+            enum vplmn {tailf:code-name local-qos-pdn-access-type-vplmn;}
+            enum both {tailf:code-name local-qos-pdn-access-type-both;}
+        }
+        default hplmn;
+        must "((current() != 'vplmn') or " +
+        " (../subscriber-type != 'homer'))" {
+            error-message "The 'local-qos-pdn-access-type' cannot be 'vplmn' or 'both'" +
+            " when 'subscriber-type' is 'homer'";
+        }
+        must "((current() != 'both') or " +
+        " (../subscriber-type != 'homer'))" {
+            error-message "The 'local-qos-pdn-access-type' cannot be 'vplmn' or 'both'" +
+            " when 'subscriber-type' is 'homer'";
+        }
+    }
+    leaf charging-char-for-gateway-sel {
+        tailf:info "Comma separated list of the APNs. Default disable";
+        type string {
+            length "1..1024";
+        }
+        default "disable";
+    }
+    leaf handover-restriction {
+        type string {
+            pattern '(utran|eutran|geran|cdma2000)([,](utran|geran|eutran|cdma2000)){0,2}|(all|none)' {
+                tailf:info "Valid values are: 'none, 'all', or up to 3 of the following RAT types 'geran', 'utran', 'cdma2000', and 'eutran', separated by commas. Default: 'none'.";
+            }
+        }
+        tailf:info "Rat types for which Inter RAT HO is not allowed. Default none";
+        default "none";
+    }
+    leaf apn-selection-profile {
+        tailf:info "A profile that allows operator to configure a secondary source for APN-NI to get the PGW Default default";
+        type leafref {
+            path "/mme-sgsn/subscriber/mme-apn-selection-profile/name";
+        }
+        default "default";
+    }
+    leaf ims-vops-agreement {
+        tailf:info "Indicates if support for IMS voice over PS is available for the service-area. Default disable";
+        type enumeration {
+            enum "enable" {tailf:code-name subscriber-class-ims-vops-agreement-enable;}
+            enum "disable" {tailf:code-name subscriber-class-ims-vops-agreement-disable;}
+        }
+        default "disable";
+    }
+    leaf gateway-interface-sel {
+        tailf:info "Preference of gateway interface to be selected. Default s4-preferred";
+        type enumeration {
+            enum "gn" {tailf:code-name gateway-interface-sel-gn;}
+            enum "s4-preferred" {tailf:code-name gateway-interface-sel-s4-preferred;}
+            enum "ue-epc-capability" {tailf:code-name gateway-interface-sel-ue-epc-capability;}
+        }
+        default "s4-preferred";
+    }
+} /* mme-subscriber-class */
+} /* subscriber */
+augment "/mme-sgsn/engineering" {
+    container mme-congestion-overload {
+        tailf:alt-name "congestion-overload";
+        presence "";
+        tailf:info "MME processing congestion overload control configuration.";
+        leaf minor-onset {
+            must "(current() <= ../major-abate)" {
+                error-message "The values for the onset-related fields must be greater than or equal " +
+                "to abatement-related fields in the order 'critical-onset' >= " +
+                "'critical-abate' >= 'major-onset' >= 'major-abate' >= " +
+                "'minor-onset' >= 'minor-abate'";
+            }
+            must "(../minor-abate <= current())" {
+                error-message "The values for the onset-related fields must be greater than or equal " +
+                "to abatement-related fields in the order 'critical-onset' >= " +
+                "'critical-abate' >= 'major-onset' >= 'major-abate' >= " +
+                "'minor-onset' >= 'minor-abate'";
+            }
+            tailf:info "Congestion overload minor alarm set. Default 70";
+            type uint8 {
+                range "0..100";
+            }
+            default 70;
+        }
+        leaf minor-abate {
+            tailf:info "Congestion overload minor alarm clear. Default 65";
+            type uint8 {
+                range "0..100";
+            }
+            default 65;
+        }
+        leaf minor-action {
+            tailf:info "Congestion overload minor alarm action. Default ignore-attach";
+            type enumeration {
+                enum "none" {tailf:code-name mme-congestion-overload-minor-action-none;}
+                enum "ignore-attach" {tailf:code-name mme-congestion-overload-minor-action-ignore-attach;}
+                enum "ignore-itau-irau" {tailf:code-name mme-congestion-overload-minor-action-ignore-itau-irau;}
+                enum "reject-roamer-s1-inc-ho" {tailf:code-name mme-congestion-overload-minor-action-reject-roamer-s1-inc-ho;}
+                enum "reject-all-s1-inc-ho" {tailf:code-name mme-congestion-overload-minor-action-reject-all-s1-inc-ho;}
+            }
+            default "ignore-attach";
+        }
+        leaf minor-ovld {
+            tailf:info "Enable or disable actions on minor overload. Default enable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-congestion-overload-minor-ovld-enable;}
+                enum "disable" {tailf:code-name mme-congestion-overload-minor-ovld-disable;}
+            }
+            default "enable";
+        }
+        leaf major-onset {
+            must "(current() <= ../critical-abate)" {
+                error-message "The values for the onset-related fields must be greater than or equal " +
+                "to abatement-related fields in the order 'critical-onset' >= " +
+                "'critical-abate' >= 'major-onset' >= 'major-abate' >= " +
+                "'minor-onset' >= 'minor-abate'";
+            }
+            must "(../major-abate <= current())" {
+                error-message "The values for the onset-related fields must be greater than or equal " +
+                "to abatement-related fields in the order 'critical-onset' >= " +
+                "'critical-abate' >= 'major-onset' >= 'major-abate' >= " +
+                "'minor-onset' >= 'minor-abate'";
+            }
+            tailf:info "Congestion overload major alarm set. Default 80";
+            type uint8 {
+                range "0..100";
+            }
+            default 80;
+        }
+        leaf major-abate {
+            tailf:info "Congestion overload major alarm clear. Default 75";
+            type uint8 {
+                range "0..100";
+            }
+            default 75;
+        }
+        leaf major-action {
+            tailf:info "Congestion overload major alarm action. Default ignore-itau-irau";
+            type enumeration {
+                enum "none" {tailf:code-name mme-congestion-overload-major-action-none;}
+                enum "ignore-attach" {tailf:code-name mme-congestion-overload-major-action-ignore-attach;}
+                enum "ignore-itau-irau" {tailf:code-name mme-congestion-overload-major-action-ignore-itau-irau;}
+                enum "reject-roamer-s1-inc-ho" {tailf:code-name mme-congestion-overload-major-action-reject-roamer-s1-inc-ho;}
+                enum "reject-all-s1-inc-ho" {tailf:code-name mme-congestion-overload-major-action-reject-all-s1-inc-ho;}
+            }
+            default "ignore-itau-irau";
+        }
+        leaf major-ovld {
+            tailf:info "Enable or disable actions on major overload. Default enable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-congestion-overload-major-ovld-enable;}
+                enum "disable" {tailf:code-name mme-congestion-overload-major-ovld-disable;}
+            }
+            default "enable";
+        }
+        leaf critical-onset {
+            must "(../critical-abate <= current())" {
+                error-message "The values for the onset-related fields must be greater than or equal " +
+                "to abatement-related fields in the order 'critical-onset' >= " +
+                "'critical-abate' >= 'major-onset' >= 'major-abate' >= " +
+                "'minor-onset' >= 'minor-abate'";
+            }
+            tailf:info "Congestion overload critical alarm set. Default 90";
+            type uint8 {
+                range "0..100";
+            }
+            default 90;
+        }
+        leaf critical-abate {
+            tailf:info "Congestion overload critical alarm clear. Default 85";
+            type uint8 {
+                range "0..100";
+            }
+            default 85;
+        }
+        leaf critical-action {
+            tailf:info "Congestion overload critical alarm action. Default reject-roamer-s1-inc-ho";
+            type enumeration {
+                enum "none" {tailf:code-name mme-congestion-overload-critical-action-none;}
+                enum "ignore-attach" {tailf:code-name mme-congestion-overload-critical-action-ignore-attach;}
+                enum "ignore-itau-irau" {tailf:code-name mme-congestion-overload-critical-action-ignore-itau-irau;}
+                enum "reject-roamer-s1-inc-ho" {tailf:code-name mme-congestion-overload-critical-action-reject-roamer-s1-inc-ho;}
+                enum "reject-all-s1-inc-ho" {tailf:code-name mme-congestion-overload-critical-action-reject-all-s1-inc-ho;}
+            }
+            default "reject-roamer-s1-inc-ho";
+        }
+        leaf critical-ovld {
+            tailf:info "Enable or disable actions on critical overload. Default enable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-congestion-overload-critical-ovld-enable;}
+                enum "disable" {tailf:code-name mme-congestion-overload-critical-ovld-disable;}
+            }
+            default "enable";
+        }
+    } /* mme-congestion-overload */
+} /* engineering */
+augment "/mme-sgsn/subscriber" {
+    list mme-imsi-range {
+        tailf:alt-name "imsi-range";
+        tailf:validate imsiValidate {
+            tailf:call-once "true";
+        }
+        key "range service-area-field";
+        max-elements 1024;
+        tailf:info "IMSI range";
+        leaf range {
+            tailf:info "IMSI range; Valid values: IMSI ranges of form 111-999, wherein each range value has minimum of three digits and maximum of 15 digits; Also there can be a standalone IMSI of 3 to 15 digits long.";
+
+            type string {
+                length 3..31;
+                pattern '(([1-9][0-9]{2,14})|([1-9][0-9]{2,14}[\-][1-9][0-9]{2,14}))' {
+                }
+            }
+            mandatory true;
+        }
+        leaf service-area-field {
+            tailf:alt-name "service-area";
+
+            tailf:info "The service area for this IMSI range; Valid values: 'global' or plmn:list of PLMNs or tai:list of TAIs or lai:list of LAIs or rai:list of RAIs; Valid format for TAI entry: plmn-id.tac, for LAI entry: plmn-id.lac, for RAI entry: plmn-id.lac.rac";
+            type string {
+                pattern "((plmn:[A-Fa-f0-9]+(,[A-Fa-f0-9]+)*)|((tai|lai):([A-Fa-f0-9]+[.][A-Fa-f0-9]+){1}(,[A-Fa-f0-9]+[.][A-Fa-f0-9]+)*)|(rai:(([A-Fa-f0-9]+[.]){2}[A-Fa-f0-9]+)+(,([A-Fa-f0-9]+[.]){2}[A-Fa-f0-9]+)*)|global)" {
+                }
+            }
+        }
+        leaf subscriber-class {
+            tailf:info "Name of a treatment class. Default default";
+            type leafref {
+                path "/mme-sgsn/subscriber/mme-subscriber-class/name";
+            }
+            default "default";
+        }
+    } /* mme-imsi-range */
+} /* subscriber */
+augment "/mme-sgsn/engineering" {
+    container mme-subscriber-overload {
+        tailf:alt-name "subscriber-overload";
+        presence "";
+        tailf:info "MME subscriber capacity overload control configuration.";
+        leaf minor-onset {
+            must "(current() <= ../major-abate)" {
+                error-message "The values for the onset-related fields must be greater than or equal " +
+                "to abatement-related fields in the order 'critical-onset' >= " +
+                "'critical-abate' >= 'major-onset' >= 'major-abate' >= " +
+                "'minor-onset' >= 'minor-abate'";
+            }
+            must "(../minor-abate <= current())" {
+                error-message "The values for the onset-related fields must be greater than or equal " +
+                "to abatement-related fields in the order 'critical-onset' >= " +
+                "'critical-abate' >= 'major-onset' >= 'major-abate' >= " +
+                "'minor-onset' >= 'minor-abate'";
+            }
+            tailf:info "Subscriber overload minor alarm set. Default 70";
+            type uint8 {
+                range "0..100";
+            }
+            default 70;
+        }
+        leaf minor-abate {
+            tailf:info "Subscriber overload minor alarm clear. Default 65";
+            type uint8 {
+                range "0..100";
+            }
+            default 65;
+        }
+        leaf minor-action {
+            tailf:info "Subscriber overload minor alarm action. Default reject-roamer-itau-irau";
+            type enumeration {
+                enum "none" {tailf:code-name mme-subscriber-overload-minor-action-none;}
+                enum "reject-roamer-attach" {tailf:code-name mme-subscriber-overload-minor-action-reject-roamer-attach;}
+                enum "reject-roamer-itau-irau" {tailf:code-name mme-subscriber-overload-minor-action-reject-roamer-itau-irau;}
+                enum "reject-all-attach" {tailf:code-name mme-subscriber-overload-minor-action-reject-all-attach;}
+                enum "reject-all-itau-irau" {tailf:code-name mme-subscriber-overload-minor-action-reject-all-itau-irau;}
+                enum "reject-roamer-inc-ho" {tailf:code-name mme-subscriber-overload-minor-action-reject-roamer-inc-ho;}
+                enum "reject-all-s1-iu-inc-ho" {tailf:code-name mme-subscriber-overload-minor-action-reject-all-s1-iu-inc-ho;}
+                enum "load-rebalancing-tau" {tailf:code-name mme-subscriber-overload-minor-action-load-rebalancing-tau;}
+                enum "detach-idle-roamer" {tailf:code-name mme-subscriber-overload-minor-action-detach-idle-roamer;}
+                enum "detach-idle-ue" {tailf:code-name mme-subscriber-overload-minor-action-detach-idle-ue;}
+                enum "detach-all-ue" {tailf:code-name mme-subscriber-overload-minor-action-detach-all-ue;}
+            }
+            default "reject-roamer-itau-irau";
+        }
+        leaf minor-ovld {
+            tailf:info "Enable or disable actions on minor overload. Default enable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-subscriber-overload-minor-ovld-enable;}
+                enum "disable" {tailf:code-name mme-subscriber-overload-minor-ovld-disable;}
+            }
+            default "enable";
+        }
+        leaf major-onset {
+            must "(current() <= ../critical-abate)" {
+                error-message "The values for the onset-related fields must be greater than or equal " +
+                "to abatement-related fields in the order 'critical-onset' >= " +
+                "'critical-abate' >= 'major-onset' >= 'major-abate' >= " +
+                "'minor-onset' >= 'minor-abate'";
+            }
+            must "(../major-abate <= current())" {
+                error-message "The values for the onset-related fields must be greater than or equal " +
+                "to abatement-related fields in the order 'critical-onset' >= " +
+                "'critical-abate' >= 'major-onset' >= 'major-abate' >= " +
+                "'minor-onset' >= 'minor-abate'";
+            }
+            tailf:info "Subscriber overload major alarm set. Default 80";
+            type uint8 {
+                range "0..100";
+            }
+            default 80;
+        }
+        leaf major-abate {
+            tailf:info "Subscriber overload major alarm clear. Default 75";
+            type uint8 {
+                range "0..100";
+            }
+            default 75;
+        }
+        leaf major-action {
+            tailf:info "Subscriber overload major alarm action. Default reject-all-itau-irau";
+            type enumeration {
+                enum "none" {tailf:code-name mme-subscriber-overload-major-action-none;}
+                enum "reject-roamer-attach" {tailf:code-name mme-subscriber-overload-major-action-reject-roamer-attach;}
+                enum "reject-roamer-itau-irau" {tailf:code-name mme-subscriber-overload-major-action-reject-roamer-itau-irau;}
+                enum "reject-all-attach" {tailf:code-name mme-subscriber-overload-major-action-reject-all-attach;}
+                enum "reject-all-itau-irau" {tailf:code-name mme-subscriber-overload-major-action-reject-all-itau-irau;}
+                enum "reject-roamer-inc-ho" {tailf:code-name mme-subscriber-overload-major-action-reject-roamer-inc-ho;}
+                enum "reject-all-s1-iu-inc-ho" {tailf:code-name mme-subscriber-overload-major-action-reject-all-s1-iu-inc-ho;}
+                enum "load-rebalancing-tau" {tailf:code-name mme-subscriber-overload-major-action-load-rebalancing-tau;}
+                enum "detach-idle-roamer" {tailf:code-name mme-subscriber-overload-major-action-detach-idle-roamer;}
+                enum "detach-idle-ue" {tailf:code-name mme-subscriber-overload-major-action-detach-idle-ue;}
+                enum "detach-all-ue" {tailf:code-name mme-subscriber-overload-major-action-detach-all-ue;}
+            }
+            default "reject-all-itau-irau";
+        }
+        leaf major-ovld {
+            tailf:info "Enable or disable actions on major overload. Default enable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-subscriber-overload-major-ovld-enable;}
+                enum "disable" {tailf:code-name mme-subscriber-overload-major-ovld-disable;}
+            }
+            default "enable";
+        }
+        leaf critical-onset {
+            must "(../critical-abate <= current())" {
+                error-message "The values for the onset-related fields must be greater than or equal " +
+                "to abatement-related fields in the order 'critical-onset' >= " +
+                "'critical-abate' >= 'major-onset' >= 'major-abate' >= " +
+                "'minor-onset' >= 'minor-abate'";
+            }
+            tailf:info "Subscriber overload critical alarm set. Default 90";
+            type uint8 {
+                range "0..100";
+            }
+            default 90;
+        }
+        leaf critical-abate {
+            tailf:info "Subscriber overload critical alarm clear. Default 85";
+            type uint8 {
+                range "0..100";
+            }
+            default 85;
+        }
+        leaf critical-action {
+            tailf:info "Subscriber overload critical alarm action. Default reject-all-s1-iu-inc-ho";
+            type enumeration {
+                enum "none" {tailf:code-name mme-subscriber-overload-critical-action-none;}
+                enum "reject-roamer-attach" {tailf:code-name mme-subscriber-overload-critical-action-reject-roamer-attach;}
+                enum "reject-roamer-itau-irau" {tailf:code-name mme-subscriber-overload-critical-action-reject-roamer-itau-irau;}
+                enum "reject-all-attach" {tailf:code-name mme-subscriber-overload-critical-action-reject-all-attach;}
+                enum "reject-all-itau-irau" {tailf:code-name mme-subscriber-overload-critical-action-reject-all-itau-irau;}
+                enum "reject-roamer-inc-ho" {tailf:code-name mme-subscriber-overload-critical-action-reject-roamer-inc-ho;}
+                enum "reject-all-s1-iu-inc-ho" {tailf:code-name mme-subscriber-overload-critical-action-reject-all-s1-iu-inc-ho;}
+                enum "load-rebalancing-tau" {tailf:code-name mme-subscriber-overload-critical-action-load-rebalancing-tau;}
+                enum "detach-idle-roamer" {tailf:code-name mme-subscriber-overload-critical-action-detach-idle-roamer;}
+                enum "detach-idle-ue" {tailf:code-name mme-subscriber-overload-critical-action-detach-idle-ue;}
+                enum "detach-all-ue" {tailf:code-name mme-subscriber-overload-critical-action-detach-all-ue;}
+            }
+            default "reject-all-s1-iu-inc-ho";
+        }
+        leaf critical-ovld {
+            tailf:info "Enable or disable actions on critical overload. Default enable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-subscriber-overload-critical-ovld-enable;}
+                enum "disable" {tailf:code-name mme-subscriber-overload-critical-ovld-disable;}
+            }
+            default "enable";
+        }
+    } /* mme-subscriber-overload */
+    container mme-bearer-overload {
+        tailf:alt-name "bearer-overload";
+        presence "";
+        tailf:info "MME bearer capacity overload control configuration.";
+        leaf minor-onset {
+            must "(current() <= ../major-abate)" {
+                error-message "The values for the onset-related fields must be greater than or equal " +
+                "to abatement-related fields in the order 'critical-onset' >= " +
+                "'critical-abate' >= 'major-onset' >= 'major-abate' >= " +
+                "'minor-onset' >= 'minor-abate'";
+            }
+            must "(../minor-abate <= current())" {
+                error-message "The values for the onset-related fields must be greater than or equal " +
+                "to abatement-related fields in the order 'critical-onset' >= " +
+                "'critical-abate' >= 'major-onset' >= 'major-abate' >= " +
+                "'minor-onset' >= 'minor-abate'";
+            }
+            tailf:info "Bearer overload minor alarm set. Default 70";
+            type uint8 {
+                range "0..100";
+            }
+            default 70;
+        }
+        leaf minor-abate {
+            tailf:info "Bearer overload minor alarm clear. Default 65";
+            type uint8 {
+                range "0..100";
+            }
+            default 65;
+        }
+        leaf minor-action {
+            tailf:info "Bearer overload minor alarm action. Default reject-roamer-itau-irau";
+            type enumeration {
+                enum "none" {tailf:code-name mme-bearer-overload-minor-action-none;}
+                enum "reject-pdn-conn" {tailf:code-name mme-bearer-overload-minor-action-reject-pdn-conn;}
+                enum "reject-roamer-attach" {tailf:code-name mme-bearer-overload-minor-action-reject-roamer-attach;}
+                enum "reject-roamer-itau-irau" {tailf:code-name mme-bearer-overload-minor-action-reject-roamer-itau-irau;}
+                enum "reject-all-attach" {tailf:code-name mme-bearer-overload-minor-action-reject-all-attach;}
+                enum "reject-all-itau-irau" {tailf:code-name mme-bearer-overload-minor-action-reject-all-itau-irau;}
+                enum "reject-roamer-inc-ho" {tailf:code-name mme-bearer-overload-minor-action-reject-roamer-inc-ho;}
+                enum "reject-all-s1-iu-inc-ho" {tailf:code-name mme-bearer-overload-minor-action-reject-all-s1-iu-inc-ho;}
+                enum "reject-bearer-setup" {tailf:code-name mme-bearer-overload-minor-action-reject-bearer-setup;}
+                enum "load-rebalancing-tau" {tailf:code-name mme-bearer-overload-minor-action-load-rebalancing-tau;}
+                enum "detach-idle-roamer" {tailf:code-name mme-bearer-overload-minor-action-detach-idle-roamer;}
+                enum "detach-idle-ue" {tailf:code-name mme-bearer-overload-minor-action-detach-idle-ue;}
+                enum "detach-all-ue" {tailf:code-name mme-bearer-overload-minor-action-detach-all-ue;}
+            }
+            default "reject-roamer-itau-irau";
+        }
+        leaf minor-ovld {
+            tailf:info "Enable or disable actions on minor overload. Default enable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-bearer-overload-minor-ovld-enable;}
+                enum "disable" {tailf:code-name mme-bearer-overload-minor-ovld-disable;}
+            }
+            default "enable";
+        }
+        leaf major-onset {
+            must "(current() <= ../critical-abate)" {
+                error-message "The values for the onset-related fields must be greater than or equal " +
+                "to abatement-related fields in the order 'critical-onset' >= " +
+                "'critical-abate' >= 'major-onset' >= 'major-abate' >= " +
+                "'minor-onset' >= 'minor-abate'";
+            }
+            must "(../major-abate <= current())" {
+                error-message "The values for the onset-related fields must be greater than or equal " +
+                "to abatement-related fields in the order 'critical-onset' >= " +
+                "'critical-abate' >= 'major-onset' >= 'major-abate' >= " +
+                "'minor-onset' >= 'minor-abate'";
+            }
+            tailf:info "Bearer overload major alarm set. Default 80";
+            type uint8 {
+                range "0..100";
+            }
+            default 80;
+        }
+        leaf major-abate {
+            tailf:info "Bearer overload major alarm clear. Default 75";
+            type uint8 {
+                range "0..100";
+            }
+            default 75;
+        }
+        leaf major-action {
+            tailf:info "Bearer overload major alarm action. Default reject-all-itau-irau";
+            type enumeration {
+                enum "none" {tailf:code-name mme-bearer-overload-major-action-none;}
+                enum "reject-pdn-conn" {tailf:code-name mme-bearer-overload-major-action-reject-pdn-conn;}
+                enum "reject-roamer-attach" {tailf:code-name mme-bearer-overload-major-action-reject-roamer-attach;}
+                enum "reject-roamer-itau-irau" {tailf:code-name mme-bearer-overload-major-action-reject-roamer-itau-irau;}
+                enum "reject-all-attach" {tailf:code-name mme-bearer-overload-major-action-reject-all-attach;}
+                enum "reject-all-itau-irau" {tailf:code-name mme-bearer-overload-major-action-reject-all-itau-irau;}
+                enum "reject-roamer-inc-ho" {tailf:code-name mme-bearer-overload-major-action-reject-roamer-inc-ho;}
+                enum "reject-all-s1-iu-inc-ho" {tailf:code-name mme-bearer-overload-major-action-reject-all-s1-iu-inc-ho;}
+                enum "reject-bearer-setup" {tailf:code-name mme-bearer-overload-major-action-reject-bearer-setup;}
+                enum "load-rebalancing-tau" {tailf:code-name mme-bearer-overload-major-action-load-rebalancing-tau;}
+                enum "detach-idle-roamer" {tailf:code-name mme-bearer-overload-major-action-detach-idle-roamer;}
+                enum "detach-idle-ue" {tailf:code-name mme-bearer-overload-major-action-detach-idle-ue;}
+                enum "detach-all-ue" {tailf:code-name mme-bearer-overload-major-action-detach-all-ue;}
+            }
+            default "reject-all-itau-irau";
+        }
+        leaf major-ovld {
+            tailf:info "Enable or disable actions on major overload. Default enable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-bearer-overload-major-ovld-enable;}
+                enum "disable" {tailf:code-name mme-bearer-overload-major-ovld-disable;}
+            }
+            default "enable";
+        }
+        leaf critical-onset {
+            must "(../critical-abate <= current())" {
+                error-message "The values for the onset-related fields must be greater than or equal " +
+                "to abatement-related fields in the order 'critical-onset' >= " +
+                "'critical-abate' >= 'major-onset' >= 'major-abate' >= " +
+                "'minor-onset' >= 'minor-abate'";
+            }
+            tailf:info "Bearer overload critical alarm set. Default 90";
+            type uint8 {
+                range "0..100";
+            }
+            default 90;
+        }
+        leaf critical-abate {
+            tailf:info "Bearer overload critical alarm clear. Default 85";
+            type uint8 {
+                range "0..100";
+            }
+            default 85;
+        }
+        leaf critical-action {
+            tailf:info "Bearer overload critical alarm action. Default reject-bearer-setup";
+            type enumeration {
+                enum "none" {tailf:code-name mme-bearer-overload-critical-action-none;}
+                enum "reject-pdn-conn" {tailf:code-name mme-bearer-overload-critical-action-reject-pdn-conn;}
+                enum "reject-roamer-attach" {tailf:code-name mme-bearer-overload-critical-action-reject-roamer-attach;}
+                enum "reject-roamer-itau-irau" {tailf:code-name mme-bearer-overload-critical-action-reject-roamer-itau-irau;}
+                enum "reject-all-attach" {tailf:code-name mme-bearer-overload-critical-action-reject-all-attach;}
+                enum "reject-all-itau-irau" {tailf:code-name mme-bearer-overload-critical-action-reject-all-itau-irau;}
+                enum "reject-roamer-inc-ho" {tailf:code-name mme-bearer-overload-critical-action-reject-roamer-inc-ho;}
+                enum "reject-all-s1-iu-inc-ho" {tailf:code-name mme-bearer-overload-critical-action-reject-all-s1-iu-inc-ho;}
+                enum "reject-bearer-setup" {tailf:code-name mme-bearer-overload-critical-action-reject-bearer-setup;}
+                enum "load-rebalancing-tau" {tailf:code-name mme-bearer-overload-critical-action-load-rebalancing-tau;}
+                enum "detach-idle-roamer" {tailf:code-name mme-bearer-overload-critical-action-detach-idle-roamer;}
+                enum "detach-idle-ue" {tailf:code-name mme-bearer-overload-critical-action-detach-idle-ue;}
+                enum "detach-all-ue" {tailf:code-name mme-bearer-overload-critical-action-detach-all-ue;}
+            }
+            default "reject-bearer-setup";
+        }
+        leaf critical-ovld {
+            tailf:info "Enable or disable actions on critical overload. Default enable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-bearer-overload-critical-ovld-enable;}
+                enum "disable" {tailf:code-name mme-bearer-overload-critical-ovld-disable;}
+            }
+            default "enable";
+        }
+    } /* mme-bearer-overload */
+} /* engineering */
+augment "/mme-sgsn/subscriber" {
+    list mme-qos-conversion {
+        tailf:alt-name "qos-conversion";
+        key "traffic-class";
+        max-elements 6;
+        tailf:info "QoS Conversion.";
+        leaf traffic-class {
+            tailf:info "Name.";
+            type enumeration {
+                enum "conversational" {
+                    tailf:code-name "conversational";
+                }
+                enum "streaming" {
+                    tailf:code-name "streaming";
+                }
+                enum "background" {
+                    tailf:code-name "background";
+                }
+                enum "interactive-thp1" {
+                    tailf:code-name "interactive-thp1";
+                }
+                enum "interactive-thp2" {
+                    tailf:code-name "interactive-thp2";
+                }
+                enum "interactive-thp3" {
+                    tailf:code-name "interactive-thp3";
+                }
+            }
+            mandatory true;
+            must "((current() != 'conversational') or " +
+            " (../residual-ber = 'residualber-5hundredth') or " +
+            " (../residual-ber = 'residualber-1hundredth') or " +
+            " (../residual-ber = 'residualber-5thousandth') or " +
+            " (../residual-ber = 'residualber-1thousandth') or " +
+            " (../residual-ber = 'residualber-1tenthousandth') or " +
+            " (../residual-ber = 'residualber-1hundredthousandth') or " +
+            " (../residual-ber = 'residualber-1millionth'))" {
+                error-message "If 'traffic-class' is set to 'conversational' then the values " +
+                "'residualber-6hundredmillionth' and 'residualber-4thousandth' for " +
+                "'residual-ber' are invalid values";
+            }
+            must "((current() != 'streaming') or " +
+            " (../residual-ber = 'residualber-5hundredth') or " +
+            " (../residual-ber = 'residualber-1hundredth') or " +
+            " (../residual-ber = 'residualber-5thousandth') or " +
+            " (../residual-ber = 'residualber-1thousandth') or " +
+            " (../residual-ber = 'residualber-1tenthousandth') or " +
+            " (../residual-ber = 'residualber-1hundredthousandth') or " +
+            " (../residual-ber = 'residualber-1millionth'))" {
+                error-message "If 'traffic-class' is set to 'streaming' then the values " +
+                "'residualber-6hundredmillionth' and 'residualber-4thousandth' for " +
+                "'residual-ber' are invalid values";
+            }
+        }
+        leaf max-sdu-size {
+            tailf:info "QoS max SDU size. Default 1500";
+            type uint16 {
+                range "0..1520";
+            }
+            default 1500;
+        }
+        leaf residual-ber {
+            tailf:info "Residual bit error ratio.";
+            type enumeration {
+                enum "residualber-5hundredth" {tailf:code-name mme-qos-conversion-residual-ber-residualber-5hundredth;}
+                enum "residualber-1hundredth" {tailf:code-name mme-qos-conversion-residual-ber-residualber-1hundredth;}
+                enum "residualber-5thousandth" {tailf:code-name mme-qos-conversion-residual-ber-residualber-5thousandth;}
+                enum "residualber-4thousandth" {tailf:code-name mme-qos-conversion-residual-ber-residualber-4thousandth;}
+                enum "residualber-1thousandth" {tailf:code-name mme-qos-conversion-residual-ber-residualber-1thousandth;}
+                enum "residualber-1tenthousandth" {tailf:code-name mme-qos-conversion-residual-ber-residualber-1tenthousandth;}
+                enum "residualber-1hundredthousandth" {tailf:code-name mme-qos-conversion-residual-ber-residualber-1hundredthousandth;}
+                enum "residualber-1millionth" {tailf:code-name mme-qos-conversion-residual-ber-residualber-1millionth;}
+                enum "residualber-6hundredmillionth" {tailf:code-name mme-qos-conversion-residual-ber-residualber-6hundredmillionth;}
+            }
+            mandatory true;
+        }
+        leaf delivery-of-erroneous-sdus {
+            tailf:info "QoS delivery of erroneous SDUs. Default err-sdus-not-delivered";
+            type enumeration {
+                enum "no-detect" {tailf:code-name mme-qos-conversion-delivery-of-erroneous-sdus-no-detect;}
+                enum "err-sdus-delivered" {tailf:code-name mme-qos-conversion-delivery-of-erroneous-sdus-err-sdus-delivered;}
+                enum "err-sdus-not-delivered" {tailf:code-name mme-qos-conversion-delivery-of-erroneous-sdus-err-sdus-not-delivered;}
+            }
+            default "err-sdus-not-delivered";
+        }
+        leaf arp-high {
+            tailf:info "ARP conversion range - High. Default 5";
+            type uint8 {
+                range "1..15";
+            }
+            default 5;
+        }
+        leaf arp-medium {
+            tailf:info "ARP conversion range - Medium. Default 10";
+            type uint8 {
+                range "1..15";
+            }
+            default 10;
+        }
+    } /* mme-qos-conversion */
+} /* subscriber */
+augment "/mme-sgsn/interface/ss7" {
+    list mme-address-translation {
+        tailf:alt-name "address-translation";
+        key "plmn-id";
+        max-elements 1024;
+        tailf:info "For E.214 to E.212 translation.";
+        leaf plmn-id {
+            type string {
+                pattern '(([0-9]{5,6}))' {
+                    tailf:info "Valid values are: digits";
+                }
+            }
+            tailf:info "A unique PLMN identifier.";
+            mandatory true;
+        }
+        leaf country-code {
+            type string {
+                pattern '[0-9]*' {
+                    tailf:info "Valid values are: digits";
+                }
+            }
+            tailf:info "Country code.";
+            mandatory true;
+        }
+        leaf network-code {
+            tailf:info "Network code.";
+            type string {
+                length "1..9";
+            }
+            mandatory true;
+        }
+    } /* mme-address-translation */
+} /* ss7 */
+augment "/mme-sgsn/interface" {
+    container gr {
+        tailf:info "Gr interface to HLR";
+        presence "";
+        container mme-gr-if {
+            tailf:alt-name "gr-if";
+            presence "";
+            tailf:info "Gr Interface.";
+            leaf sai-message-version {
+                tailf:info "Initial version of SAI message. Default v3";
+                type enumeration {
+                    enum "v2" {tailf:code-name mme-gr-if-sai-message-version-v2;}
+                    enum "v3" {tailf:code-name mme-gr-if-sai-message-version-v3;}
+                }
+                default "v3";
+            }
+            leaf odb-sms {
+               tailf:info "Enable/disable operator determined barring of SMS in ISD response. Default disable";
+               type enumeration {
+                   enum "enable" {tailf:code-name mme-gr-if-odb-sms-enable;}
+                   enum "disable" {tailf:code-name mme-gr-if-odb-sms-disable;}
+               }
+               default "disable";
+            }
+        leaf send-rej-for-roaming-restrict {
+            tailf:info "Enable/disable roaming restricted feature. Default disable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-gr-if-send-rej-for-roaming-restrict-enable;}
+                enum "disable" {tailf:code-name mme-gr-if-send-rej-for-roaming-restrict-disable;}
+            }
+            default "disable";
+        }
+        leaf vplmn-address-allowed-override {
+            tailf:info "Override VPLMN allowed flag in ISD message from HLR. Default disable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-gr-if-vplmn-address-allowed-override-enable;}
+                enum "disable" {tailf:code-name mme-gr-if-vplmn-address-allowed-override-disable;}
+            }
+            default "disable";
+        }
+        leaf automatic-device-detection {
+            tailf:info "Enable/disable automatic device detection feature. Default disable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-gr-if-automatic-device-detection-enable;}
+                enum "disable" {tailf:code-name mme-gr-if-automatic-device-detection-disable;}
+            }
+            default "disable";
+        }
+        leaf num-of-imsi-digits {
+            tailf:info "Number of IMSI digits used to identify the HLR. Default 6";
+            type uint8 {
+                range "6..9";
+            }
+            default 6;
+        }
+        leaf request-timer {
+            tailf:info "HLR response timer. Default 13";
+            type uint8 {
+                range "1..32";
+            }
+            default 13;
+        }
+        leaf ugl-retry {
+            tailf:info "Number of UGL retries to HLR. Default 0";
+            type uint8 {
+                range "0..4";
+            }
+            default 0;
+        }
+        leaf sai-retry {
+            tailf:info "Number of SAI retries to HLR. Default 0";
+            type uint8 {
+                range "0..4";
+            }
+            default 0;
+        }
+        leaf afr-retry {
+            tailf:info "Number of AFR retries to HLR. Default 1";
+            type uint8 {
+                range "0..4";
+            }
+            default 1;
+        }
+        leaf mc-fallback-timer {
+            type string {
+                pattern '(disable|immediate|[1-9]|1[0-9]|2[0-1])' {
+                    tailf:info "Valid values are: disable, immediate, 1..21";
+                }
+            }
+            tailf:info "Time to reset MAP Client fallback table. Default 21";
+            default "21";
+        }
+            leaf sai-vector-limit {
+                tailf:info "Number of auth vectors in the SAI (send auth info) messaging on the Gr interface. Default 4";
+                type uint8 {
+                    range 1..5;
+                }
+                default 4;
+        }
+        leaf odb-ps {
+            tailf:info "Support of operator determined barring of Packet Oriented Services. Default disable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-gr-if-odb-ps-enable;}
+                enum "disable" {tailf:code-name mme-gr-if-odb-ps-disable;}
+
+            }
+            default "disable";
+        }
+    } /* mme-gr-if */
+  } /* gr */
+} /* interface */
+
+augment "/mme-sgsn/subscriber" {
+    container mme-amf-shutdown {
+        tailf:alt-name "service-shutdown";
+        tailf:validate serviceShutDownValidate;
+        presence "";
+        tailf:info "Actions to be taken on AMF shutdown of SC.";
+        leaf connected-subs-action {
+            tailf:info "Action on connected subscribers. Default offload-all";
+            type enumeration {
+                enum "offload-all" {tailf:code-name mme-amf-shutdown-connected-subs-action-offload-all;}
+                enum "offload-user-inactivity" {tailf:code-name mme-amf-shutdown-connected-subs-action-offload-user-inactivity;}
+                enum "detach" {tailf:code-name mme-amf-shutdown-connected-subs-action-detach;}
+            }
+            default "offload-all";
+        }
+        leaf idle-subs-action {
+            tailf:info "Action on idle subscribers. Default offload-with-paging";
+            type enumeration {
+                enum "offload-after-tau-sr" {tailf:code-name mme-amf-shutdown-idle-subs-action-offload-after-tau-sr;}
+                enum "offload-after-tau" {tailf:code-name mme-amf-shutdown-idle-subs-action-offload-after-tau;}
+                enum "offload-after-rau" {tailf:code-name mme-amf-shutdown-idle-subs-action-offload-after-rau;}
+                enum "offload-with-paging" {tailf:code-name mme-amf-shutdown-idle-subs-action-offload-with-paging;}
+                enum "implicit-detach" {tailf:code-name mme-amf-shutdown-idle-subs-action-implicit-detach;}
+            }
+            default "offload-with-paging";
+        }
+        leaf duration {
+            tailf:info "Duration in which the AMF shutdown has to be completed. Default 20";
+            type uint16 {
+                range "20..1140";
+            }
+            default 20;
+        }
+    } /* mme-amf-shutdown */
+} /* subscriber */
+augment "/mme-sgsn/interface/nas" {
+    container mme-nas-common {
+        presence "";
+        tailf:alt-name "nas-common";
+        tailf:validate nasCommonValidate;
+        tailf:info "This includes common attributes which can be used for both SGSN and MME.";
+        leaf ppf-reset-timer {
+            type string {
+                pattern '((disable)|([1-9])|([1-9][0-9])|([1-5][0-9][0-9])|600)' {
+                    tailf:info "Valid values are: disable, 1..600";
+                }
+            }
+            tailf:info "Reset PPF flag timer. Default disable";
+            default "disable";
+        }
+        leaf reset-timer {
+            tailf:info "Clears recently-reset flag. Default 60";
+            type uint8 {
+                range "0..186";
+            }
+            default 60;
+        }
+        leaf topological-search {
+            tailf:info "If MME or SGSN shall favor topologically proximate and/or colocated PGW/SGW. Default enable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-nas-common-topological-search-enable;}
+                enum "disable" {tailf:code-name mme-nas-common-topological-search-disable;}
+            }
+            default "enable";
+        }
+        leaf security-context-lifetime {
+            type string {
+                pattern '(([1-9][0-9]{0,1})|([1][0-5][0-9])|([1][6][0-8])|(disable))' {
+                    tailf:info "Valid values are: disable, 1..168";
+                }
+            }
+            tailf:info "Security context lifetime. Default disable";
+            default "disable";
+        }
+        leaf dual-addr-bearer {
+            tailf:info "Dual address bearer functionality. Default enable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-nas-common-dual-addr-bearer-enable;}
+                enum "disable" {tailf:code-name mme-nas-common-dual-addr-bearer-disable;}
+            }
+            default "enable";
+        }
+        leaf pdn-type-preference {
+            tailf:info "Operator preference of PDN type. Default ipv4";
+            type enumeration {
+                enum "ipv4" {tailf:code-name mme-nas-common-pdn-type-preference-ipv4;}
+                enum "ipv6" {tailf:code-name mme-nas-common-pdn-type-preference-ipv6;}
+            }
+            default "ipv4";
+        }
+        leaf full-network-name {
+            tailf:info "Full name for network. Default 3gppnetwork";
+            type string {
+                length "1..127";
+            }
+            default "3gppnetwork";
+        }
+        leaf short-network-name {
+            tailf:info "Short name for network. Default 3gppnetwork";
+            type string {
+                length "1..32";
+            }
+            default "3gppnetwork";
+        }
+        leaf mm-info-triggers {
+            type string {
+                pattern '[a-zA-Z,-]*' {
+                    tailf:info "Valid values are: 'none' or a comma separated list containing 'attach','inter-mme-tau','dst-change','config-change','timezone-change'";
+                }
+            }
+            tailf:info "A comma separated list of triggers that will cause the MME to send the EMM Information message. Valid values are: 'none' or a comma separated list containing attach,inter-mme-tau,dst-change,config-change,timezone-change. Default none";
+            default "none";
+        }
+        leaf mm-info-lifetime {
+            type string {
+                pattern '((disable)|([1-9]|[1-9][0-9]|1[0-5][0-9]|16[0-8]))' {
+                    tailf:info "Valid values are: disable, 1..168";
+                }
+            }
+            tailf:info "The lifetime of an EMM Information message. Default disable";
+            default "disable";
+        }
+        leaf version {
+            tailf:info "3GPP spec applicable to this interface is TS24.301. Default 10.10.0";
+            type enumeration {
+                enum "9.5.0" {tailf:code-name mme-nas-common-version-9-5-0;}
+                enum "10.10.0" {tailf:code-name mme-nas-common-version-10-10-0;}
+            }
+            default "10.10.0";
+        }
+        leaf use-pgwid-from-hss {
+            tailf:info "Option to use PGW ID from HSS during PGW selection Default enable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-nas-common-use-pgwid-from-hss-enable;}
+                enum "disable" {tailf:code-name mme-nas-common-use-pgwid-from-hss-disable;}
+            }
+            default "enable";
+        }
+        leaf gw-reselection-retries {
+            tailf:info "Specifies the maximum number of GW retries for reselection Default 2";
+            type uint8 {
+                range "0..10";
+            }
+            default 2;
+        }
+        leaf native-mme-groups {
+            tailf:info "Option to use Native MME groups listed in subscriber-plmn. Default disable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-nas-common-native-mme-groups-enable;}
+                enum "disable" {tailf:code-name mme-nas-common-native-mme-groups-disable;}
+            }
+            default "disable";
+        }
+        leaf non-broadcast-tai {
+            tailf:info "TAI to be used in GUTI reallocation when directional offload is in progress or while moving a subscriber to a target MME-SGSN. Default none";
+            type string {
+                pattern '(none|(0x[0-9]{5,6}[.][0-9a-f]{4,4}))' {
+                    tailf:info "Valid values are: Hex value of non broadcast TAI in plmn.tac format with 0x prefixed or 'none'";
+                }
+            }
+            default "none";
+        }
+    } /* mme-nas-common */
+} /* nas */
+augment "/mme-sgsn/service-area" {
+    list mme-vlr {
+        tailf:alt-name "vlr";
+        tailf:validate serviceAreaVlrValidate {
+            tailf:call-once "true";
+        }
+        key "name";
+        max-elements 64;
+        tailf:info "VLR table.";
+        leaf name {
+            tailf:info "Name of VLR.";
+            type string {
+                length "1..255";
+            }
+            mandatory true;
+        }
+        leaf vlr-type {
+            tailf:info "Vlr type.";
+            type enumeration {
+                enum "gs" {
+                    tailf:code-name "vlr-vlr-type-gs";
+                }
+                enum "sgs" {
+                    tailf:code-name "vlr-vlr-type-sgs";
+                }
+                enum "both" {
+                    tailf:code-name "vlr-vlr-type-both";
+                }
+            }
+            must "(current() != 'gs') or (count(../../../interface/gs/mme-gs-if) != 0)" {
+                error-message "For 'vlr-type' 'gs', 'mme-sgsn interface gs gs-if' must exist";
+            }
+            must "(current() != 'sgs') or (count(../../../interface/sgs/mme-sgs-if) != 0)" {
+                error-message "For 'vlr-type' 'sgs', 'mme-sgsn interface sgs sgs-if' must exist";
+            }
+            must "((current() != 'both') or ((count(../../../interface/gs/mme-gs-if) != 0) and (count(../../../interface/sgs/mme-sgs-if) != 0)))" {
+                error-message "For 'vlr-type 'both', 'mme-sgsn interface gs gs-if' and 'mme-sgsn interface sgs sgs-if' both must exist";
+            }
+            mandatory true;
+        }
+        leaf vlr-number {
+            when "../vlr-type != 'sgs'";
+            type string {
+                pattern '[0-9]{1,15}' {
+                    tailf:info "Valid values are: digits of length 1..15";
+                }
+            }
+            tailf:info "VLR address.";
+        }
+        uses callp-service-identifier;
+        leaf ip-address1 {
+            when "../vlr-type != 'gs'";
+            must "((../vlr-type = 'gs') or (../ip-address1 != '0.0.0.0') and (../ip-address1 != '::'))" {
+                error-message
+                "If 'vlr-type' is 'sgs', 'ip-address1' must be non-zero";
+            }
+            tailf:info "SG IP Address.";
+            type inet:ip-address;
+        }
+        leaf ip-address2 {
+            when "../vlr-type != 'gs'";
+            default "0.0.0.0";
+            tailf:info "SG IP Address.";
+            type inet:ip-address;
+        }
+    } /* mme-vlr */
+} /* service-area */
+augment "/mme-sgsn/service-area" {
+    list mme-vlr-pool {
+        tailf:alt-name "vlr-pool";
+        tailf:validate vlrPoolValidate {
+            tailf:call-once "true";
+        }
+        key "vlr-pool-name vlr-selection-digits";
+        max-elements 1056;
+        tailf:info "VLR Pool table has a group of VLRs which can be selected using IMSI mask range.";
+        leaf vlr-pool-name {
+            tailf:info "VLR pool name.";
+            type string {
+                length "1..31";
+            }
+            mandatory true;
+        }
+        leaf vlr-selection-digits {
+            type string {
+                pattern '((default)|([0-9]{3}[\-][0-9]{3}))' {
+                    tailf:info "Valid values are: 'default' or nnn-nnn where nnn can be 000-999 and can be a comma separated list";
+                }
+            }
+            tailf:info "Range of IMSI mask under the VLR pool.";
+            mandatory true;
+        }
+        leaf vlr-name {
+            tailf:info "VLR identifier.";
+            type leafref {
+                path "/mme-sgsn/service-area/mme-vlr/name";
+            }
+            mandatory true;
+        }
+    } /* mme-vlr-pool */
+} /* service-area */
+augment "/mme-sgsn/subscriber" {
+    container mme-load-control-profile {
+        presence "";
+        tailf:alt-name "load-control-profile";
+        tailf:info "This represents the global parameters required to control the SGSN's behaviour with respect to mobile stations.";
+        leaf alarm-update-interval {
+            tailf:info "Alarm update interval. Default 15";
+            type uint8 {
+                range "1..60";
+            }
+            default 15;
+        }
+        leaf attach-reject-cause {
+            tailf:info "Attach load control reject cause. Default 0";
+            type uint8 {
+                range "0..255";
+            }
+            default 0;
+        }
+        leaf irau-reject-cause {
+            tailf:info "IRAU load control reject cause. Default 0";
+            type uint8 {
+                range "0..255";
+            }
+            default 0;
+        }
+        leaf ms-act-reject-cause {
+            tailf:info "MS activation reject cause. Default 0";
+            type uint8 {
+                range "0..255";
+            }
+            default 0;
+        }
+        leaf itau-reject-cause {
+            tailf:info "Inter MME TAU reject cause. Default 0";
+            type uint8 {
+                range "0..255";
+            }
+            default 0;
+        }
+    } /* mme-load-control-profile */
+    list mme-plmn-load-control {
+        key "plmn";
+        tailf:alt-name "plmn-load-control";
+        max-elements 16;
+        must "(count(../../feature/mme-feature-control[name = 'plmn-based-reporting-and-control' " +
+        "and status-field = 'on']) != 0)" {
+            error-message "If 'plmn-load-control' object exists then 'mme-sgsn feature control " +
+            "plmn-based-reporting-and-control' must be 'on'";
+        }
+        tailf:info "This supports per PLMN load control.";
+        leaf plmn {
+            tailf:info "PLMN identifier.";
+            type string {
+                length "5..6";
+            }
+            mandatory true;
+        }
+        leaf ms-att-reqs-threshold {
+            tailf:info "MS attach requests alarm threshold. Default 0";
+            type uint32 {
+                range "0..100000000";
+            }
+            default 0;
+        }
+        leaf ms-irau-reqs-threshold {
+            tailf:info "MS IRAU requests alarm threshold. Default 0";
+            type uint32 {
+                range "0..100000000";
+            }
+            default 0;
+        }
+        leaf ms-pdpc-act-attempts-threshold {
+            tailf:info "MS PDP context activate attemps alarm threshold. Default 0";
+            type uint32 {
+                range "0..100000000";
+            }
+            default 0;
+        }
+        leaf ms-itau-reqs-threshold {
+            tailf:info "Inter MME TAU attemps alarm threshold. Default 0";
+            type uint32 {
+                range "0..100000000";
+            }
+            default 0;
+        }
+        leaf ms-dedbearer-reqs-threshold {
+            tailf:info "Dedicated Bearer attemps alarm threshold. Default 0";
+            type uint32 {
+                range "0..100000000";
+            }
+            default 0;
+        }
+        leaf current-attach-subs-threshold {
+            tailf:info "Current attached subscribers alarm threshold. Default 0";
+            type uint32 {
+                range "0..100000000";
+            }
+            default 0;
+        }
+        leaf current-pdp-context-threshold {
+            tailf:info "Current PDP context alarm threshold. Default 0";
+            type uint32 {
+                range "0..100000000";
+            }
+            default 0;
+        }
+        leaf current-act-bearer-threshold {
+            tailf:info "Current activated bearer alarm threshold. Default 0";
+            type uint32 {
+                range "0..100000000";
+            }
+            default 0;
+        }
+        leaf load-control {
+            tailf:info "Load control. Default disable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-plmn-load-control-load-control-enable;}
+                enum "disable" {tailf:code-name mme-plmn-load-control-load-control-disable;}
+            }
+            default "disable";
+        }
+    } /* mme-plmn-load-control */
+} /* subscriber */
+augment "/mme-sgsn/interface" {
+    container s101 {
+        tailf:info "S101 interface to HRPD";
+        list mme-ean {
+            tailf:alt-name "ean";
+            key "ehrpd-access-id";
+            max-elements 15000;
+            tailf:info "Ean";
+            leaf ehrpd-access-id {
+                type string {
+                    pattern '0x[0-9a-f]{1,32}' {
+                        tailf:info "Valid values are: hexadecimal value of length 1..34 including a leading '0x'";
+                    }
+                }
+                tailf:info "The Identifier of the cdmaAccess Node. This is extracted from first n octets of the sector id in the UL S1 CDMA2000 Tunnel message";
+                mandatory true;
+            }
+            leaf ip-address {
+                tailf:info "The primary IP address of the eAN.";
+                type inet:ip-address;
+                mandatory true;
+            }
+        } /* mme-ean */
+        container mme-s101-if {
+            presence "";
+            tailf:alt-name "s101-if";
+            must "(count(../../gtp/mme-gtp-profile[name = 's101']) != 0)" {
+                error-message "The 'mme-sgsn interface gtp profile s101' must exist";
+            }
+            must "(count(../../../feature/mme-feature-control[name = 's101' and status-field = 'on']) != 0)" {
+                error-message "If 's101-if' object exists then 'mme-sgsn feature control s101' must be 'on'";
+            }
+            tailf:info "S101 interface.";
+            leaf tunnel-change-delay-timer {
+                tailf:info "Time to wait before initiating the S101 tunnel change. Default 5";
+                type uint8 {
+                    range "1..15";
+                }
+                default 5;
+            }
+            leaf wait-for-notification-timer {
+                tailf:info "Relocation indirect forwarding tunnel holding timer. Default 5";
+                type uint8 {
+                    range "1..30";
+                }
+                default 5;
+            }
+            leaf handover-hold-timer {
+                tailf:info "Source eNB S1 handover holding timer. Default 5";
+                type uint8 {
+                    range "1..30";
+                }
+                default 5;
+            }
+            leaf version {
+                tailf:info "3GPP spec applicable to this interface is TS29.276. Default 10.3.0";
+                type enumeration {
+                    enum "9.0.0-proprietary" {tailf:code-name mme-s101-if-version-9-0-0-proprietary;}
+                    enum "10.3.0" {tailf:code-name mme-s101-if-version-10-3-0;}
+                }
+                default "10.3.0";
+            }
+        } /* mme-s101-if */
+    } /* s101 */
+} /* interface */
+augment "/mme-sgsn" {
+    container trace {
+        tailf:info "Trace objects";
+        presence "";
+        list mme-trace-standards {
+            tailf:alt-name "session";
+            tailf:validate traceObjectValidate {
+                tailf:call-once "true";
+            }
+            key "target-type target-value";
+            unique "session-id";
+            max-elements 10;
+            tailf:info "Trace Standards";
+            must "(count(../../feature/mme-feature-control[name = 'trace' and status-field = 'on']) != 0)" {
+                error-message "If 'trace session' object exists then 'mme-sgsn feature control trace' must be 'on'";
+            }
+            leaf target-type {
+                tailf:info "The type of target for tracing.";
+                type enumeration {
+                    enum "imsi" {tailf:code-name mme-trace-standards-target-type-imsi;}
+                    enum "imei" {tailf:code-name mme-trace-standards-target-type-imei;}
+                    enum "imeisv" {tailf:code-name mme-trace-standards-target-type-imeisv;}
+                }
+                mandatory true;
+            }
+            leaf target-value {
+                type string {
+                    pattern '[0-9]*' {
+                        tailf:info "Valid values are: digits";
+                    }
+                }
+                tailf:info "The actual value of IMSI or IMEI or IMEISV.";
+                mandatory true;
+            }
+            leaf session-id {
+                type string {
+                    pattern '[0-9]{5,6}[.][0-9a-f]{6}' {
+                        tailf:info "Valid values are: in PLMN.trace-id format where PLMN is input as 5 or 6 digit BCD number and trace-id is input as a 3 byte hexadecimal number";
+                    }
+                }
+                tailf:info "ID to uniquely identify the trace session.";
+                mandatory true;
+            }
+            leaf mme-interface-mask {
+                type string {
+                    pattern '[0-9a-z,]*' {
+                        tailf:info "Valid values are: 'off' or any order or combination of 's11', 's10', 's6a', 's1', 's13'";
+                    }
+                }
+                tailf:info "Trace target interfaces for MME. Valid values are: 'off' or any order or combination of s11,s10,s6a,s1,s13,s3. Default s11,s10,s6a,s1,s13,s3";
+                default "s11,s10,s6a,s1,s13,s3";
+            }
+            leaf mme-event-mask {
+                type string {
+                    pattern '[0-9a-z,-]*' {
+                        tailf:info "Valid values in any order or combination are: none, handover, bearer-act-mod-del, ue-pdn-disconn, att-tau-det, svc-req, ue-pdn-conn";
+                    }
+                }
+                tailf:info "Trace target events for MME. Valid values are 'none' or any order or combination of handover,bearer-act-mod-del,ue-pdn-disconn,att-tau-det,svc-req,ue-pdn-conn. Default handover,bearer-act-mod-del,ue-pdn-disconn,att-tau-det,svc-req,ue-pdn-conn";
+                default "handover,bearer-act-mod-del,ue-pdn-disconn,att-tau-det,svc-req,ue-pdn-conn";
+            }
+            leaf enb-interface-mask {
+                type string {
+                    pattern '(off|(uu((,x2)(,s1)?|(,s1)(,x2)?)?)|(x2((,s1)(,uu)?|(,uu)(,s1)?)?)|(s1((,uu)(,x2)?|(,x2)(,uu)?)?))' {
+                        tailf:info "Valid values are: 'off' or any order or combination of 'uu', 'x2', 's1'. Default: 'off'";
+                    }
+                }
+                tailf:info "Trace target interfaces for enodeB. Valid values are: off or any order or combination of uu,x2,s1. Default off";
+                default "off";
+            }
+            leaf sgw-interface-mask {
+                type string {
+                    pattern '[0-9a-z,]*' {
+                        tailf:info "Valid values are: 'off' or any order or combination of 'gxc', 's11', 's8b', 's5', 's4'";
+                    }
+                }
+                tailf:info "Trace target events for SGW. Valid values are: 'off' or any order or combination of gxc,s11,s8b,s5,s4. Default off";
+                default "off";
+            }
+            leaf sgw-event-mask {
+                type string {
+                    pattern '(bearer-act-mod-del|pdn-conn-term|pdn-conn-creation)([,](bearer-act-mod-del|pdn-conn-term|pdn-conn-creation)){0,2}|none' {
+                        tailf:info "Valid values are: 'none' or any order or combination of 'bearer-act-mod-del', 'pdn-conn-term', 'pdn-conn-creation'. Default: 'none'";
+                    }
+                }
+                tailf:info "Trace target event mask for SGW. Valid values are: 'none' or any order or combination of bearer-act-mod-del,pdn-conn-term,pdn-conn-creation. Default none";
+                default "none";
+            }
+            leaf pgw-interface-mask {
+                type string {
+                    pattern '[0-9a-z,]*' {
+                        tailf:info "Valid values in any order or combination are: off, sgi, s8b, gx, s6b, s5, s2c, s2b, s2a";
+                    }
+                }
+                tailf:info "Trace-target interfaces for PGW. Valid values are: 'off' or any order or combination of sgi,s8b,gx,s6b,s5,s2c,s2b,s2a. Default off";
+                default "off";
+            }
+            leaf pgw-event-mask {
+                type string {
+                    pattern '(bearer-act-mod-del|pdn-conn-term|pdn-conn-creation)([,](bearer-act-mod-del|pdn-conn-term|pdn-conn-creation)){0,2}|none' {
+                        tailf:info "Valid values are: 'none' or any order or combination of 'bearer-act-mod-del', 'pdn-conn-term', 'pdn-conn-creation'. Default: 'none'";
+                    }
+                }
+                tailf:info "Trace target events for PGW. Valid values are: 'none' or any order or combination of bearer-act-mod-del,pdn-conn-term,pdn-conn-creation. Default none";
+                default "none";
+            }
+            leaf trace-depth {
+                tailf:info "The trace information level for all the interfaces to be collected. Default med";
+                type enumeration {
+                    enum "min" {tailf:code-name mme-trace-standards-trace-depth-min;}
+                    enum "med" {tailf:code-name mme-trace-standards-trace-depth-med;}
+                    enum "max" {tailf:code-name mme-trace-standards-trace-depth-max;}
+                    enum "minnovs" {tailf:code-name mme-trace-standards-trace-depth-minnovs;}
+                    enum "mednovs" {tailf:code-name mme-trace-standards-trace-depth-mednovs;}
+                    enum "maxnovs" {tailf:code-name mme-trace-standards-trace-depth-maxnovs;}
+                }
+                default "med";
+            }
+            leaf nms-ip {
+                tailf:info "Destination address for trace data transmission. Default 0.0.0.0";
+                type inet:ipv4-address;
+                default 0.0.0.0;
+            }
+        } /* mme-trace-standards */
+    } /* trace */
+} /* mme-sgsn */
+
+augment "/mme-sgsn/subscriber" {
+    list mme-long-mnc {
+        tailf:alt-name "long-mnc";
+        key "mcc";
+        max-elements 50;
+        tailf:info "This list specifies which Mobile Country Codes (MCC) use a three digit Mobile Network Code (MNC).";
+        leaf mcc {
+            type string {
+                pattern '[0-9]*' {
+                    tailf:info "Valid values are: digits";
+                }
+            }
+            tailf:info "Mobile country code (3 digit).";
+            mandatory true;
+        }
+    } /* mme-long-mnc */
+} /* subscriber */
+augment "/mme-sgsn/engineering" {
+    list mme-sc-capacity {
+        tailf:alt-name "sc-capacity";
+        key "callp-service-id";
+        max-elements 32;
+        tailf:info "SC capacity.";
+        uses callp-service-identifier;
+        leaf subs-per-su {
+            tailf:info "SC capacity per service-unit in thousand of subscribers, zero indicates no SC service";
+            type uint16 {
+                range "0 | 150..416";
+            }
+            mandatory true;
+        }
+    } /* mme-sc-capacity */
+} /* engineering */
+augment "/mme-sgsn/subscriber" {
+    list mme-bearer-limits-profile {
+        tailf:alt-name "bearer-limits-profile";
+        tailf:validate bearerLimitProfileValidate {
+            tailf:call-once "true";
+        }
+        key "name qos-class-identifier";
+        max-elements 64;
+        tailf:info "Subscriber bearer limits profile.";
+        leaf name {
+            tailf:info "The bearer limits profile name.";
+            type string {
+                length "1..32";
+            }
+            mandatory true;
+        }
+        leaf qos-class-identifier {
+            tailf:info "The QoS Class Identifier (QCI).";
+            type enumeration {
+                enum qci1 {
+                    tailf:info "QCI 1";
+                    tailf:code-name qos-class-identifier-1;
+                }
+                enum qci2 {
+                    tailf:info "QCI 2";
+                    tailf:code-name qos-class-identifier-2;
+                }
+                enum qci3 {
+                    tailf:info "QCI 3";
+                    tailf:code-name qos-class-identifier-3;
+                }
+                enum qci4 {
+                    tailf:info "QCI 4";
+                    tailf:code-name qos-class-identifier-4;
+                }
+                enum qci5 {
+                    tailf:info "QCI 5";
+                    tailf:code-name qos-class-identifier-5;
+                }
+                enum qci6 {
+                    tailf:info "QCI 6";
+                    tailf:code-name qos-class-identifier-6;
+                }
+                enum qci7 {
+                    tailf:info "QCI 7";
+                    tailf:code-name qos-class-identifier-7;
+                }
+                enum qci8 {
+                    tailf:info "QCI 8";
+                    tailf:code-name qos-class-identifier-8;
+                }
+                enum qci9 {
+                    tailf:info "QCI 9";
+                    tailf:code-name qos-class-identifier-9;
+                }
+            }
+            must "(((current() != 'qci1') and (current() != 'qci2') and (current() != 'qci3') and (current() != 'qci4')) or " +
+            " (../max-bitrate-uplink != '0') or " +
+            " (../max-bitrate-downlink != '0'))" {
+                error-message "The 'max-bitrate-uplink' or 'max-bitrate-downlink' must be non-zero if 'qos-class-identifier' is in the range of 1..4";
+            }
+
+            must "(((current() != 'qci1') and (current() != 'qci2') and (current() != 'qci3') and (current() != 'qci4')) or " +
+            " (../guaranteed-bitrate-uplink != '0') or " +
+            " (../guaranteed-bitrate-downlink != '0'))" {
+                error-message "The 'guaranteed-bitrate-uplink' or 'guaranteed-bitrate-downlink' must be non-zero if 'qos-class-identifier' is in the range of 1..4";
+            }
+
+            must "(((current() != 'qci1') and (current() != 'qci2') and (current() != 'qci3') and (current() != 'qci4')) or (../name != 'default'))" {
+                error-message "For 'mme-sgsn subscriber bearer-limits-profile name' to be 'default', 'qos-class-identifier' must be in range 5..9";
+            }
+
+            must "(((current() != 'qci5') and (current() != 'qci6') and (current() != 'qci7') and (current() != 'qci8') and (current() != 'qci9')) or " +
+            " ((../max-bitrate-uplink = '0') and (../max-bitrate-downlink = '0') and (../guaranteed-bitrate-uplink = '0') and (../guaranteed-bitrate-downlink = '0')))" {
+                error-message "The 'max-bitrate-uplink', 'max-bitrate-downlink','guaranteed-bitrate-uplink' and 'guaranteed-bitrate-downlink' must be '0' if 'qos-class-identifier' is in the range of 5..9";
+            }
+        }
+        leaf arp-priority {
+            tailf:info "The Allocation and Retention Priority (ARP) priority.";
+            type uint8 {
+                range "1..15";
+            }
+            mandatory true;
+        }
+        leaf max-bitrate-uplink {
+            tailf:info "The maximum bit rate (MBR) for uplink in KBPS. Default 256000";
+            type uint32 {
+                range "0..256000";
+            }
+            default 256000;
+        }
+        leaf max-bitrate-downlink {
+            tailf:info "The maximum bit rate (MBR) for downlink in KBPS. Default 256000";
+            type uint32 {
+                range "0..256000";
+            }
+            default 256000;
+        }
+        leaf guaranteed-bitrate-uplink {
+            tailf:info "The guaranteed bit rate (GBR) for uplink in KBPS. Default 256000";
+            type uint32 {
+                range "0..256000";
+            }
+            default 256000;
+        }
+        leaf guaranteed-bitrate-downlink {
+            tailf:info "The guaranteed bit rate (GBR) for downlink in KBPS. Default 256000";
+            type uint32 {
+                range "0..256000";
+            }
+            default 256000;
+        }
+        leaf pci {
+            must "(../name != 'mvno' or current() != 'enable')" {
+                error-message "If the 'name' is 'mvno' then 'pci' should not be set to 'enable";
+            }
+            tailf:info "The pre-emption capability. Default disable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-bearer-limits-profile-pci-enable;}
+                enum "disable" {tailf:code-name mme-bearer-limits-profile-pci-disable;}
+            }
+            default "disable";
+        }
+        leaf pvi {
+            tailf:info "The pre-emption vulnerability. Default enable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-bearer-limits-profile-pvi-enable;}
+                enum "disable" {tailf:code-name mme-bearer-limits-profile-pvi-disable;}
+            }
+            default "enable";
+        }
+    } /* mme-bearer-limits-profile */
+    list mme-local-eps-qos-entry {
+        tailf:alt-name "local-eps-qos-entry";
+        tailf:validate localEpsQosEntryValidate {
+            tailf:call-once "true";
+        }
+        key "name";
+        max-elements 11;
+        tailf:info "Local Eps QoS Entry.";
+        leaf name {
+            tailf:info "Name of the local EPS QoS entry.";
+            type string {
+                length "1..32";
+            }
+            mandatory true;
+        }
+        leaf default-bearer-limits-profile {
+            tailf:info "A pointer to a bearer-limits-profile for the default bearer of a PDN connection.";
+            type leafref {
+                path "/mme-sgsn/subscriber/mme-bearer-limits-profile/name";
+            }
+            mandatory true;
+        }
+        leaf dedicated-bearer-limits-profile {
+            tailf:info "A pointer to a bearer-limits-profile for the dedicated bearer of a PDN connection.";
+            type leafref {
+                path "/mme-sgsn/subscriber/mme-bearer-limits-profile/name";
+            }
+        }
+        leaf ue-ambr-uplink {
+            when "../name != 'mvno'";
+            tailf:info "The ue-aggregated max bitrate for uplink in KBPS. Default 4294968";
+            type uint32 {
+                range "0..4294968";
+            }
+            default 4294968;
+        }
+        leaf ue-ambr-downlink {
+            when "../name != 'mvno'";
+            tailf:info "The ue-aggregated max bitrate for downlink in KBPS. Default 4294968";
+            type uint32 {
+                range "0..4294968";
+            }
+            default 4294968;
+        }
+        leaf apn-ambr-uplink {
+            when "../name != 'mvno'";
+            tailf:info "The apn-aggregated max bitrate for uplink in KBPS. Default 4294968";
+            type uint32 {
+                range "0..4294968";
+            }
+            default 4294968;
+        }
+        leaf apn-ambr-downlink {
+            when "../name != 'mvno'";
+            tailf:info "The apn-aggregated max bitrate for downlink in KBPS. Default 4294968";
+            type uint32 {
+                range "0..4294968";
+            }
+            default 4294968;
+        }
+        leaf local-qos-action {
+            when "../name != 'mvno'";
+            tailf:info "The type of action to be taken to control local-eps-qos-entry subscriber. Default enforce";
+            type enumeration {
+                enum "enforce" {tailf:code-name mme-local-eps-qos-entry-local-qos-action-enforce;}
+                enum "downgrade" {tailf:code-name mme-local-eps-qos-entry-local-qos-action-downgrade;}
+                enum "negotiate" {tailf:code-name mme-local-eps-qos-entry-local-qos-action-negotiate;}
+            }
+            default "enforce";
+        }
+    } /* mme-local-eps-qos-entry */
+    list mme-location-report {
+        tailf:alt-name "location-report";
+        tailf:validate locationReportValidate {
+            tailf:call-once "true";
+        }
+        key "sln-id";
+        max-elements 5;
+        tailf:info "Subscriber location report.";
+        leaf sln-id {
+            tailf:info "A unique identifier.";
+            type uint32 {
+                range "0..2147483647";
+            }
+            mandatory true;
+        }
+        choice identity {
+            mandatory true;
+            leaf imsi {
+                type string {
+                    pattern '[0-9]*' {
+                        tailf:info "Valid values are: digits";
+                    }
+                }
+                tailf:info "The IMSI of targetted UE.";
+            }
+            leaf imei {
+                type string {
+                    pattern '[0-9]*' {
+                        tailf:info "Valid values are: digits";
+                    }
+                }
+                tailf:info "The IMEI of targetted UE.";
+            }
+            leaf imeisv {
+                type string {
+                    pattern '[0-9]*' {
+                        tailf:info "Valid values are: digits";
+                    }
+                }
+                tailf:info "The IMEISV of targetted UE.";
+            }
+        } /* choice */
+        leaf page {
+            tailf:info "When true, page idle UE on SLN start. Default true";
+            type boolean;
+            default true;
+        }
+        leaf alarm {
+            tailf:info "When true, alarm is raised when UE is connected. Default true";
+            type boolean;
+            default true;
+        }
+
+        leaf end-time {
+            type string {
+                pattern '[0-9]*' {
+                    tailf:info "Valid values are: digits in the format YYYYMMDDhhmmss. Default: 30 minutes from current time.";
+                }
+            }
+            tailf:info "The date and time when entry expires and location reporting will cease.";
+        }
+    } /* mme-location-report */
+    list mme-voice-domain-profile {
+        tailf:alt-name "voice-domain-profile";
+        key "name";
+        max-elements 16;
+        tailf:info "Voice Domain Profile";
+        leaf name {
+            tailf:info "A unique profile name.";
+            type string {
+                length "1..32";
+            }
+            mandatory true;
+        }
+        leaf dc00-cs-voice-only {
+            type string {
+                pattern 'use-subscribed-value|none|([1-9]|[1-9][0-9]|[1][0-9][0-9]|[2][0-4][0-9]|[2][5][0-6])' {
+                    tailf:info "Valid values are: use-subscribed-value, none, 1..256";
+                }
+            }
+            tailf:info "Data Centric Circuit Switched Voice. Default use-subscribed-value";
+            default "use-subscribed-value";
+        }
+        leaf dc01-ps-voice-only {
+            type string {
+                pattern 'use-subscribed-value|none|([1-9]|[1-9][0-9]|[1][0-9][0-9]|[2][0-4][0-9]|[2][5][0-6])' {
+                    tailf:info "Valid values are: use-subscribed-value, none, 1..256";
+                }
+            }
+            tailf:info "Data Centric Packet Switched Voice. Default use-subscribed-value";
+            default "use-subscribed-value";
+        }
+        leaf dc10-cs-voice-preferred {
+            type string {
+                pattern 'use-subscribed-value|none|([1-9]|[1-9][0-9]|[1][0-9][0-9]|[2][0-4][0-9]|[2][5][0-6])' {
+                    tailf:info "Valid values are: use-subscribed-value, none, 1..256";
+                }
+            }
+            tailf:info "Data Centric Circuit Switched Voice. Default use-subscribed-value";
+            default "use-subscribed-value";
+        }
+        leaf dc11-ps-voice-preferred {
+            type string {
+                pattern 'use-subscribed-value|none|([1-9]|[1-9][0-9]|[1][0-9][0-9]|[2][0-4][0-9]|[2][5][0-6])' {
+                    tailf:info "Valid values are: use-subscribed-value, none, 1..256";
+                }
+            }
+            tailf:info "Data Centric Packet Switched Voice. Default use-subscribed-value";
+            default "use-subscribed-value";
+        }
+        leaf vc00-cs-voice-only {
+            type string {
+                pattern 'use-subscribed-value|none|([1-9]|[1-9][0-9]|[1][0-9][0-9]|[2][0-4][0-9]|[2][5][0-6])' {
+                    tailf:info "Valid values are: use-subscribed-value, none, 1..256";
+                }
+            }
+            tailf:info "Voice Centric Circuit Switched Voice. Default use-subscribed-value";
+            default "use-subscribed-value";
+        }
+        leaf vc01-ps-voice-only {
+            type string {
+                pattern 'use-subscribed-value|none|([1-9]|[1-9][0-9]|[1][0-9][0-9]|[2][0-4][0-9]|[2][5][0-6])' {
+                    tailf:info "Valid values are: use-subscribed-value, none, 1..256";
+                }
+            }
+            tailf:info "Voice Centric Packet Switched Voice. Default use-subscribed-value";
+            default "use-subscribed-value";
+        }
+        leaf vc10-cs-voice-preferred {
+            type string {
+                pattern 'use-subscribed-value|none|([1-9]|[1-9][0-9]|[1][0-9][0-9]|[2][0-4][0-9]|[2][5][0-6])' {
+                    tailf:info "Valid values are: use-subscribed-value, none, 1..256";
+                }
+            }
+            tailf:info "Voice Centric Circuit Switched Voice. Default use-subscribed-value";
+            default "use-subscribed-value";
+        }
+        leaf vc11-ps-voice-preferred {
+            type string {
+                pattern 'use-subscribed-value|none|([1-9]|[1-9][0-9]|[1][0-9][0-9]|[2][0-4][0-9]|[2][5][0-6])' {
+                    tailf:info "Valid values are: use-subscribed-value, none, 1..256";
+                }
+            }
+            tailf:info "Voice Centric Packet Switched Voice. Default use-subscribed-value";
+            default "use-subscribed-value";
+        }
+    } /* mme-voice-domain-profile */
+} /* subscriber */
+augment "/mme-sgsn/subscriber" {
+    list mme-mvno-apn-list {
+        tailf:alt-name "mvno-apn-list";
+        tailf:validate MvnoApnListValidate {
+            tailf:call-once "true";
+        }
+        key "apn-name";
+        max-elements 256;
+        tailf:info "The MVNO apn list.";
+        leaf apn-name {
+            type string {
+                pattern '[a-zA-Z0-9]([.-]|[A-Za-z0-9])*' {
+                    tailf:info "Valid values are: Alphabetical characters, digits, and hyphen";
+                }
+            }
+            tailf:info "The MVNO APN name.";
+            mandatory true;
+        }
+    } /* mme-mvno-apn-list */
+} /* subscriber */
+augment "/mme-sgsn/subscriber" {
+    list mme-apn-selection-profile {
+        tailf:alt-name "apn-selection-profile";
+        tailf:validate apnSelectionProfileValidate {
+            tailf:call-once "true";
+        }
+        key "name";
+        max-elements 64;
+        tailf:info "MME apn-selection-profile configuration";
+        leaf name {
+            tailf:info "A unique name.";
+            type string {
+                length "1..32";
+            }
+            mandatory true;
+        }
+        leaf local-config-default-pdn-type {
+            tailf:info "PDN type to be used if locally configured APN is used Default ipv4";
+            type enumeration {
+                enum "ipv4" {tailf:code-name mme-apn-selection-profile-local-config-default-pdn-type-ipv4;}
+                enum "ipv6" {tailf:code-name mme-apn-selection-profile-local-config-default-pdn-type-ipv6;}
+                enum "ipv4v6" {tailf:code-name mme-apn-selection-profile-local-config-default-pdn-type-ipv4v6;}
+            }
+            default "ipv4";
+        }
+        leaf secondary-apn-source-gprs {
+            tailf:info "Secondary-apn-source to select APN when regular selection fails for GPRS based subscriptions Default off";
+            type enumeration {
+                enum "single-subscription" {tailf:code-name mme-apn-selection-profile-secondary-apn-source-gprs-single-subscription;}
+                enum "single-subscription-or-local" {tailf:code-name mme-apn-selection-profile-secondary-apn-source-gprs-single-subscription-or-local;}
+                enum "first-subscription" {tailf:code-name mme-apn-selection-profile-secondary-apn-source-gprs-first-subscription;}
+                enum "first-subscription-or-local" {tailf:code-name mme-apn-selection-profile-secondary-apn-source-gprs-first-subscription-or-local;}
+                enum "local-config" {tailf:code-name mme-apn-selection-profile-secondary-apn-source-gprs-local-config;}
+                enum "off" {tailf:code-name mme-apn-selection-profile-secondary-apn-source-gprs-off;}
+            }
+            default "off";
+        }
+        leaf secondary-apn-source-epc {
+            tailf:info "Secondary-apn-source to select APN when regular selection fails for EPC based subscriptions Default off";
+            type enumeration {
+                enum "default-subscription" {tailf:code-name mme-apn-selection-profile-secondary-apn-source-epc-default-subscription;}
+                enum "local-config" {tailf:code-name mme-apn-selection-profile-secondary-apn-source-epc-local-config;}
+                enum "off" {tailf:code-name mme-apn-selection-profile-secondary-apn-source-epc-off;}
+            }
+            default "off";
+        }
+        leaf local-config-apn {
+            type string {
+                pattern '[A-Za-z0-9]([.-]|[A-Za-z0-9])*' {
+                    tailf:info "Valid values are: case-sensitive alphabetical characters, digits, . and - ";
+                }
+            }
+            tailf:info "Replacement APN-NI in case the secondary-apn-source is local-config or the default APN-NI Default default.apnni.com";
+            default "default.apnni.com";
+        }
+        leaf wildcard-dns-fail-override {
+            tailf:info "Is APN-selection after the DNS with APN (Req) and wild card subscription fails allowed Default disable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-apn-selection-profile-wildcard-dns-fail-override-enable;}
+                enum "disable" {tailf:code-name mme-apn-selection-profile-wildcard-dns-fail-override-disable;}
+            }
+            default "disable";
+            must "((current() != 'enable') or (../secondary-apn-source-gprs != 'off') or " +
+            "(../secondary-apn-source-epc != 'off'))" {
+                error-message "If 'wildcard-dns-fail-override' is 'enable' " +
+                "then 'secondary-apn-source-gprs' or 'secondary-apn-source-epc' must not be 'off'";
+            }
+        }
+    } /* mme-apn-selection-profile */
+} /* subscriber */
+
+augment "/mme-sgsn/service-area" {
+    list mme-tracking-area {
+        tailf:alt-name "tracking-area";
+        tailf:info "Tracking area";
+        key "plmn-id tac";
+        max-elements 32000;
+        leaf plmn-id {
+            tailf:info "A unique PLMN identifier.";
+            type leafref {
+                path "/mme-sgsn/service-area/mme-plmn/plmn-id";
+            }
+            mandatory true;
+        }
+        leaf tac {
+            tailf:info "Tracking Area Code";
+            type string {
+                pattern '0x[0-9a-f]{4}' {
+                    tailf:info "Valid values are: hexadecimal values of length 4 including a leading '0x'";
+                }
+            }
+            must "(((current() = '0x0000') and (current()/../plmn-id = '000000' or current()/../plmn-id = '00000'))" +
+                 " or ((current() != '0x0000') and (current()/../plmn-id != '000000' and current()/../plmn-id != '00000')))" {
+                  error-message "The 'tac' value must be nonzero for a non-default entry and must be zero  for the default entry when set via 'mme-sgsn service-area tracking-area'.";
+            } 
+            mandatory true;
+        }
+        leaf ims-support {
+            tailf:info "Per PLMN IMS voice over PS support.";
+            type enable-disable-enum;
+            default "disable";
+        }
+        leaf emergency-support {
+            tailf:info "Indicates if support for emergency voice over PS is available.";
+            type enable-disable-enum;
+            default "disable";
+        }
+        leaf lac {
+            tailf:info "Location Area Code.";
+            type string {
+                pattern '0x[0-9a-f]{1,4}' {
+                    tailf:info "Valid values are: hexadecimal values of length 3..6 including a leading '0x'";
+                }
+            }
+            default "0x0000";
+        }
+        leaf e-smlc-pool-name {
+            tailf:info "Name of the E-SMLC pool.";
+            type string {
+                length 1..32;
+            }
+            default "none";
+        }
+        leaf timezone {
+            tailf:info "LINUX timezone values.";
+            type timezone:timezone-string;
+        }
+    } /* tracking-area */
+} /* service-area */
+
+} /*submodule*/
+

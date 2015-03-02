@@ -1,0 +1,360 @@
+//////////////////////////////////////////////////////////////////////////
+/// @file sgsnScCli.yang
+/// @brief Yang definitions for operational commands.
+///        "show mme-sgsn status gprs"
+///        "show mme-sgsn status umts"
+///        "show mme-sgsn subscriber camel-subscription"
+///        "show mme-sgsn subscriber camel-context" 
+///
+/// Maintained by: HCTA
+/// History:
+///
+/// yyyymmmdd Changed by      Change Reason
+/// --------- --------------- --------------------------------------------
+/// 2014Jan15 Hardik W        AGW-21104 - Initial development
+/// 2014Feb28 Adam Floyd      AGW-21104 - Updated callpoint info
+/// 2014Apr17 Adam Floyd      AGW-21104 - Add sort-flag to cp opaque data
+/// 2014Aug15 Adam Floyd      AGW-23534 - Remove fake-key kludge
+/// 2014Sep15 Lakshmi Priya   AGW-22082 - Schema upgrade
+///
+/// Copyright (c) 2014 HCTA. All Rights Reserved.
+///
+/// CONFIDENTIALITY AND LIMITED USE
+///
+/// This software, including any software of third parties embodied herein,
+/// contains information and concepts which are confidential to HCTA
+/// and such third parties. This software is licensed for use
+/// solely in accordance with the terms and conditions of the applicable
+/// license agreement with HCTA or its authorized distributor.
+//////////////////////////////////////////////////////////////////////////
+submodule sgsnScCli{
+   belongs-to hcta-epc {
+      prefix epc;
+   }
+
+   import tailf-common {
+      prefix tailf;
+   }
+
+   include mmeSgsnConfig;
+   include cmdCommonHcta;
+   include scConfig;
+
+   augment "/mme-sgsn/status" {
+      list gprs {
+         tailf:info "GPRS health check";
+         config false;
+         ordered-by user; // not for use with keyed lists
+
+         tailf:cli-no-key-completion;
+         //key "service";
+
+         tailf:callpoint cli_oper_show
+         {
+            // Callpoint Opaque Data Format (255 chars max):
+            // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+            tailf:opaque '0:mme-sgsn status gprs::1';
+         }
+
+         leaf service {
+            tailf:info "";
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf location {
+            tailf:info "";
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf current-subscribers {
+            tailf:info "Current number of subscribers.";
+            type uint32;
+            tailf:display-groups "none detail";
+         }
+         leaf current-pdp-contexts {
+            tailf:info "Current number of PDP contexts.";
+            type uint32;
+            tailf:display-groups "none detail";
+         }
+         leaf attach-success-rate-nwk {
+            tailf:info "Network attach success rate.";
+            type uint32;
+            tailf:display-groups "none detail";
+         }
+         leaf attach-success-rate-nodal {
+            tailf:info "Nodal attach success rate.";
+            type uint32;
+            tailf:display-groups "none detail";
+         }
+         leaf session-act-success-rate-nwk {
+            tailf:info "Network session activation success rate.";
+            type uint32;
+            tailf:display-groups "none detail";
+         }
+         leaf session-act-success-rate-nodal {
+            tailf:info "Nodal session activation success rate.";
+            type uint32;
+            tailf:display-groups "none detail";
+         }
+         leaf pdp-retainability-nwk {
+            tailf:info "PDP context retainability success rate.";
+            type uint32;
+            tailf:display-groups "none detail";
+         }
+         leaf rau-success-rate-nwk {
+            tailf:info "RAU success rate.";
+            type uint32;
+            tailf:display-groups "none detail";
+         }
+         leaf irau-success-rate-nwk {
+            tailf:info "IRAU success rate.";
+            type uint32;
+            tailf:display-groups "none detail";
+         }
+      } /* list gprs */
+      
+      list umts {
+         tailf:info "UMTS health check";
+         config false;
+         ordered-by user; // not for use with keyed lists
+
+         tailf:cli-no-key-completion;
+         //key "service";
+
+         tailf:callpoint cli_oper_show
+         {
+            // Callpoint Opaque Data Format (255 chars max):
+            // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+            tailf:opaque '0:mme-sgsn status umts::1';
+         }
+
+         leaf service {
+            tailf:info "";
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf location {
+            tailf:info "";
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf current-subscribers {
+            tailf:info "Current number of subscribers.";
+            type uint32;
+            tailf:display-groups "none detail";
+         }
+         leaf current-pdp-contexts {
+            tailf:info "Current number of PDP contexts.";
+            type uint32;
+            tailf:display-groups "none detail";
+         }
+         leaf attach-success-rate-nwk {
+            tailf:info "Network attach success rate.";
+            type uint32;
+            tailf:display-groups "none detail";
+         }
+         leaf attach-success-rate-nodal {
+            tailf:info "Nodal attach success rate.";
+            type uint32;
+            tailf:display-groups "none detail";
+         }
+         leaf session-act-success-rate-nwk {
+            tailf:info "Network session activation success rate.";
+            type uint32;
+            tailf:display-groups "none detail";
+         }
+         leaf session-act-success-rate-nodal {
+            tailf:info "Nodal Session activation success rate.";
+            type uint32;
+            tailf:display-groups "none detail";
+         }
+         leaf pdp-retainability-nwk {
+            tailf:info "PDP retainibility success rate.";
+            type uint32;
+            tailf:display-groups "none detail";
+         }
+         leaf rau-success-rate-nwk {
+            tailf:info "RAU success rate.";
+            type uint32;
+            tailf:display-groups "none detail";
+         }
+         leaf irau-success-rate-nwk {
+            tailf:info "IRAU success rate.";
+            type uint32;
+            tailf:display-groups "none detail";
+         }
+      } /* list umts */
+   }
+
+   augment "/mme-sgsn/subscriber" {
+       list camel-subscription {
+            tailf:info "CAMEL subscription";
+            config false;
+//            ordered-by user; // not for use with keyed lists
+
+            tailf:cli-no-key-completion;
+            key "imsi tdp-type";
+
+            tailf:cli-incomplete-show-path
+            {
+                tailf:cli-min-keys "1";
+            }
+
+            tailf:callpoint cli_oper_show
+            {
+                // Callpoint Opaque Data Format (255 chars max):
+                // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+                tailf:opaque '1:mme-sgsn subscriber camel-subscription:imsi/imsi-t tdp-type/uint8:1';
+            }
+
+            leaf imsi {
+                tailf:info "IMSI.";
+                type imsi-t;
+                tailf:display-groups "none detail";
+            }
+            leaf tdp-type {
+                tailf:info "Type of trigger detection point.";
+                type uint8;
+                tailf:display-groups "none detail";
+            }
+            leaf phase-supported {
+                tailf:info "CAMEL phase supported.";
+                type uint16;
+                tailf:display-groups "none detail";
+            }
+            leaf scp-address {
+                tailf:info "SCP address of subscriber.";
+                type string;
+                tailf:display-groups "detail";
+            }
+            leaf service-key {
+                tailf:info "Service logic.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf default-gprs-handling {
+                tailf:info "Default error handling in SGSN.";
+                type string;
+                tailf:display-groups "detail";
+            }
+        } /* subscriber-camel-subscription */
+
+        list camel-context {
+            tailf:info "CAMEL context";
+            config false;
+//            ordered-by user; // not for use with keyed lists
+
+            tailf:cli-no-key-completion;
+            key "imsi signatured-session-id";
+
+            tailf:cli-incomplete-show-path
+            {
+                tailf:cli-min-keys "1";
+            }
+
+            tailf:callpoint cli_oper_show
+            {
+                // Callpoint Opaque Data Format (255 chars max):
+                // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+                tailf:opaque '1:mme-sgsn subscriber camel-context:imsi/imsi-t signatured-session-id/uint32:1';
+            }
+
+            leaf imsi {
+                tailf:info "IMSI.";
+                type imsi-t;
+                tailf:display-groups "none detail";
+            }
+            leaf signatured-session-id {
+                tailf:info "GPRS signature session id.";
+                type uint32;
+                tailf:display-groups "none detail";
+            }
+            leaf ssf-ref-number {
+                tailf:info "SSF reference number.";
+                type uint32;
+                tailf:display-groups "none detail";
+            }
+            leaf scp-ref-number {
+                tailf:info "SCP reference number.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf ssf-state {
+                tailf:info "Current SSF state.";
+                type string;
+                tailf:display-groups "none detail";
+            }
+            leaf edp-list {
+                tailf:info "List of Event Detection Point (EDP)s armed.";
+                type string;
+                tailf:display-groups "detail";
+            }
+            leaf tcp-threshold {
+                tailf:info "TCP time threshold sent by SCP.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf vc-threshold {
+                tailf:info "Volume threshold sent by SCP.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf tsw-threshold {
+                tailf:info "Tariff switch threshold sent by SCP.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf tcp-timestamp {
+                tailf:info "Timestamp of start of TCP timer.";
+                type string;
+                tailf:display-groups "detail";
+            }
+            leaf tcp-timestamp-current-interval {
+                tailf:info "Timestamp of start of current TCP timer.";
+                type string;
+                tailf:display-groups "detail";
+            }
+            leaf tsw-timestamp {
+                tailf:info "Timestamp of start of Tariff-switch timer.";
+                type string;
+                tailf:display-groups "detail";
+            }
+            leaf tsp-timestamp {
+                tailf:info "Timestamp of previous Tariff-switch.";
+                type string;
+                tailf:display-groups "detail";
+            }
+            leaf tsl-timestamp {
+                tailf:info "Timestamp of latest Tariff-switch.";
+                type string;
+                tailf:display-groups "detail";
+            }
+            leaf tsp-vol-count {
+                tailf:info "Volume count of previous Tariff-switch.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf tsl-vol-count {
+                tailf:info "Volume count of latest Tariff-switch.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf tsp-rollover {
+                tailf:info "Volume rollover of previous Tariff-switch.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf tsl-rollover {
+                tailf:info "Volume rollover of latest Tariff-switch.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf scp-address {
+                tailf:info "SCP address.";
+                type string;
+                tailf:display-groups "detail";
+            }
+        } /* subscriber-camel-context */
+    }
+}
+

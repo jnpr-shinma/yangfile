@@ -1,0 +1,24 @@
+module juniper{
+    yang-version 1;
+    namespace "http://www.juniper.net/ns/vnc";
+    prefix "juniper";
+
+    include ems;
+    include configlet-management;
+    include configuration-file-management;
+    include device-management;
+    include image-management;
+    include script-management;
+    include template-management;
+
+    contact "JUNOS Space <jspace@juniper.net>";
+
+    organization "Juniper Networks";
+
+    description
+        "YANG version of the device-management";
+
+    revision "2014-07-26" {
+        description "draft-ietf-netmod-yang-02 compatible.";
+    }
+}

@@ -1,0 +1,98 @@
+//////////////////////////////////////////////////////////////////////////
+/// @file hcta-snmp.yang
+/// @brief Yang definitions snmp config.
+///
+/// Maintained by: HCTA
+/// History:
+///
+/// yyyymmmdd Changed by      Change Reason
+/// --------- --------------- --------------------------------------------
+/// 2014Feb15 Irina Pershwitz AGW-21103 - Initial development
+/// 2014Mar14 Irina Pershwitz AGW-21103 - Added contact and location attr
+/// 2014Sep15 Lakshmi Priya   AGW-22082 - Schema upgrade.
+///
+/// Copyright (c) 2014 HCTA. All Rights Reserved.
+///
+/// CONFIDENTIALITY AND LIMITED USE
+///
+/// This software, including any software of third parties embodied herein,
+/// contains information and concepts which are confidential to HCTA
+/// and such third parties. This software is licensed for use
+/// solely in accordance with the terms and conditions of the applicable
+/// license agreement with HCTA or its authorized distributor.
+//////////////////////////////////////////////////////////////////////////
+
+module hcta-snmp {
+  namespace "http://hitachi-cta.com/ns/snmp";
+  prefix snmp;
+
+  import tailf-common {
+    prefix tailf;
+  }
+
+  import ietf-inet-types {
+    prefix inet;
+  }
+
+  organization "Hitachi-CTA";
+  description
+       "The module snmp.";
+
+  revision 2014-09-18 {
+    description  "EPC8.0";
+  }
+
+  container snmp {
+    tailf:info "Simple Network Management Protocol configuration.";
+    list trap-targets {     
+      max-elements 5;
+      key "ip-address";  
+      tailf:info "Trap targets."; 
+      leaf ip-address {
+         tailf:info "IP address.";
+         type inet:ip-address;
+      } 	  
+      leaf community {
+         tailf:info "Community string.";
+         type string;
+         default "public";
+      } 	  
+    }
+    list managers {     
+      max-elements 5;
+      key "ip-address";  
+      tailf:info "Managers"; 
+      leaf ip-address {
+         tailf:info "IP address.";
+         type inet:ip-address;
+      } 	  
+      leaf community {
+         tailf:info "Community string.";
+         type string;
+         default "public";
+      } 	  
+    }
+    leaf location {
+       tailf:info "Physical system location.";
+         type string {
+           length "1..256";
+         } 	  
+    } 	  
+    
+    leaf contact {
+       tailf:info "Administrator contact information.";
+         type string {
+            length "1..256";
+         } 	  
+    } 	  
+
+    leaf limit-traps-per-second {
+         tailf:info "Max number of traps to send per second.";
+         type uint16 {
+            range 1..100;
+         } 	  
+         default 100;
+         tailf:hidden true; //MME8.0 attribute
+    } 	  
+  } //snmp container
+}

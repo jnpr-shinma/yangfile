@@ -1,0 +1,149 @@
+/* cslConfig.yang generated from cslConfig.xml */
+submodule cslConfig{
+
+belongs-to hcta-epc {
+    prefix epc;
+}
+
+import tailf-common {
+    prefix tailf;
+}
+
+include mmeSgsnConfig;
+
+include fgwConfig;
+
+include cmdCommonHcta;
+include s1MasterConfig;
+import ietf-inet-types {
+    prefix inet;
+}
+
+augment "/mme-sgsn" {
+    container csl {
+        tailf:info "CSL objects";
+        presence ""; 
+        container agw-csl {
+            tailf:alt-name "profile";
+            tailf:validate cslProfileValidate;
+            tailf:info "Call Summary Log.";
+            leaf pdnconn-events-mme {
+                tailf:info "PDN connection events on MME. Default true";
+                type boolean;
+                default true;
+            }
+            leaf bearer-events-mme {
+                tailf:info "Bearer events on MME. Default true";
+                type boolean;
+                default true;
+            }
+            leaf mobility-events-mme {
+                tailf:info "Mobility events on MME. Default true";
+                type boolean;
+                default true;
+            }
+            leaf radiobearer-events-mme {
+                tailf:info "Radio Bearer events on MME. Default true";
+                type boolean;
+                default true;
+            }
+            leaf file-creation-period {
+                tailf:info "Time interval to generate the output file. Default 30";
+                type uint16 {
+                    range "30..1800";
+                }
+                default 30;
+            }
+            leaf file-retention-period {
+                tailf:info "Time to retain the old files. Default 60";
+                type uint8 {
+                    range "10..120";
+                }
+                default 60;
+            }
+            leaf max-records-per-file {
+                tailf:info "Maximum number of records to be written per file. Default 780000";
+                type uint32 {
+                    range "1..1000000";
+                }
+                default 780000;
+            }
+            leaf triggers-mme {
+                type string {
+                    pattern '[a-zA-Z,-]*' {
+                        tailf:info "Valid values are: alphabetical characters, - and ,(comma)";
+                    }  
+                }
+                tailf:info "CSL log generation triggers. Valid values are: combination of 'fail,reject,release,success,abnormal-release,normal-release', default: fail,reject,abnormal-release.";
+                mandatory true;
+            }
+            leaf max-records-per-period {
+                type string {
+                    pattern '((no-limit)|([1-9]([0-9]{2,4}))|(100000))' {
+                        tailf:info "Valid values are: no-limit, 100..100000";
+                    }  
+                }
+                tailf:info "CSL record throttling. Default no-limit";
+                default "no-limit";
+            }
+        } /* csl */
+        container streaming-csl {
+            tailf:alt-name "streaming";
+            tailf:validate cslStreamingValidate;
+            presence ""; 
+            tailf:info "Streaming CSL Interface.";
+            leaf sctp-profile {
+                tailf:info "SCTP profile name.";
+                type leafref {
+                    path "/mme-sgsn/interface/mme-sctp-profile/name";
+                }
+                mandatory true;
+            }
+            uses routing-instance-name;
+            leaf local-ip-address {
+                must "../local-ip-address != '0.0.0.0'" {
+                    error-message
+                    "'local-ip-address' must not be configured as '0.0.0.0'";
+                }
+                tailf:info "Local IP address used for remote streaming by each SC CSL-Client instance.";
+                type inet:ipv4-address;
+                mandatory true;
+            }
+            leaf remote-ip-address1 {
+                tailf:info "Remote IP address for CSL server #1. Default 0.0.0.0";
+                type inet:ipv4-address;
+                default 0.0.0.0;
+            }
+            leaf remote-port1 {
+                tailf:info "Remote streaming port number for CSL server #1. Default 0";
+                type uint16 {
+                    range "0..65535";
+                }
+                default 0;
+            }
+            leaf remote-ip-address2 {
+                tailf:info "Remote IP address for CSL server #2. Default 0.0.0.0";
+                type inet:ipv4-address;
+                default 0.0.0.0;
+            }
+            leaf remote-port2 {
+                tailf:info "Remote streaming port number for CSL server #2. Default 0";
+                type uint16 {
+                    range "0..65535";
+                }
+                default 0;
+            }
+            uses dscp;
+            leaf streaming-fallback {
+                tailf:info "Indicates if fallback to local file based mode should be used when the streaming interfaces to the remote CSL server are down. Default disable";
+                type enumeration {
+                    enum "enable" {tailf:code-name streaming-csl-streaming-fallback-enable;}
+                    enum "disable" {tailf:code-name streaming-csl-streaming-fallback-disable;}
+                }
+                default "disable";
+            }
+        } /* streaming-csl */
+    } /* csl */
+} /* sgsn-mme*/
+} /*submodule*/
+

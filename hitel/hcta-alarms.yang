@@ -1,0 +1,357 @@
+//////////////////////////////////////////////////////////////////////////
+/// @file hcta-alarms.yang
+/// @brief Yang definitions alarms config.
+///
+/// Maintained by: HCTA
+/// History:
+///
+/// yyyymmmdd Changed by      Change Reason
+/// --------- --------------- --------------------------------------------
+/// 2014Jun17 Kaori Tong      AGW-22083 - Initial development
+/// 2014Aug15 Adam Floyd      AGW-23534 - Remove fake-key kludge
+/// 2014Aug13 Kaori Tong      AGW-22083 - Active Alarm List Drop 3
+/// 2014Sep15 Lakshmi Priya   AGW-22082 - Schema upgrade
+///
+/// Copyright (c) 2014 HCTA. All Rights Reserved.
+///
+/// CONFIDENTIALITY AND LIMITED USE
+///
+/// This software, including any software of third parties embodied herein,
+/// contains information and concepts which are confidential to HCTA
+/// and such third parties. This software is licensed for use
+/// solely in accordance with the terms and conditions of the applicable
+/// license agreement with HCTA or its authorized distributor.
+//////////////////////////////////////////////////////////////////////////
+
+//*************************************************************
+// WARNING: If leaf is added, deleted or the order is changed, 
+// then cmn/fmCentral/alarmDbMgr.cc must also be updated.
+//
+// If new keys are added, then the order of leafs that are 
+// retrieved using cdb_get_objects(), will change.  The keys are
+// always returned first before the other leafs.
+//*************************************************************
+
+module hcta-alarms {
+ namespace "http://hitachi-cta.com/ns/alarms";
+  prefix alarms;
+
+  import tailf-common {
+    prefix tailf;
+  }
+
+  organization "Hitachi-CTA";
+  description
+       "The module alarms.";
+
+  revision 2014-09-18 {
+    description  "EPC8.0 Initial creation";
+  }
+
+  container alarms {
+
+      list summary {
+         tailf:info "Active Alarm Summary";
+         config false;
+         ordered-by user;  // data provider is responsible of list
+  
+         tailf:cli-no-key-completion;
+
+         tailf:callpoint cli_oper_show
+         {
+            // Callpoint Opaque Data Format (255 chars max):
+            // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+            tailf:opaque '0:alarms summary::1';
+         }
+
+         leaf critical{
+               type uint32;
+               tailf:display-groups "none detail";
+               tailf:info "Number of critical alarms";
+            }
+         leaf major{
+               type uint32;
+               tailf:display-groups "none detail";
+               tailf:info "Number of major alarms";
+         }
+         leaf minor{
+               type uint32;
+               tailf:display-groups "none detail";
+               tailf:info "Number of minor alarms";
+         }
+         leaf warning{
+               type uint32;
+               tailf:display-groups "none detail";
+               tailf:info "Number of warning alarms";
+         }
+         leaf indeterminate{
+               type uint32;
+               tailf:display-groups "none detail";
+               tailf:info "Number of indeterminate alarms";
+         }
+     } // list summary
+
+
+     list alarm-list {
+         tailf:info "Active Alarm List";
+         config false;
+         ordered-by user;  // The first one added is always first in the
+                           // array when list is retrieved.
+
+        
+         tailf:cdb-oper
+         {
+            tailf:persistent false;
+         }
+
+         key "alarm-name entity-tag subentity-tag group-key";
+
+         tailf:cli-suppress-table;
+         tailf:cli-show-template-enter "";
+
+         tailf:cli-show-template-legend
+                 "$(.display_groups~=detail?:INDEX      )"
+                +"$(.display_groups~=detail?:LAST EVENT           )"
+                +"$(.display_groups~=detail?:ALARM NAME     )"
+                +"$(.display_groups~=detail?:SEVERITY   )"
+                +"$(.display_groups~=detail?:SERVICE   )"
+                +"$(.display_groups~=detail?:ENTITY TAG                  )"
+                +"$(.display_groups~=detail?:DESCRIPTION                              )"
+                +"$(.display_groups~=detail?:REASON\n)"
+                +"$(.display_groups~=detail?:----------------------------------------------------------------------------------------------------------------------------------------------)"
+                +"$(.display_groups~=detail?:-----------------------------------------\n)";
+
+          tailf:cli-show-template
+                  "$(.display_groups~=detail?alarms alarm-list\n" +
+                  " index          $(index)\n" +
+                  " last-event     $(last-event)\n" +
+                  " first-event    $(first-event)\n" +
+                  " alarm-name     $(alarm-name)\n" +
+                  " severity       $(severity)\n" +
+                  " service        $(service)\n" +
+                  " entity-tag     $(entity-tag)\n" +
+                  " subentity-tag  $(subentity-tag)\n" +
+                  " location       $(location)\n" +
+                  " description    $(description)\n"+
+                  " reason         $(reason)\n" +
+                  " group-key      $(group-key)\n:" +
+                  "$(index|ljust:10) $(last-event|ljust:20) " +
+                  "$(alarm-name|ljust:14) $(severity|ljust:10) " +
+                  "$(service|ljust:9) $($(entity-tag|ljust:27)|trunc:27) " +
+                  "$($(description|ljust:40)|trunc:40) " + 
+                  "$($(reason|ljust:40)|trunc:40)\n)"
+                {
+                tailf:cli-auto-legend;
+                }
+
+
+         tailf:cli-show-template-footer
+                "$(.?\n% $(.licounter) entries in the table.\n:"
+                +"% No entries in the table.\n)";
+
+         leaf alarm-name {
+            type string;
+            tailf:display-groups "none detail";
+            tailf:info "Name of the alarm";
+         }
+         leaf entity-tag {
+            type string;
+            tailf:display-groups "none detail";
+            tailf:info "Entity tag of the alarm resource";
+         }
+         leaf subentity-tag {
+            type string;
+            tailf:display-groups "detail";
+            tailf:info "Additional information of entity";
+         }
+         leaf group-key {
+            type string;
+            tailf:display-groups "detail";
+            tailf:info "Group key used for clearAll";
+         }
+         leaf index {
+            type uint32;
+            tailf:display-groups "none detail";
+            tailf:info "Index of the alarm";
+         }
+         leaf last-event {
+            type string;
+            tailf:cli-preformatted;
+            tailf:display-groups "detail";
+            tailf:info "Timestamp of the last alarm set";
+         }
+         leaf first-event {
+            type string;
+            tailf:cli-preformatted;
+            tailf:display-groups "detail";
+            tailf:info "Timestamp of the first time alarm is set";
+         }
+         leaf severity {
+            type string;
+            tailf:display-groups "detail";
+            tailf:info "Severity of the alarm";
+         }
+         leaf service {
+            type string;
+            tailf:display-groups "detail";
+            tailf:info "Service of the alarm resource";
+         }
+         leaf location {
+            type string;
+            tailf:display-groups "detail";
+            tailf:info "Location of the alarm resource";
+         }
+         leaf description {
+            type string;
+            tailf:display-groups "none detail";
+            tailf:info "Description of the alarm";
+         }
+         leaf reason {
+            type string;
+            tailf:display-groups "detail";
+            tailf:info "Reason information";
+         }
+      } //list alarms
+
+      list event-list {
+           
+         tailf:info "Event List";
+         config false;
+         ordered-by user;  // The first one added is always first in the
+                           // array when list is retrieved.
+
+         tailf:cdb-oper
+         {
+            tailf:persistent false;
+         }
+
+         key "sequence-number";
+
+         tailf:cli-suppress-table;
+         tailf:cli-show-template-enter "";
+
+         tailf:cli-show-template-legend
+                 "$(.display_groups~=detail?:SEQUENCE\nNUMBER     )"
+                +"$(.display_groups~=detail?:TYPE   )"
+                +"$(.display_groups~=detail?:DATE                 )"
+                +"$(.display_groups~=detail?:EVENT NAME     )"
+                +"$(.display_groups~=detail?:SEVERITY   )"
+                +"$(.display_groups~=detail?:SERVICE   )"
+                +"$(.display_groups~=detail?:ENTITY TAG                  )"
+                +"$(.display_groups~=detail?:DESCRIPTION                              )"
+                +"$(.display_groups~=detail?:REASON\n)"
+                +"$(.display_groups~=detail?:----------------------------------------------------------------------------------------------------------------------------------------------)"
+                +"$(.display_groups~=detail?:-----------------------------------------\n)";
+
+        tailf:cli-show-template
+                  "$(.display_groups~=detail?alarms event-list\n" +
+                  " sequence-number  $(sequence-number)\n" +
+                  " type             $(type)\n" +
+                  " date             $(date)\n" +
+                  " event-name       $(event-name)\n" +
+                  " severity         $(severity)\n" +
+                  " service          $(service)\n" +
+                  " entity-tag       $(entity-tag)\n" +
+                  " subentity-tag    $(subentity-tag)\n" +
+                  " location         $(location)\n" +
+                  " description      $(description)\n" +
+                  " reason           $(reason)\n:" +
+                  "$(sequence-number|ljust:10) $(type|ljust:6) " +
+                  "$(date|ljust:20) $(event-name|ljust:14) " +
+                  "$(severity|ljust:10) $(service|ljust:9) " +
+                  "$($(entity-tag|ljust:27)|trunc:27) " +
+                  "$($(description|ljust:40)|trunc:40) " +
+                  "$($(reason|ljust:40)|trunc:40)\n)"
+                {
+                tailf:cli-auto-legend;
+                }
+
+
+         tailf:cli-show-template-footer
+                "$(.?\n% $(.licounter) entries in the table.\n:"
+                +"% No entries in the table.\n)";
+
+         leaf sequence-number {
+            type uint32;
+            tailf:display-groups "none detail";
+            tailf:info "Sequence number of the event";
+         }
+         leaf type {
+            type string;
+            tailf:display-groups "none detail";
+            tailf:info "Type of event";
+         }
+         leaf date {
+            type string;
+            tailf:cli-preformatted;
+            tailf:display-groups "none detail";
+            tailf:info "Timestamp of the event";
+         }
+         leaf event-name {
+            type string;
+            tailf:display-groups "none detail";
+            tailf:info "Name of the alarm";
+         }
+         leaf severity {
+            type string;
+            tailf:display-groups "none detail";
+            tailf:info "Severity of the alarm";
+         }
+         leaf service {
+            type string;
+            tailf:display-groups "none detail";
+            tailf:info "Service of the event";
+         }
+         leaf location {
+            type string;
+            tailf:display-groups "detail";
+            tailf:info "Location of the event";
+         }
+         leaf entity-tag {
+            type string;
+            tailf:display-groups "none detail";
+            tailf:info "Entity tag of event";
+         }
+         leaf subentity-tag {
+            type string;
+            tailf:display-groups "detail";
+            tailf:info "Additional information of entity";
+         }
+         leaf description {
+            type string;
+            tailf:display-groups "none detail";
+            tailf:info "Description of the event";
+         }
+         leaf reason {
+            type string;
+            tailf:display-groups "none detail";
+            tailf:info "Reason information";
+         }
+      } //list event
+  } //alarms container
+
+  grouping request-cmd-output {
+    leaf Success {
+      type string;
+    }
+    leaf Error {
+      type string;
+    }
+  }
+
+  augment "/alarms" {
+    tailf:action clear {
+      tailf:actionpoint cli-request-command;
+      input {
+         leaf index {
+           type uint32;
+           tailf:info "Index of the alarm";
+           mandatory true;
+         }
+      }
+      output {
+         uses request-cmd-output;
+      }
+    }
+  }
+}

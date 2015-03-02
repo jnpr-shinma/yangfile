@@ -1,0 +1,678 @@
+//////////////////////////////////////////////////////////////////////////
+/// @file epcCmnNmCli.yang
+/// @brief Yang definitions for operational commands.
+///        "request mme-sgsn system mgmt lock"
+///        "request mme-sgsn system mgmt unlock"
+///        "request mme-sgsn system mgmt shutdown"
+///        "request mme-sgsn system mgmt switchover"
+///        "request mme-sgsn system callp lock"
+///        "request mme-sgsn system callp unlock"
+///        "request mme-sgsn system callp shutdown"
+///        "request mme-sgsn system callp switchover"
+///        "request mme-sgsn system sig lock"
+///        "request mme-sgsn system sig unlock"
+///        "request mme-sgsn system data lock"
+///        "request mme-sgsn system data unlock"
+///        "request mme-sgsn system data shutdown"
+///        "request mme-sgsn system lb lock"
+///        "request mme-sgsn system lb unlock"
+///        "request mme-sgsn system lb shutdown"
+///        "request mme-sgsn system rm lock"
+///        "request mme-sgsn system rm unlock"
+///        "request mme-sgsn system rm shutdown"
+///        "request mme-sgsn system rm switchover"
+///        "request fgw system mgmt lock"
+///        "request fgw system mgmt unlock"
+///        "request fgw system mgmt shutdown"
+///        "request fgw system mgmt switchover"
+///        "request fgw system callp lock"
+///        "request fgw system callp unlock"
+///        "request fgw system callp shutdown"
+///        "request fgw system callp switchover"
+///        "request fgw system lb lock"
+///        "request fgw system lb unlock"
+///        "request fgw system lb shutdown"
+///        "show mme-sgsn status system"
+///        "show fgw status system"
+///
+/// Maintained by: HCTA
+/// History:
+///
+/// yyyymmmdd Changed by      Change Reason
+/// --------- --------------- --------------------------------------------
+/// 2014Jan15 Mike Lesko      AGW-21104 - Initial development
+/// 2014Jan17 Hardik W        AGW-21104 - Added yang model of show status 
+///                                       system cmd for mme-sgsn and fgw.
+/// 2014Feb28 Mike Lesko      AGW-21104 - Updated action/callpoint info
+/// 2014Mar30 Mike Lesko      AGW-21104 - Remove service-id from callp request 
+///                                       commands
+/// 2014Apr01 Adam Floyd      AGW-21104 - Change some leaf types to match app
+/// 2014Apr17 Adam Floyd      AGW-21104 - Add sort-flag to cp opaque data
+/// 2014May15 Irina Pershwitz AGW-21105 - Load Balancer VM
+/// 2014Jul20 Sujay R         AGW-22082 - Added RM Vm support.
+/// 2014Aug15 Adam Floyd      AGW-23534 - Remove fake-key kludge
+/// 2014Sep04 Akash Gupta     AGW-23574 - Remove sig vm switchover
+/// 2014Sep15 Lakshmi Priya   AGW-22082 - Schema upgrade
+///
+/// Copyright (c) 2014 HCTA. All Rights Reserved.
+///
+/// CONFIDENTIALITY AND LIMITED USE
+///
+/// This software, including any software of third parties embodied herein,
+/// contains information and concepts which are confidential to HCTA
+/// and such third parties. This software is licensed for use
+/// solely in accordance with the terms and conditions of the applicable
+/// license agreement with HCTA or its authorized distributor.
+//////////////////////////////////////////////////////////////////////////
+submodule epcCmnNmCli{
+  belongs-to hcta-epc {
+     prefix epc; 
+  }
+
+  import tailf-common {
+     prefix tailf;
+  }
+
+  include mmeSgsnConfig;
+  include fgwConfig;
+  include scConfig;
+  include s1MasterConfig;
+
+  include cmdCommonHcta;
+
+  augment "/mme-sgsn/system/mgmt" {
+    tailf:action lock {
+      tailf:actionpoint cli-request-command;
+      input {
+         leaf unit-id {
+           type uint8;
+           mandatory true;
+         }
+         container force {
+           presence "";
+         }
+      }
+      output {
+         uses request-cmd-output;
+      }
+    }
+
+    tailf:action unlock {
+      tailf:actionpoint cli-request-command;
+      input {
+         leaf unit-id {
+           type uint8;
+           mandatory true;
+         }
+      }
+      output {
+         uses request-cmd-output;
+      }
+    }
+
+    tailf:action shutdown {
+      tailf:actionpoint cli-request-command;
+      input {
+         leaf unit-id {
+           type uint8;
+           mandatory true;
+         }
+         container force {
+           presence "";
+         }
+      }
+      output {
+         uses request-cmd-output;
+      }
+    }
+
+    tailf:action switchover {
+      tailf:actionpoint cli-request-command;
+      output {
+         uses request-cmd-output;
+      }
+    }
+  }
+
+  augment "/mme-sgsn/system/rm" {
+    tailf:action lock {
+      tailf:actionpoint cli-request-command;
+      input {
+         leaf unit-id {
+           type uint8;
+           mandatory true;
+         }
+         container force {
+           presence "";
+         }
+      }
+      output {
+         uses request-cmd-output;
+      }
+    }
+
+    tailf:action unlock {
+      tailf:actionpoint cli-request-command;
+      input {
+         leaf unit-id {
+           type uint8;
+           mandatory true;
+         }
+      }
+      output {
+         uses request-cmd-output;
+      }
+    }
+
+    tailf:action shutdown {
+      tailf:actionpoint cli-request-command;
+      input {
+         leaf unit-id {
+           type uint8;
+           mandatory true;
+         }
+         container force {
+           presence "";
+         }
+      }
+      output {
+         uses request-cmd-output;
+      }
+    }
+
+    tailf:action switchover {
+      tailf:actionpoint cli-request-command;
+      output {
+         uses request-cmd-output;
+      }
+    }
+  }
+
+  augment "/mme-sgsn/system/callp" {
+    tailf:action lock {
+      tailf:actionpoint cli-request-command;
+      input {
+         leaf unit-id {
+           type uint8;
+           mandatory true;
+         }
+         container force {
+           presence "";
+         }
+      }
+      output {
+         uses request-cmd-output;
+      }
+    }
+
+    tailf:action unlock {
+      tailf:actionpoint cli-request-command;
+      input {
+         leaf unit-id {
+           type uint8;
+           mandatory true;
+         }
+      }
+      output {
+         uses request-cmd-output;
+      }
+    }
+
+    tailf:action shutdown {
+      tailf:actionpoint cli-request-command;
+      input {
+         leaf unit-id {
+           type uint8;
+           mandatory true;
+         }
+         container force {
+           presence "";
+         }
+      }
+      output {
+         uses request-cmd-output;
+      }
+    }
+
+    tailf:action switchover {
+      tailf:actionpoint cli-request-command;
+      input {
+      }
+      output {
+         uses request-cmd-output;
+      }
+    }
+  }
+
+  augment "/mme-sgsn/system/sig" {
+    tailf:action lock {
+      tailf:actionpoint cli-request-command;
+      input {
+         leaf unit-id {
+           type uint8;
+           mandatory true;
+         }
+         container force {
+           presence "";
+         }
+      }
+      output {
+         uses request-cmd-output;
+      }
+    }
+
+    tailf:action unlock {
+      tailf:actionpoint cli-request-command;
+      input {
+         leaf unit-id {
+           type uint8;
+           mandatory true;
+         }
+      }
+      output {
+         uses request-cmd-output;
+      }
+    }
+
+    tailf:action shutdown {
+      tailf:actionpoint cli-request-command;
+      input {
+         leaf unit-id {
+           type uint8;
+           mandatory true;
+         }
+         container force {
+           presence "";
+         }
+      }
+      output {
+         uses request-cmd-output;
+      }
+    }
+  }
+
+  augment "/mme-sgsn/system/data" {
+    tailf:action lock {
+      tailf:actionpoint cli-request-command;
+      input {
+        leaf unit-id {
+          type uint8;
+          mandatory true;
+        }
+         container force {
+           presence "";
+         }
+      }
+      output {
+         uses request-cmd-output;
+      }
+    }
+
+    tailf:action unlock {
+      tailf:actionpoint cli-request-command;
+      input {
+        leaf unit-id {
+          type uint8;
+          mandatory true;
+        }
+      }
+      output {
+         uses request-cmd-output;
+      }
+    }
+
+    tailf:action shutdown {
+      tailf:actionpoint cli-request-command;
+      input {
+         leaf unit-id {
+           type uint8;
+           mandatory true;
+         }
+         container force {
+           presence "";
+         }
+      }
+      output {
+         uses request-cmd-output;
+      }
+    }
+  }
+
+  augment "/mme-sgsn/system/lb" {
+    tailf:action lock {
+      tailf:actionpoint cli-request-command;
+      input {
+        leaf unit-id {
+          type uint8;
+          mandatory true;
+        }
+         container force {
+           presence "";
+         }
+      }
+      output {
+         uses request-cmd-output;
+      }
+    }
+
+    tailf:action unlock {
+      tailf:actionpoint cli-request-command;
+      input {
+        leaf unit-id {
+          type uint8;
+          mandatory true;
+        }
+      }
+      output {
+         uses request-cmd-output;
+      }
+    }
+
+    tailf:action shutdown {
+      tailf:actionpoint cli-request-command;
+      input {
+         leaf unit-id {
+           type uint8;
+           mandatory true;
+         }
+         container force {
+           presence "";
+         }
+      }
+      output {
+         uses request-cmd-output;
+      }
+    }
+  }
+
+  augment "/fgw/system/mgmt" {
+    tailf:action lock {
+      tailf:actionpoint cli-request-command;
+      input {
+         leaf unit-id {
+           type uint8;
+           mandatory true;
+         }
+         container force {
+           presence "";
+         }
+      }
+      output {
+         uses request-cmd-output;
+      }
+    }
+
+    tailf:action unlock {
+      tailf:actionpoint cli-request-command;
+      input {
+         leaf unit-id {
+           type uint8;
+           mandatory true;
+         }
+      }
+      output {
+         uses request-cmd-output;
+      }
+    }
+
+    tailf:action shutdown {
+      tailf:actionpoint cli-request-command;
+      input {
+         leaf unit-id {
+           type uint8;
+           mandatory true;
+         }
+         container force {
+           presence "";
+         }
+      }
+      output {
+         uses request-cmd-output;
+      }
+    }
+
+    tailf:action switchover {
+      tailf:actionpoint cli-request-command;
+      output {
+         uses request-cmd-output;
+      }
+    }
+  }
+
+  augment "/fgw/system/callp" {
+    tailf:action lock {
+      tailf:actionpoint cli-request-command;
+      input {
+         leaf unit-id {
+           type uint8;
+           mandatory true;
+         }
+         container force {
+           presence "";
+         }
+      }
+      output {
+         uses request-cmd-output;
+      }
+    }
+
+    tailf:action unlock {
+      tailf:actionpoint cli-request-command;
+      input {
+         leaf unit-id {
+           type uint8;
+           mandatory true;
+         }
+      }
+      output {
+         uses request-cmd-output;
+      }
+    }
+
+    tailf:action shutdown {
+      tailf:actionpoint cli-request-command;
+      input {
+         leaf unit-id {
+           type uint8;
+           mandatory true;
+         }
+         container force {
+           presence "";
+         }
+      }
+      output {
+         uses request-cmd-output;
+      }
+    }
+
+    tailf:action switchover {
+      tailf:actionpoint cli-request-command;
+      input {
+      }
+      output {
+         uses request-cmd-output;
+      }
+    }
+  }
+
+
+  augment "/fgw/system/lb" {
+    tailf:action lock {
+      tailf:actionpoint cli-request-command;
+      input {
+        leaf unit-id {
+          type uint8;
+          mandatory true;
+        }
+         container force {
+           presence "";
+         }
+      }
+      output {
+         uses request-cmd-output;
+      }
+    }
+
+    tailf:action unlock {
+      tailf:actionpoint cli-request-command;
+      input {
+        leaf unit-id {
+          type uint8;
+          mandatory true;
+        }
+      }
+      output {
+         uses request-cmd-output;
+      }
+    }
+
+    tailf:action shutdown {
+      tailf:actionpoint cli-request-command;
+      input {
+         leaf unit-id {
+           type uint8;
+           mandatory true;
+         }
+         container force {
+           presence "";
+         }
+      }
+      output {
+         uses request-cmd-output;
+      }
+    }
+  }
+
+
+  augment "/mme-sgsn/status" {
+      list mme-sgsn-system {
+         tailf:alt-name "system";
+         tailf:info "System status per VM";
+         config false;
+         ordered-by user; // not for use with keyed lists
+         tailf:cli-no-key-completion;
+
+         tailf:callpoint cli_oper_show
+         {
+            // Callpoint Opaque Data Format (255 chars max):
+            // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+            tailf:opaque '0:mme-sgsn status system::0';
+         }
+
+         leaf location {
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf service {
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf unit-id {
+            type uint8;
+            tailf:display-groups "none detail";
+         }
+         leaf admin {
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf oper {
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf standby {
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf usage {
+            type string;
+            tailf:display-groups "detail";
+         }
+         leaf availability {
+            type string;
+            tailf:display-groups "detail";
+         }
+         leaf procedural {
+            type string;
+            tailf:display-groups "detail";
+         }
+         leaf cpu {
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf memory {
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf sync {
+            type string;
+            tailf:display-groups "none detail";
+         }
+      } /* mme-sgsn-system */
+   } /* mme-sgsn/status */
+
+   augment "/fgw/status" {
+      list fgw-system {
+         tailf:alt-name "system";
+         tailf:info "System status per VM";
+         config false;
+         ordered-by user; // not for use with keyed lists
+         tailf:cli-no-key-completion;
+
+         tailf:callpoint cli_oper_show
+         {      
+           // Callpoint Opaque Data Format (255 chars max):
+           // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+           tailf:opaque '0:fgw status system::0';
+         }
+
+         leaf location {
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf service {
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf unit-id {
+            type uint8;
+            tailf:display-groups "none detail";
+         }
+         leaf admin {
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf oper {
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf standby {
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf usage {
+            type string;
+            tailf:display-groups "detail";
+         }
+         leaf availability {
+            type string;
+            tailf:display-groups "detail";
+         }
+         leaf procedural {
+            type string;
+            tailf:display-groups "detail";
+         }
+         leaf cpu {
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf memory {
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf sync {
+            type string;
+            tailf:display-groups "none detail";
+         }
+      } /* fgw-system */
+   } /* fgw/status */  
+}

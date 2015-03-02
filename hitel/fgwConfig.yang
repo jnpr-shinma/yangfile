@@ -1,0 +1,274 @@
+//////////////////////////////////////////////////////////////////////////
+/// @file fgwConfig.yang
+/// @brief Yang definitions fgw system config.
+///
+/// Maintained by: HCTA
+/// History:
+///
+/// yyyymmmdd Changed by      Change Reason
+/// --------- --------------- --------------------------------------------
+/// 2014Feb05 Irina Pershwitz AGW-21103 - Initial development
+/// 2014Feb28 Mike Lesko      AGW-21104 - Removed commented callpoint
+/// 2014Apr01 Adam Floyd      AGW-21104 - Add status container w/o presence
+/// 2014Apr17 Adam Floyd      AGW-21104 - Block global show-all
+/// 2014May09 Kaori Tong      AGW-22080 - Remove external-ip-address and 
+///                           add oam-ip-address
+/// 2014May15 Adam Floyd      AGW-22345 - Change steering mode enum vals
+/// 2014May15 Irina Pershwitz AGW-21105 - Load Balancer VM
+/// 2014May20 Matt Kloppmann  AGW-22444 - Add Support for 3 CallP VMs
+/// 2014May30 Adam Floyd      AGW-22346 - Hide steering mode leaf
+/// 2014Jun26 Ajit Singh      AGW-22812 - remove hidden flags.
+/// 2014Aug27 Irina Pershwitz AGW-22082 - Tail-f OAM Enhancements
+/// 2014Sep08 Irina Pershwitz AGW-22082 - Tail-f OAM Enhancements
+/// 2014Sep15 Lakshmi Priya   AGW-22082 - Schema upgrade
+/// 2014Oct24 Irina Pershwitz AGW-24023 - NTP config - oam ip
+///
+/// Copyright (c) 2014 HCTA. All Rights Reserved.
+///
+/// CONFIDENTIALITY AND LIMITED USE
+///
+/// This software, including any software of third parties embodied herein,
+/// contains information and concepts which are confidential to HCTA
+/// and such third parties. This software is licensed for use
+/// solely in accordance with the terms and conditions of the applicable
+/// license agreement with HCTA or its authorized distributor.
+//////////////////////////////////////////////////////////////////////////
+
+submodule fgwConfig {
+
+  belongs-to hcta-epc {
+     prefix epc;
+  }
+
+  import tailf-common {
+    prefix tailf;
+  }
+  
+  import ietf-inet-types {
+    prefix inet;
+  }
+
+  import hcta-routing {
+    prefix routing;
+  }
+
+  include mtuConfig;
+
+  container fgw 
+  {
+    presence "";
+    tailf:info "Femto-Gateway configuration";
+    tailf:cli-incomplete-show-path;
+     
+    must "count(../mme-sgsn) = 0" {
+      error-message
+        "Either 'mme-sgsn' or 'fgw' could be configured.";  
+         tailf:dependency "../mme-sgsn";
+    }
+    
+    leaf instance-name {
+      tailf:info "The Femto-Gateway instance name";
+      type string{
+        length "1..64";
+      }
+      mandatory true;
+      must "not(/mme-sgsn[instance-name = current()])"{
+        error-message 
+              "The 'instance-name' is already used by an 'fgw' object";
+          tailf:dependency "/mme-sgsn";  	
+      } 
+    }
+    leaf instance-number {
+      tailf:info "The Femto-Gateway instance number";
+      type uint16 {
+        range 1..254;
+      } 
+      mandatory true;	  
+      must "not(/mme-sgsn[instance-number = current()])"{
+        error-message 
+         "The 'instance-number' is already used by an 'mme-sgsn' object";
+        tailf:dependency "/mme-sgsn";  	
+      } 
+    }
+    leaf oam-ip-address {
+      tailf:info "Floating IP address for interface towards NMS.";
+      type inet:ip-address;
+    }
+   
+    container status {
+      tailf:info "Status objects";
+    }
+
+    container system {
+      tailf:info "FGW System Configuration";
+      leaf opmode {
+        tailf:info "Operating mode";
+        type enumeration {
+          enum "product";
+          enum "desktop";
+          enum "lab"; 
+        }
+        default "product";
+        /*hidden internal;*/
+      }
+      leaf steering {
+        tailf:info "Steering mechanism";
+        type enumeration {
+          enum "contrail";
+          enum "off";
+          enum "load-balancer";
+        }
+        default "contrail";
+      }
+
+      uses system-mtu;
+	
+      container mgmt {
+        tailf:info "Management VM";
+          list unit {
+            tailf:info "Management VM unit";
+            key "unit-id";
+            max-elements 2;
+            leaf unit-id{
+              tailf:info "Management VM unit identifier";
+              type uint16 {
+                range "0..1";
+              }
+            }
+            leaf vm-instance {
+              tailf:info "Virtual machine instance";
+              mandatory true;
+              type string {
+                length "1..64";
+              }
+              must "(count(../../../mgmt/unit[vm-instance = current()]) = 1) or (../../../opmode = 'lab')"
+              {
+                error-message "The 'vm-instance' is already used by another 'fgw system mgmt unit'";
+                tailf:dependency ".";
+              }
+              must "(count(../../../lb/unit[vm-instance = current()]) = 0) or (../../../opmode = 'lab')"
+              {
+                error-message "The 'vm-instance' is already used by another 'fgw system lb unit'";
+                tailf:dependency ".";
+              }
+              must "(count(../../../callp/unit[vm-instance = current()]) = 0) or (../../../opmode = 'lab')"
+              {
+                error-message "The 'vm-instance' is already used by another 'fgw system callp unit'";
+                tailf:dependency ".";
+              }
+            }
+            leaf mgmt-oam-ip-address {
+                tailf:info "The OAM IP address";
+                tailf:display-when "../../../steering = 'contrail'";   	    
+                type tailf:ip-address-and-prefix-length;
+            }	     
+          }  /* unit */
+        }  /* mgmt */
+        list callp {
+          tailf:info "Call Processing VM";
+          max-elements 32;
+          key "service-id";  
+          leaf service-id {
+            tailf:info "Call Processing VM identifier";
+              type uint16 {
+              range "0..31";
+            }
+          }
+          list unit {
+            tailf:info "Call Processing VM unit";
+            max-elements 2;
+            key "unit-id";
+            leaf unit-id {
+              tailf:info "Call Processing VM unit identifier";
+              type uint16 {
+                range "0..1";
+            }
+          }
+          leaf vm-instance {
+            tailf:info "Virtual machine instance";
+            mandatory true;
+            type string {
+              length "1..64";
+            } 
+            must "(count(../../../mgmt/unit[vm-instance = current()]) = 0) or (../../../opmode = 'lab')"
+            {
+              error-message "The 'vm-instance' is already used by another 'fgw system mgmt unit'";
+              tailf:dependency "../../../";
+            }
+            must "(count(../../../lb/unit[vm-instance = current()]) = 0) or (../../../opmode = 'lab')"
+            {
+              error-message "The 'vm-instance' is already used by another 'fgw system lb unit'";
+              tailf:dependency "../../../";
+            }
+            must "(count(../../../callp/unit[vm-instance = current()]) = 1) or (../../../opmode = 'lab')"
+            {
+              error-message "The 'vm-instance' is already used by another 'fgw system callp unit'";
+              tailf:dependency "../../../";
+            }
+          }
+        } /* unit */
+      }  /* callp */
+      container lb {
+        tailf:info "Load Balancing Control VM";
+        list unit{
+          tailf:info "Load Balancing Control VM unit";
+          max-elements 8;
+          key "unit-id";
+          leaf unit-id{
+            tailf:info "Load Balancing Control VM unit identifier";
+            type uint16 {
+              range "0..7";
+            }
+            must "((count(/routing:routing-instances/routing:instance)) = 
+                  (count(/routing:routing-instances/routing:instance/routing:lb-instances/routing:lb-instance[routing:unit-id = current()])))"
+            {
+               error-message "'lb-instance' must be configured for every 'routing-instances instance' component.";
+               tailf:dependency "/routing:routing-instances/routing:instance";
+            }
+	    
+          } 
+          leaf vm-instance {
+            tailf:info "Virtual machine instance";
+            mandatory true;
+            type string {
+              length "1..64";
+            } 
+            must "(count(../../../mgmt/unit[vm-instance = current()]) = 0) or (../../../opmode = 'lab')"
+            {
+              error-message "The 'vm-instance' is already used by another 'fgw system mgmt unit'";
+              tailf:dependency "../../../";
+            }
+            must "(count(../../../lb/unit[vm-instance = current()]) = 0) or (../../../opmode = 'lab')"
+            {
+              error-message "The 'vm-instance' is already used by another 'fgw system lb unit'";
+              tailf:dependency "../../../";
+            }
+            must "(count(../../../callp/unit[vm-instance = current()]) = 1) or (../../../opmode = 'lab')"
+            {
+              error-message "The 'vm-instance' is already used by another 'fgw system callp unit'";
+              tailf:dependency "../../../";
+            }
+          }
+        } /* unit */
+      } /* lb */	
+      leaf transaction {
+         tailf:hidden full;	
+         tailf:info "Transaction id";
+         type string {
+                length "1..128";
+         }
+      }	
+    } /* system */ 
+    
+    container interface {
+      tailf:info "Interface Objects";
+    }	 
+    container engineering {
+      tailf:info "Engineering Objects";
+    }	
+    container service-area {
+      tailf:info "Service-area Objects";
+    }	
+       
+  }
+}

@@ -1,0 +1,85 @@
+//////////////////////////////////////////////////////////////////////////
+/// @file mtuConfig.yang
+/// @brief Yang definitions mtu config.
+///
+/// Maintained by: HCTA
+/// History:
+///
+/// yyyymmmdd Changed by      Change Reason
+/// --------- --------------- --------------------------------------------
+/// 2014Feb15 Irina Pershwitz AGW-21105 - Initial development
+/// 2014Sep15 Lakshmi Priya   AGW-22082 - Schema upgrade
+///
+/// Copyright (c) 2014 HCTA. All Rights Reserved.
+///
+/// CONFIDENTIALITY AND LIMITED USE
+///
+/// This software, including any software of third parties embodied herein,
+/// contains information and concepts which are confidential to HCTA
+/// and such third parties. This software is licensed for use
+/// solely in accordance with the terms and conditions of the applicable
+/// license agreement with HCTA or its authorized distributor.
+//////////////////////////////////////////////////////////////////////////
+submodule mtuConfig{
+
+  belongs-to hcta-epc {
+    prefix epc;
+  }
+
+  import tailf-common {
+    prefix tailf;
+  }
+
+  organization "Hitachi-CTA";
+  description
+       "The module routing.";
+
+  revision 2014-01-09 {
+    description  "EPC8.0 Initial creation";
+  }
+  
+  typedef mtu-type {
+    type uint16 {
+      range 500..9000;      
+    }
+  }
+
+  grouping system-mtu {
+    container system-mtu {
+      tailf:validate mtuValidate;
+      
+      tailf:alt-name "mtu";      
+      tailf:info "Maximum transmission units per VM interface.";  
+      leaf mgmt-mtu {
+        tailf:alt-name "mgmt";      
+        type mtu-type;
+        tailf:info "MTU of mgmt internal network.";
+        default 1500; 	  
+      }
+      leaf inter-vm-mtu {
+        tailf:alt-name "inter-vm";      
+        type mtu-type;
+        tailf:info "MTU of inter-vm internal network.";
+        default 1500; 	  
+      }
+      leaf data-mtu {
+        type mtu-type;
+        tailf:alt-name "data";      
+        tailf:info "MTU of data internal network.";
+        default 1500; 	  
+      }
+      leaf external-if1-mtu {
+        type mtu-type;
+        tailf:alt-name "external-if1";      
+        tailf:info "MTU of first passthrough interface.";
+        default 1500; 	  
+      }
+      leaf external-if2-mtu {
+        type mtu-type;
+        tailf:alt-name "external-if2";      
+        tailf:info "MTU of second passthrough interface.";
+        default 1500; 	  
+      }	   
+    }// mtu - container
+  }    
+}

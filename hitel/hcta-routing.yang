@@ -1,0 +1,303 @@
+//////////////////////////////////////////////////////////////////////////
+/// @file hcta-routing.yang
+/// @brief Yang definitions routing config.
+///
+/// Maintained by: HCTA
+/// History:
+///
+/// yyyymmmdd Changed by      Change Reason
+/// --------- --------------- --------------------------------------------
+/// 2014Feb15 Irina Pershwitz AGW-21103 - Initial development
+/// 2014Jun09 Irina Pershwitz AGW-21105 - Load Balancer VM
+/// 2014Sep15 Lakshmi Priya   AGW-22082 - Schema upgrade.
+/// 2014Oct01 Irina Pershwitz AGW-23761 - Added lbInstancesValidate and
+///                                       dataInstancesValidate escapes
+///
+/// Copyright (c) 2014 HCTA. All Rights Reserved.
+///
+/// CONFIDENTIALITY AND LIMITED USE
+///
+/// This software, including any software of third parties embodied herein,
+/// contains information and concepts which are confidential to HCTA
+/// and such third parties. This software is licensed for use
+/// solely in accordance with the terms and conditions of the applicable
+/// license agreement with HCTA or its authorized distributor.
+//////////////////////////////////////////////////////////////////////////
+
+module hcta-routing {
+  namespace "http://hitachi-cta.com/ns/routing";
+  prefix routing;
+
+  import tailf-common {
+    prefix tailf;
+  }
+
+  organization "Hitachi-CTA";
+  description
+       "The module routing.";
+
+  revision 2014-09-18 {
+    description  "EPC8.0";
+  }
+
+  grouping lb-data-instance-group {
+    leaf if1-ipv4-addr {
+      tailf:info "IP v4 address and prefix length of the interface 1.";
+      type tailf:ipv4-address-and-prefix-length;
+      must "(../../../next-hop-ipv4-gw-addr1)" {
+        error-message
+          "If 'if1-ipv4-addr' is provisioned then 'next-hop-ipv4-gw-addr1' must be provisioned.";
+        tailf:dependency "../../../../";
+      }
+    }
+    leaf if1-ipv6-addr {
+      tailf:info "IP v6 address and prefix length of the interface 1.";
+      type tailf:ipv6-address-and-prefix-length;
+      must "(../../../next-hop-ipv6-gw-addr1)" {
+        error-message
+          "If 'if1-ipv6-addr' is provisioned then 'next-hop-ipv6-gw-addr1' must be provisioned.";
+        tailf:dependency "../../../../";
+      }
+    }
+    leaf if2-ipv4-addr {
+      tailf:info "IP v4 address and prefix length of the interface 2.";
+      type tailf:ipv4-address-and-prefix-length;
+      must "(../../../vlan-host-interface2)" {
+        error-message
+          "If 'if2-ipv4-addr' is provisioned then 'vlan-host-interface2' must be provisioned.";
+        tailf:dependency "../../../../";
+      }
+      must "(../../../next-hop-ipv4-gw-addr2)" {
+        error-message
+          "If 'if2-ipv4-addr' is provisioned then 'next-hop-ipv4-gw-addr2' must be provisioned.";
+        tailf:dependency "../../../../";
+      }
+    }
+    leaf if2-ipv6-addr {
+      tailf:info "IP v6 address and prefix length of the interface 2.";
+      type tailf:ipv6-address-and-prefix-length;
+      must "(../../../vlan-host-interface2)" {
+        error-message
+          "If 'if2-ipv6-addr' is provisioned then 'vlan-host-interface2' must be provisioned.";
+        tailf:dependency "../../../../";
+      }	     
+      must "(../../../next-hop-ipv6-gw-addr2)" {
+        error-message
+          "If 'if2-ipv6-addr' is provisioned then 'next-hop-ipv6-gw-addr2' must be provisioned.";
+        tailf:dependency "../../../../";
+      }
+    }
+  }
+
+  container routing-instances {
+    tailf:info "Routing instance.";
+    list instance {     
+      max-elements 64;
+      key "name";  
+      unique "vlan-tag1";
+      unique "vlan-tag2";
+      tailf:info "Instance."; 
+      must "(next-hop-ipv4-gw-addr1 or next-hop-ipv6-gw-addr1)" {
+          error-message
+            "Either 'next-hop-ipv4-gw-addr1' or 'next-hop-ipv6-gw-addr1' must be provisioned.";
+          tailf:dependency "../";
+      }
+      must "(not(vlan-host-interface2) or (next-hop-ipv4-gw-addr2 or next-hop-ipv6-gw-addr2))" {
+          error-message
+             "If 'vlan-host-interface2' is provisioned then either 'next-hop-ipv4-gw-addr2' or 'next-hop-ipv6-gw-addr2' must be provisioned.";
+          tailf:dependency ".";
+      }
+      must "(not(vlan-host-interface2) or (vlan-tag2))" {
+          error-message
+             "If 'vlan-host-interface2' is provisioned then 'vlan-tag2' must be provisioned.";
+          tailf:dependency ".";
+      }
+      must "(not(vlan-tag2) or (vlan-host-interface2))" {
+          error-message
+             "If 'vlan-tag2' is provisioned then 'vlan-host-interface2' must be provisioned.";
+          tailf:dependency ".";
+      }
+      
+      leaf name {
+         tailf:info "Instance.";
+         type string {
+           length "1..64";
+         }
+      } 	  
+      leaf vlan-tag1 {
+         tailf:info "VLAN tag for host interface 1.";
+         type uint16 {
+           range "1..4095";
+         }
+         must "(count(../../instance[vlan-tag2 = current()]) = 0)" {
+           error-message
+              "'vlan-tag1' and 'vlan-tag2' must be unique across routing instances.";
+           tailf:dependency "../../";	      
+         }
+         mandatory true;
+      }
+      leaf vlan-tag2 {
+         tailf:info "VLAN tag for host interface 2.";
+         type uint16 {
+           range "1..4095";
+         }
+         must "(count(../../instance[vlan-tag1 = current()]) = 0)" {
+           error-message
+              "'vlan-tag1' and 'vlan-tag2' must be unique across routing instances..";
+           tailf:dependency "../../";	      
+         }
+      }
+      leaf next-hop-ipv4-gw-addr1 {
+         tailf:info "IP v4 address and prefix length of the VLAN interface on the next hop router.";
+         type tailf:ipv4-address-and-prefix-length;
+      } 	  
+      leaf next-hop-ipv6-gw-addr1 {
+         tailf:info "IP v6 address and prefix length of the VLAN interface on the next hop router.";
+         type tailf:ipv6-address-and-prefix-length;
+      }
+      leaf next-hop-ipv4-gw-addr2 {
+         tailf:info "IP v4 address and prefix length of the VLAN interface on the next hop router.";
+         type tailf:ipv4-address-and-prefix-length;
+         must "(../vlan-host-interface2)" {
+           error-message
+               "If 'next-hop-ipv4-gw-addr2' is provisioned then 'vlan-host-interface2' must be provisioned.";
+           tailf:dependency "../";
+         }	     
+      } 	  
+      leaf next-hop-ipv6-gw-addr2 {
+         tailf:info "IP v6 address and prefix length of the VLAN interface on the next hop router.";
+         type tailf:ipv6-address-and-prefix-length;
+         must "(../vlan-host-interface2)" {
+           error-message
+               "If 'next-hop-ipv6-gw-addr2' is provisioned then 'vlan-host-interface2' must be provisioned.";
+           tailf:dependency "../";
+         }	     
+      }
+      must "((vlan-host-interface1 != vlan-host-interface2) or not(vlan-host-interface2))" {
+        error-message
+            "The 'vlan-host-interface1' must not be same as 'vlan-host-interface2'.";
+        tailf:dependency ".";
+      }	     
+      
+      leaf vlan-host-interface1 {
+         tailf:info "VLAN host interface 1.";
+         type string {
+  	   pattern 'eth[0-9]|eth[1-9][0-9]';
+         }
+         mandatory true;
+      }   	  
+      leaf vlan-host-interface2 {
+         tailf:info "VLAN host interface 2.";
+         type string {
+  	   pattern 'eth[0-9]|eth[1-9][0-9]';
+         }
+      }   	  
+      container lb-instances {
+        presence "";      
+        tailf:cli-no-keyword;
+        tailf:alt-name "";
+        tailf:validate lbInstancesValidate;
+        list lb-instance {     
+          max-elements 8;
+          key "unit-id";  
+          unique "if1-ipv4-addr";
+          unique "if1-ipv6-addr";
+          tailf:info "Load Balancing Control instances."; 
+	  
+          must "(if1-ipv4-addr or if1-ipv6-addr)" {
+               error-message
+               "Either 'if1-ipv4-addr' or 'if1-ipv6-addr' must be provisioned.";
+                tailf:dependency "../../../";
+          }
+          must "(not(../../vlan-host-interface2) or (if2-ipv4-addr or if2-ipv6-addr))" {
+               error-message
+               "If 'vlan-host-interface2' is provisioned then either 'if2-ipv4-addr' or 'if2-ipv6-addr' must be provisioned.";
+                tailf:dependency "../../../";
+          }
+          must "(not(../../next-hop-ipv4-gw-addr1) or if1-ipv4-addr)" {
+               error-message
+               "If 'next-hop-ipv4-gw-addr1' is provisioned then 'if1-ipv4-addr' must be provisioned.";
+                tailf:dependency "../../../";
+          }
+          must "(not(../../next-hop-ipv6-gw-addr1) or if1-ipv6-addr)" {
+               error-message
+               "If 'next-hop-ipv6-gw-addr1' is provisioned then 'if1-ipv6-addr' must be provisioned.";
+                tailf:dependency "../../../";
+          }
+          must "(not(../../next-hop-ipv4-gw-addr2) or if2-ipv4-addr)" {
+               error-message
+               "If 'next-hop-ipv4-gw-addr2' is provisioned then 'if2-ipv4-addr' must be provisioned.";
+                tailf:dependency "../../../";
+          }
+
+          must "(not(../../next-hop-ipv6-gw-addr2) or if2-ipv6-addr)" {
+               error-message
+               "If 'next-hop-ipv6-gw-addr2' is provisioned then 'if2-ipv6-addr' must be provisioned.";
+                tailf:dependency "../../../";
+          }
+          leaf unit-id {
+            tailf:info "Load Balancing Control VM unit identifier";
+            type uint16 {
+              range "0..7";
+            }
+          }
+          uses lb-data-instance-group;
+	  
+        } //lb-instance list       
+      } //container lb-instances
+      container data-instances {
+        presence "";    
+        tailf:cli-no-keyword;
+        tailf:alt-name "";
+        tailf:validate dataInstancesValidate;
+        list data-instance {     
+          max-elements 15;
+          key "unit-id";  
+          unique "if1-ipv4-addr";
+          unique "if1-ipv6-addr";
+          tailf:info "Data instances."; 
+          must "(if1-ipv4-addr or if1-ipv6-addr)" {
+               error-message
+               "Either 'if1-ipv4-addr' or 'if1-ipv6-addr' must be provisioned.";
+                tailf:dependency "../../../";
+          }
+          must "(not(../../vlan-host-interface2) or (if2-ipv4-addr or if2-ipv6-addr))" {
+               error-message
+               "If 'vlan-host-interface2' is provisioned then either 'if2-ipv4-addr' or 'if2-ipv6-addr' must be provisioned.";
+                tailf:dependency "../../../";
+          }
+          must "(not(../../next-hop-ipv4-gw-addr1) or if1-ipv4-addr)" {
+               error-message
+               "If 'next-hop-ipv4-gw-addr1' is provisioned then 'if1-ipv4-addr' must be provisioned.";
+                tailf:dependency "../../../";
+          }
+          must "(not(../../next-hop-ipv6-gw-addr1) or if1-ipv6-addr)" {
+               error-message
+               "If 'next-hop-ipv6-gw-addr1' is provisioned then 'if1-ipv6-addr' must be provisioned.";
+                tailf:dependency "../../../";
+          }
+          must "(not(../../next-hop-ipv4-gw-addr2) or if2-ipv4-addr)" {
+               error-message
+               "If 'next-hop-ipv4-gw-addr2' is provisioned then 'if2-ipv4-addr' must be provisioned.";
+                tailf:dependency "../../../";
+          }
+
+          must "(not(../../next-hop-ipv6-gw-addr2) or if2-ipv6-addr)" {
+               error-message
+               "If 'next-hop-ipv6-gw-addr2' is provisioned then 'if2-ipv6-addr' must be provisioned.";
+                tailf:dependency "../../../";
+          }
+	  
+          leaf unit-id {
+            tailf:info "Data VM unit identifier";
+            type uint16 {
+              range "0..31";
+            }
+          }
+          uses lb-data-instance-group;
+	  	  
+        } //data-instance list       
+      } //container data-instances
+    } // instance list
+  } //routing-intstances container
+}

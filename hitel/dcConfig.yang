@@ -1,0 +1,558 @@
+//////////////////////////////////////////////////////////////////////////
+/// @file dcConfig.yang
+/// @brief Yang groups definitions for DC operational commands.
+///
+/// Maintained by: HCTA
+/// History:
+///
+/// yyyymmmdd Changed by      Change Reason
+/// --------- --------------- --------------------------------------------
+/// 2014Oct07 P Visuthisen    AGW-23943 Prop from MME7.0 to MME8.0
+///
+/// Copyright (c) 2014 HCTA. All Rights Reserved.
+///
+/// CONFIDENTIALITY AND LIMITED USE
+///
+/// This software, including any software of third parties embodied herein,
+/// contains information and concepts which are confidential to HCTA
+/// and such third parties. This software is licensed for use
+/// solely in accordance with the terms and conditions of the applicable
+/// license agreement with HCTA or its authorized distributor.
+//////////////////////////////////////////////////////////////////////////
+submodule dcConfig{
+
+belongs-to hcta-epc {
+    prefix epc;
+}
+
+import tailf-common {
+    prefix tailf;
+}
+
+include mmeSgsnConfig;
+
+include fgwConfig;
+
+include s1MasterConfig;
+include cmdCommonHcta;
+import ietf-inet-types {
+    prefix inet;
+}
+
+augment "/mme-sgsn" {
+    container imsi-routing {
+        tailf:info "IMSI routing objects";
+        
+        list mme-hss-hlr-routing {
+            max-elements 1000;
+            key "imsi-range";
+            tailf:alt-name "hss-hlr-routing ";
+            tailf:validate hssHlrRoutingValidate {
+                tailf:call-once "true";
+            }
+            tailf:info "HSS HLR ROUTING.";
+            leaf  imsi-range {
+                type string {
+                    length 3..31;  
+                    pattern '(([1-9][0-9]{2,14})|([1-9][0-9]{2,14}[\-][1-9][0-9]{2,14}))' {
+                        tailf:info "Valid values are: IMSI ranges of form 111-999, wherein each range value has minimum of three digits and maximum of 15 digits. Also there can be a standalone IMSI of 3 to 15 digits long.";
+                    }  
+                }
+                tailf:info "IMSI range:Valid values are: IMSI ranges of form 111-999, wherein each range value has minimum of three digits and maximum of 15 digits. Also there can be a standalone IMSI of 3 to 15 digits long";
+                mandatory true; 
+            }
+            leaf interface-type {
+                must "((../interface-type != 'gr') or (not(../hss-realm)))" {
+                    error-message
+                    "If 'interface-type' is 'gr' then 'hss-realm' must not be set";
+                }
+                must "((current() != 'gr') or (../routing-option = 'standard'))" {
+                    error-message
+                    "If 'interface-type' is 'gr' then 'routing-option' must be 'standard'";
+                }
+                tailf:info "Interface type to retrieve information. Default s6";
+                type enumeration {
+                    enum "s6" {tailf:code-name mme-hss-hlr-routing-interface-type-s6;}
+                    enum "gr" {tailf:code-name mme-hss-hlr-routing-interface-type-gr;}
+                }
+                default "s6";
+            }
+            leaf routing-option {
+                tailf:info "Routing option to retrieve information. Default standard";
+                type enumeration {
+                    enum "standard" {tailf:code-name mme-hss-hlr-routing-routing-option-standard;}
+                    enum "s6d-override" {tailf:code-name mme-hss-hlr-routing-routing-option-s6d-override;}
+                    enum "gr-fallback" {tailf:code-name mme-hss-hlr-routing-routing-option-gr-fallback;}
+                    enum "s6d-override-and-gr-fallback" {tailf:code-name mme-hss-hlr-routing-routing-option-s6d-override-and-gr-fallback;}
+                    enum "ue-epc-capability" {tailf:code-name mme-hss-hlr-routing-routing-option-ue-epc-capability;}
+                }
+                default "standard";
+            }
+            leaf hss-realm {
+                must "((../../../interface/diameter/mme-realm-peer-map/realm-name = 'default') or (count(../../../interface/diameter/mme-realm-peer-map[realm-name = current()]) != 0))" {
+                    error-message
+                    "There is neither an 'mme-sgsn interface diameter realm-peer-map' object with this 'hss-realm' nor 'mme-sgsn interface diameter realm-peer-map default' object";
+                }
+                tailf:info "The realm of the HSS, only needed when interface-type is set to s6 .";
+                type string {
+                    length "1..127";
+                }
+            }
+        } /* mme-hss-hlr-routing */
+    } /* imsi-routing */
+} /* mme-sgsn */
+
+augment "/mme-sgsn/interface" {
+    container diameter {
+        tailf:info "DIAMETER protocol layer used by S6, S13 and SLg";
+        container mme-diameter-profile {
+            tailf:alt-name "profile";
+            presence "";
+            tailf:info "Diameter profile.";
+            leaf sctp-profile {
+                tailf:info "The name of the sctp-profile used by diameter.";
+                type leafref {
+                    path "/mme-sgsn/interface/mme-sctp-profile/name";
+                }
+                mandatory true;
+            } 
+            leaf mme-realm {
+                tailf:info "The realm of this MME.";
+                type string {
+                    length "3..127";
+                }
+                mandatory true;
+            }
+            leaf watchdog-timer {
+                tailf:info "Watchdog timer. Default 30";
+                type uint16 {
+                    range "6..300";
+                }
+                default 30;
+            }
+            leaf reconnect-timer {
+                tailf:info "Reconnect timer. Default 30";
+                type uint8 {
+                    range "5..60";
+                }
+                default 30;
+            }
+            leaf peer-state-timer {
+                tailf:info "Peer state timer. Default 30";
+                type uint8 {
+                    range "5..60";
+                }
+                default 30;
+            }
+            uses dscp; 
+            leaf peer-selection-alg {
+                tailf:info "Peer Selection Algorithm Default load-based";
+                type enumeration {
+                    enum "load-based" {tailf:code-name mme-diameter-profile-peer-selection-alg-load-based;}
+                    enum "round-robin" {tailf:code-name mme-diameter-profile-peer-selection-alg-round-robin;}
+                }
+                default "load-based";
+            }
+        } /* mme-diameter-profile */
+        list mme-diameter-peer {
+            tailf:alt-name "peer";
+            tailf:validate diameterPeerValidate {
+                tailf:call-once "true";
+            }
+            key "host-identity"; 
+            max-elements 248;
+            unique "ip-address port-number";
+            tailf:info "Peer.";
+            leaf host-identity {
+                tailf:info "The FQDN of the peer.";
+                type string {
+                    length "3..127";
+                }
+                mandatory true;
+            }
+            leaf ip-address {
+                tailf:info "The IP address of the peer.";
+                type inet:ip-address;
+                mandatory true;
+            }
+            leaf port-number {
+                tailf:info "The port number to connect to. Default 3868";
+                type uint16 {
+                    range "3000..65534";
+                }
+                default 3868;
+            }
+            leaf ip-address2 {
+                tailf:info "Secondary IP address. Default 0.0.0.0";
+                type inet:ip-address;
+                default 0.0.0.0;
+            }
+        } /* mme-diameter-peer */
+        list mme-realm-peer-map {
+            tailf:alt-name "realm-peer-map";
+            tailf:validate realmPeerMapValidate {
+                tailf:call-once "true";
+            }
+            key "realm-name host-identity"; 
+            max-elements 2000;
+            tailf:info "The realm peer mapping.";
+            leaf realm-name {
+                tailf:info "Realm.";
+                type string {
+                    length "3..127";
+                }
+                mandatory true;
+            }
+            leaf host-identity {
+                tailf:info "Peer.";
+                type leafref {
+                    path "/mme-sgsn/interface/diameter/mme-diameter-peer/host-identity";
+                }
+                mandatory true;
+            }  
+            leaf activity-role {
+                tailf:info "The role of the peer, primary route or secondary route. Default primary";
+                type enumeration {
+                    enum "primary" {tailf:code-name mme-realm-peer-map-activity-role-primary;}
+                    enum "secondary" {tailf:code-name mme-realm-peer-map-activity-role-secondary;}
+                }
+                default "primary";
+            }
+        } /* mme-realm-peer-map */
+    } /* diameter */
+    container s6 { 
+    tailf:info "S6 interface to HSS";
+    container mme-s6-if {
+        tailf:alt-name "s6-if";
+        presence "";
+        must "count(../../diameter/mme-diameter-profile) != 0" {
+            error-message
+            "There is no 'mme-sgsn interface diameter profile' object.";  
+        }
+        tailf:info "S6 interface.";
+        leaf request-timer {
+            tailf:info "Request timer. Default 5";
+            type uint8 {
+                range "1..10";
+            }
+            default 5;
+        }
+        leaf request-retry {
+            tailf:info "Number of request retry. Default 0";
+            type uint8 {
+                range "0..5";
+            }
+            default 0;
+        }
+        leaf air-vector-limit {
+            tailf:info "Number of vectors requested during each procedure. Default 1";
+            type uint8 {
+                range "1..4";
+            }
+            default 1;
+        }
+        leaf include-dest-host {
+            tailf:info "Include dest-host in S6a request message. Default disable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-s6-if-include-dest-host-enable;}
+                enum "disable" {tailf:code-name mme-s6-if-include-dest-host-disable;}
+            }
+            default "disable";
+        }
+        leaf dual-vector-type {
+            tailf:info "This attribute is only used when the node is deployed as a combined MME/SGSN. When it is enabled, the node will request both UMTS vectors as well as EPS vectors using the same Authentication Information Request (AIR) message Default disable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-s6-if-dual-vector-type-enable;}
+                enum "disable" {tailf:code-name mme-s6-if-dual-vector-type-disable;}
+            }
+            default "disable";
+        }
+        leaf g-u-vector-limit {
+            must "((current() + ../air-vector-limit ) <= 5)" {
+                error-message "The sum of 'g-u-vector-limit' and 'air-vector-limit' must not exceed 5";
+            }
+            tailf:info "This attribute is used to control the number of GPRS or UMTS vectors that can be requested at a time in the AIR message. Default 1";
+            type uint8 {
+                range "1..4";
+            }
+            default 1;
+        }
+        leaf version {
+            tailf:info "3GPP spec applicable to this interface is TS29.272. Default 10.7.0";
+            type enumeration {
+                enum 9.5.0 { tailf:code-name s6-if-version-9-5-0;}
+                enum 10.7.0{ tailf:code-name s6-if-version-10-7-0;}
+            }
+            default "10.7.0";
+            must "(current() != '9.5.0') or (count(../../../../mme-feature-control[name = 'femto-cell-support' and status-field = 'on']) = 0)" {
+                error-message
+                "If 'version' is '9.5.0' 'mme-sgsn feature control femto-cell-support' must not be 'on'";
+            }
+            must "((current() != '9.5.0') or (../t-ads-retrieval = 'disable'))" {
+                error-message
+                "If 'version' is '9.5.0' then 'mme-sgsn interfaces s6 s6-if t-ads-retrieval' must not be set to 'enable'";
+            }
+            must "(current() != '9.5.0') or (count(../../../../mme-feature-control[name = 'multimedia-priority-service' and  status-field = 'on']) = 0)" {
+                error-message
+                "If 'version' is '9.5.0' then 'mme-sgsn feature control multimedia-priority-service' must be 'off'.";
+            }
+        }
+        leaf ue-timezone {
+            tailf:info "Ue-timezone retrieval support towards HSS. Default disable";
+            type enumeration {
+                enum "enable" {tailf:code-name ue-timezone-enable;} 
+                enum "disable" {tailf:code-name ue-timezone-disable;} 
+            }
+            default "disable";
+            must "current() != 'enable' or (count(../../../../feature/mme-feature-control[name = 'hss-npli' and status-field = 'on']) != 0)" {
+                error-message
+                "If 'ue-timezone' is set to 'enable' then 'mme-sgsn feature control hss-npli' must be 'on'";
+            }
+        }
+        leaf t-ads-retrieval {                          
+        tailf:info "T-ADS data retrieval support. Default disable";
+        type enumeration {
+            enum "enable" {tailf:code-name mme-s6-if-t-ads-retrieval-enable;}
+            enum "disable" {tailf:code-name mme-s6-if-t-ads-retrieval-disable;}
+        }
+        default "disable";
+        must "((current() != 'enable') or (count(../version != '10.7.0')) = 0)" {
+            error-message
+            "If 't-ads-retrieval' is set to 'enable' then 'mme-sgsn interface s6 s6-if version' must be at least '10.7.0'";
+        }
+        }
+        leaf odb-ps {
+           tailf:info "Support of operator determined barring of Packet Oriented Services. Default disable";
+           type enumeration {
+             enum "enable" {tailf:code-name mme-s6-if-odb-sms-enable;}
+             enum "disable" {tailf:code-name mme-s6-if-odb-sms-disable;}
+           }
+           default "disable";
+        }
+} /* mme-s6-if */
+} /* s6 */
+} /* interface */
+augment "/mme-sgsn/interface" {   
+container slg{
+    tailf:info "SLg interface to GMLC";
+    list mme-gmlc {
+        max-elements 50; 
+        tailf:alt-name "gmlc";
+        key "gmlc-number";
+        unique host-identity;
+        tailf:info "GMLC Table.";
+        leaf gmlc-number {
+            tailf:info "GMLC number in E.164 format.";
+            type string {
+                length "1..15";
+            }
+            mandatory true;
+        }
+        leaf host-identity {
+            tailf:info "Host Identity of the GMLC. A FQDN.";
+            type string {
+                length "1..127";
+            }
+            mandatory true;
+        }
+        leaf gmlc-usage {
+            tailf:info "Indicates if the GMLC is used for emergency call, regular call, roamer, or emergency and regular; default emergency-regular";
+            type enumeration {
+                enum "emergency" {tailf:code-name mme-gmlc-gmlc-usage-emergency;}
+                enum "regular" {tailf:code-name mme-gmlc-gmlc-usage-regular;}
+                enum "roamer" {tailf:code-name mme-gmlc-gmlc-usage-roamer;}
+                enum "emergency-regular" {tailf:code-name mme-gmlc-gmlc-usage-emergency-regular;}
+            }
+            default "emergency-regular";
+        }
+    } /* mme-gmlc */
+    container mme-slg-if {
+        tailf:alt-name "slg-if";
+        presence "";  
+        must "count(../../diameter/mme-diameter-profile) != 0" {
+            error-message
+            "The 'mme-sgsn interface diameter profile' entity must be configured before configuring 'slg-if'";
+        }
+        tailf:info "SLG interface.";
+        leaf gmlc-realm {
+            tailf:info "The diameter Identity of the GMLC realm.";
+            type leafref {
+                path "/mme-sgsn/interface/diameter/mme-realm-peer-map/realm-name";
+            }
+        }
+        leaf request-timer {
+            tailf:info "The attribute defines the time that the MME waits for the response to subscriber location report message. Default 5";
+            type uint8 {
+                range "1..10";
+            }
+            default 5;
+        }
+        leaf request-retry {
+            tailf:info "Number of retransmission of subscriber location report message. Default 0";
+            type uint8 {
+                range "0..5";
+            }
+            default 0;
+        }
+        leaf version {
+            tailf:info "Standard version of interface. Default 10.1.0";
+            type enumeration {
+                enum "10.1.0" {tailf:code-name mme-slg-if-version-10-1-0;}
+            }
+            default "10.1.0";
+        }
+    } /* mme-slg-if */
+} 
+} /* interface */
+augment "/mme-sgsn/interface/diameter" {
+    list mme-diameter-client-instance {
+        max-elements 32; 
+        key "callp-service-id";
+        tailf:alt-name "client-instance";
+        tailf:validate diameterClientValidate {
+            tailf:call-once "true";
+        }
+        unique host-id-prefix;
+        unique ip-address1;
+        must "count(../../s6/mme-s6-if) != 0" {
+            error-message
+            "There is no 'mme-sgsn interface s6 s6-if' object";  
+        }
+        tailf:info "Diameter-client-instance process.";
+        uses callp-service-identifier; 
+        leaf host-id-prefix {
+            tailf:info "The leading label of the host-identity of the S6 process.";
+            type string {
+                length "1..32";
+            }
+            mandatory true;
+        }
+        uses routing-instance-name-multiple;
+        leaf ip-address1 {
+            must "current() != '0.0.0.0'" {
+                error-message 
+                "The 'ip-address1' must not be '0.0.0.0'";
+            }
+            must "(count(../../../fxa/mme-fxa-if) = 0) or (../../../fxa/mme-fxa-if/ip-address != current())" {   
+            error-message "Same IP address must not be configured in 'mme-sgsn interface fxa fxa-if'";
+        }
+        must "current() != ../ip-address2 or current() = '0.0.0.0'" {
+            error-message "The 'ip-address1' and non-zero 'ip-address2' configured must not be same";
+        }
+        must "current() != '::'" {
+            error-message "The 'ip-address1' must not be '::'";
+        }
+        tailf:info "Local IP address 1.";
+        type inet:ip-address;
+        mandatory true;
+    }
+    leaf ip-address2 {
+        must "(count(../../../fxa/mme-fxa-if) = 0) or (../../../fxa/mme-fxa-if/ip-address != current())" {   
+        error-message "Same IP address must not be configured in 'mme-sgsn interface fxa fxa-if'";
+    }
+    tailf:info "Local IP address 2. Default 0.0.0.0";
+    type inet:ip-address;
+    default 0.0.0.0;
+}
+leaf port {
+    tailf:info "Local IP port. Default 11111";
+    type uint16 {
+        range "3000..65534";
+    }
+    default 11111;
+}
+leaf max-transactions-per-peer {
+    tailf:info "Max transactions per peer. Default 5000";
+    type uint16 {
+        range "10..10000";
+    }
+    default 5000;
+}
+} /* mme-diameter-client-instance */
+}/* diameter*/
+augment "/mme-sgsn/interface" {
+    container s13 {  
+    tailf:info "S13 interface to EIR";
+    container mme-s13-if {
+        tailf:alt-name "s13-if"; 
+        presence "";
+        
+        must "count(../../diameter/mme-diameter-profile) != 0" {
+            error-message
+            "There is no 'mme-sgsn interface diameter profile' object.";  
+        }
+        tailf:info "S13 interface.";
+        leaf realm-name {
+            tailf:info "The diameter identity of the realm.";
+            type leafref {
+                path "/mme-sgsn/interface/diameter/mme-realm-peer-map/realm-name";
+            }
+            mandatory true;
+        }  
+        leaf request-timer {
+            tailf:info "Waiting time for s13 request. Default 5";
+            type uint8 {
+                range "1..10";
+            }
+            default 5;
+        }
+        leaf request-retry {
+            tailf:info "Number of request retry. Default 0";
+            type uint8 {
+                range "0..5";
+            }
+            default 0;
+        }
+        leaf include-imsi {
+            tailf:info "Enable or disable imsi based on IMEI. Default enable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-s13-if-include-imsi-enable;}
+                enum "disable" {tailf:code-name mme-s13-if-include-imsi-disable;}
+            }
+            default "enable";
+        }
+        leaf eir-host-id {
+            tailf:info "EIR host identity in ECR messages Default none";
+            type string {
+                length "3..127";
+            }
+            default "none";
+        }
+        leaf version {
+            tailf:info "3GPP spec applicable to this interface is TS29.272. Default 10.7.0";
+            type enumeration {
+                enum "9.5.0" {tailf:code-name mme-s13-if-version-9-5-0;}
+                enum "10.7.0" {tailf:code-name mme-s13-if-version-10-7-0;}
+            }
+            default "10.7.0";
+        }
+    } /* mme-s13-if */
+} /* s13 */
+} /* interface */  
+augment "/mme-sgsn/interface/diameter" {
+    list mme-avp-mbit-override {
+        max-elements 100;
+        tailf:alt-name "avp-mbit-override";
+        key "avp-code"; 
+        tailf:info "AVP M-bit Override.";
+        leaf avp-code {
+            tailf:info "AVP code for which the M-bit shall be ignored.";
+            type uint16 {
+                range "0..65535";
+            }
+            mandatory true;
+        }
+        leaf application-identifier {
+            tailf:info "Application type. Default base";
+            type enumeration {
+                enum "s6" {tailf:code-name mme-avp-mbit-override-application-identifier-s6;}
+                enum "s13" {tailf:code-name mme-avp-mbit-override-application-identifier-s13;}
+                enum "slg" {tailf:code-name mme-avp-mbit-override-application-identifier-slg;}
+                enum "base" {tailf:code-name mme-avp-mbit-override-application-identifier-base;}
+            }
+            default "base";
+        }
+    } /* mme-avp-mbit-override */
+} /* diameter */
+} /*submodule*/
+

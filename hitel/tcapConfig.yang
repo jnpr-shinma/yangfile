@@ -1,0 +1,137 @@
+/* tcapConfig.yang generated from tcapConfig.xml */
+submodule tcapConfig{
+
+belongs-to hcta-epc {
+    prefix epc;
+}
+
+import tailf-common {
+    prefix tailf;
+}
+
+include mmeSgsnConfig;
+
+include fgwConfig;
+
+augment "/mme-sgsn/interface" {
+    container ss7 {
+        tailf:info "Signaling System 7 protocol layer";
+        container mme-tcap-profile {
+            tailf:alt-name "tcap";
+            tailf:info "Provisioning for TCAP Process.";
+            leaf nature-of-address {
+                tailf:info "Nature of address for global titles in SCCP header. Default intl-num";
+                type enumeration {
+                    enum "sub-num" {tailf:code-name mme-tcap-profile-nature-of-address-sub-num;}
+                    enum "res-national-use" {tailf:code-name mme-tcap-profile-nature-of-address-res-national-use;}
+                    enum "nat-spec-num" {tailf:code-name mme-tcap-profile-nature-of-address-nat-spec-num;}
+                    enum "intl-num" {tailf:code-name mme-tcap-profile-nature-of-address-intl-num;}
+                }
+                default "intl-num";
+            }
+            leaf sccp-class-of-operation {
+                tailf:info "Class of operation used for TCAP messaging. Default sequenced";
+                type enumeration {
+                    enum "non-sequenced" {tailf:code-name mme-tcap-profile-sccp-class-of-operation-non-sequenced;}
+                    enum "sequenced" {tailf:code-name mme-tcap-profile-sccp-class-of-operation-sequenced;}
+                }
+                default "sequenced";
+            }
+            leaf e164-trans-type {
+                type string {
+                    pattern 'auto-config|([0-9]|[1-9][0-9]|[1][0-9][0-9]|[2][0-4][0-9]|[2][5][0-5])' {
+                        tailf:info "Valid values are: auto-config, 0..255";
+                    }  
+                }
+                tailf:info "GTT type used for E.164 numbering plan. Default auto-config";
+                default "auto-config";
+            }
+            leaf e164-mofsm-trans-type {
+                type string {
+                    pattern 'auto-config|([0-9]|[1-9][0-9]|[1][0-9][0-9]|[2][0-4][0-9]|[2][5][0-5])' {
+                        tailf:info "Valid values are: auto-config, 0..255";
+                    }  
+                }
+                tailf:info "GTT type used for E.164 numbering plan only for mobile originated forward short message. Default auto-config";
+                default "auto-config";
+            }
+            leaf e212-trans-type {
+                type string {
+                    pattern 'auto-config|([0-9]|[1-9][0-9]|[1][0-9][0-9]|[2][0-4][0-9]|[2][5][0-5])' {
+                        tailf:info "Valid values are: auto-config, 0..255";
+                    }  
+                }
+                tailf:info "GTT type used for E.212 numbering plan. Default auto-config";
+                default "auto-config";
+            }
+            leaf e214-trans-type {
+                tailf:info "GTT type used for E.214 numbering plan. Default 0";
+                type uint8 {
+                    range "0..255";
+                }
+                default 0;
+            }
+            leaf sccp-return-option {
+                tailf:info "SCCP return option by TCAP. Default return";
+                type enumeration {
+                    enum "no-return" {tailf:code-name mme-tcap-profile-sccp-return-option-no-return;}
+                    enum "return" {tailf:code-name mme-tcap-profile-sccp-return-option-return;}
+                }
+                default "return";
+            }
+            leaf hop-counter {
+                tailf:info "Number of hops before message discard. Default 15";
+                type uint8 {
+                    range "0..15";
+                }
+                default 15;
+            }
+            leaf xudt-option {
+                tailf:info "Extended unitdata message usage option. Default off";
+                type enumeration {
+                    enum "on" {tailf:code-name mme-tcap-profile-xudt-option-on;}
+                    enum "off" {tailf:code-name mme-tcap-profile-xudt-option-off;}
+                }
+                default "off";
+            }
+            leaf max-map-transactions {
+                must "((current() + ../max-cap-transactions ) <= 7200)" {
+                    error-message
+                    "The value of 'max-map-transactions' and 'max-cap-transactions' together should be less than or equal to 7200";
+                }
+                tailf:info "Maximum number of concurrent TCAP transactions for sgsn subsystem. Default 2000";
+                type uint16 {
+                    range "0..7200";
+                }
+                default 2000;
+            }
+            leaf max-map-invokes {
+                must "((current() + ../max-cap-invokes) <= 10800)" {
+                    error-message 
+                    "The value of 'max-map-invokes' and 'max-cap-invokes' together should be less than or equal to 10800";
+                }
+                tailf:info "Maximum number of concurrent TCAP invokes for sgsn subsystem. Default 3000";
+                type uint16 {
+                    range "0..10800";
+                }
+                default 3000;
+            }
+            leaf max-cap-transactions {
+                tailf:info "Maximum number of concurrent TCAP transactions for CAP subsystem. Default 2000";
+                type uint16 {
+                    range "0..7200";
+                }
+                default 2000;
+            }
+            leaf max-cap-invokes {
+                tailf:info "Maximum number of concurrent TCAP invokes for CAP subsystem. Default 3000";
+                type uint16 {
+                    range "0..10800";
+                }
+                default 3000;
+            }
+        } /* mme-tcap-profile */
+    } /* ss7 */
+} /* interfaces*/
+} /*submodule*/
+

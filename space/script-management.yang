@@ -1,0 +1,165 @@
+submodule script-management {
+    yang-version 1;
+    belongs-to "juniper"{
+        prefix "juniper";
+    }
+    import ietf-inet-types { prefix "inet"; }
+    import ietf-yang-types { prefix "yang"; }
+    import iq-ifmap-types { prefix "ifmap"; }
+    contact "JUNOS Space <jspace@juniper.net>";
+    organization "Juniper Networks";
+    description
+        "YANG definition of the script-management";
+    revision "2014-07-26" {
+        description "draft.";
+    }
+
+    list script {
+        description "Script ";
+        uses ifmap:Identity;
+        key uuid;
+
+        leaf jobInstanceId {
+            type uint32;
+            description "Job instance ID";
+        }
+        leaf actionType {
+            type uint32;
+            description "Action type";
+        }
+        leaf associatedTagList {
+            type string;
+            description "Associated tag list";
+        }
+        leaf context {
+            type string;
+            description "context";
+        }
+        leaf endTime {
+            type string;
+            description "End time";
+        }
+        leaf hostname {
+            type string;
+            description "Host name";
+        }
+        leaf ip {
+            type string;
+            description "IP";
+        }
+        leaf jobRemarks {
+            type string;
+            description "Job remarks";
+        }
+        leaf ruleData {
+            type string;
+            description "Rule Data";
+        }
+        leaf ruleType {
+            type string;
+            description "Rule Type";
+        }
+        leaf scriptBundleId {
+            type uint32;
+            description "Script bundle id";
+        }
+        leaf scriptID {
+            type string;
+            description "Script id";
+        }
+        leaf scriptMgmtJobStatus {
+            type uint32;
+            description "Job status";
+        }
+        leaf scriptName {
+            type string;
+            description "Script Name";
+        }
+        leaf scriptParams {
+            type string;
+            description "Script Params";
+        }
+        leaf scriptType {
+            type uint32;
+            description "Script Type";
+        }
+        leaf scriptVersion {
+            type string;
+            description "Script Version";
+        }
+        leaf sequence {
+            type string;
+            description "Sequence";
+        }
+        leaf startTime {
+            type string;
+            description "Start time";
+        }
+        leaf nodeName {
+            type string;
+            description "Node name";
+        }
+    }
+
+
+
+
+    list operation {
+        description "Associated script";
+        uses ifmap:Identity;
+        key uuid;
+
+        leaf deployedVersion {
+            type string;
+            description "";
+        }
+        leaf enableAutoUpgrade {
+            type boolean;
+            description "";
+        }
+        leaf scriptStatus {
+            type uint32;
+            description "";
+        }
+        leaf scriptName {
+            type string;
+            description "";
+        }
+        leaf scriptType {
+            type string;
+            description "";
+        }
+        leaf format {
+            type string;
+            description "";
+        }
+        leaf latestVersion {
+            type string;
+            description "";
+        }
+        leaf lastestMD5 {
+            type string;
+            description "";
+        }
+        leaf createTime {
+            type yang:timestamp;
+            description "";
+        }
+        leaf lastUpdateTime {
+            type yang:timestamp;
+            description "";
+        }
+        leaf comments {
+            type string;
+            description "";
+        }
+        leaf scriptSize {
+            type uint32;
+            description "";
+        }
+        leaf encodeCompletionStatus {
+            type uint32;
+            description "";
+        }
+    }
+}

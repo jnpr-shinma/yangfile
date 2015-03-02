@@ -1,0 +1,507 @@
+//////////////////////////////////////////////////////////////////////////
+/// @file sigtranCli.yang
+/// @brief Yang definitions for operational commands.
+///        "show mme-sgsn interface ss7 peer"
+///        "show mme-sgsn interface ss7 remote-dest"
+///        "show mme-sgsn interface ss7 remote-subsystem"
+///
+/// Maintained by: HCTA
+/// History:
+///
+/// yyyymmmdd Changed by      Change Reason
+/// --------- --------------- --------------------------------------------
+/// 2014Jan20 Nimesh D        AGW-21104 - Initial development
+/// 2014Feb28 Adam Floyd      AGW-21104 - Updated callpoint info
+/// 2014Mar20 Mike Lesko      AGW-21104 - Modified egress and 
+///                           ingress-congest-level to uint8
+/// 2014Apr17 Adam Floyd      AGW-21104 - Add sort-flag to cp opaque data
+/// 2014May23 Nimesh D        AGW-22459 - Fixed node name conflict issues
+/// 2014Aug15 Adam Floyd      AGW-23534 - Remove fake-key kludge
+/// 2014Sep15 Lakshmi Priya   AGW-22082 - Schema upgrade
+/// 2014Aug27 Ajit Singh      AGW-23337 - Added field description.
+///
+/// Copyright (c) 2014 HCTA. All Rights Reserved.
+///
+/// CONFIDENTIALITY AND LIMITED USE
+///
+/// This software, including any software of third parties embodied herein,
+/// contains information and concepts which are confidential to HCTA
+/// and such third parties. This software is licensed for use
+/// solely in accordance with the terms and conditions of the applicable
+/// license agreement with HCTA or its authorized distributor.
+//////////////////////////////////////////////////////////////////////////
+submodule sigtranCli{
+    belongs-to hcta-epc {
+        prefix epc;
+    }
+    import tailf-common {
+        prefix tailf;
+    }
+    include mmeSgsnConfig;
+    include tcapConfig;
+
+    augment "/mme-sgsn/interface/ss7" {
+        list peer-oper {
+            tailf:info "Status of SIGTRAN peers for Gfreds interfaces";
+            tailf:alt-name "peer";
+            config false;
+            ordered-by user; // not for use with keyed lists
+
+            tailf:cli-no-key-completion;
+            //key "peer-process-name";
+
+            tailf:callpoint cli_oper_show
+            {
+                // Callpoint Opaque Data Format (255 chars max):
+                // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+                tailf:opaque '0:mme-sgsn interface ss7 peer::1';
+            }
+
+            leaf peer-process-name {
+                tailf:info "Peer process name.";
+                type string;
+                tailf:display-groups "none detail";
+            }
+            leaf location {
+                tailf:info "Location.";
+                type string;
+                tailf:display-groups "none detail";
+            }
+            leaf service {
+                tailf:info "Service.";
+                type string;
+                tailf:display-groups "none detail";
+            }
+            leaf state {
+                tailf:info "State of the peer process.";
+                type string;
+                tailf:display-groups "none detail";
+            }
+            leaf pdu-tx {
+                tailf:info "Count of total PDUs sent to the peer process represented by the component.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf msu-rx {
+                tailf:info "Count of total MSUs received from this M3UA peer process represented by the component.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf msu-rtx {
+                tailf:info "Count of total MSUs retransmitted to the peer process represented by this component.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf msu-tx {
+                tailf:info "Count of total MSUs sent to the peer process represented by the component.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf pdu-rx {
+                tailf:info "Count of total PDUs received from the peer process represented by the component.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf pdu-invalid-error-rx {
+                tailf:info "Count of incoming PDUs indicating a protocol error but themselves contain protocol error.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf pdu-disc-too-big-rx {
+                tailf:info "Count of total PDUs received discarded due to size exceeding maximum supported size.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf err-pdu-protocol-error-rx {
+                tailf:info "Count of incoming PDUs indicating a Protocol Error.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf err-pdu-invalid-network-app-rx {
+                tailf:info "Count of incoming PDUs indicating the Invalid Network Appearance error.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf err-pdu-invalid-version-rx {
+                tailf:info "Count of incoming PDUs indicating the Invalid Version error.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf err-pdu-no-configured-as-rx {
+                tailf:info "Count of incoming PDUs indicating the No Configured AS for ASP error.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf err-pdu-unsupp-traffic-mode-rx {
+                tailf:info "Count of incoming PDUs indicating the Unsupported Traffic Mode Type error.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf err-pdu-unexpected-parm-rx {
+                tailf:info "Count of incoming PDUs indicating the Unexpected Parameter error.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf err-pdu-missing-parm-rx {
+                tailf:info "Count of incoming PDUs indicating the Missing Parameter error.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf err-pdu-invalid-aspid-rx {
+                tailf:info "Count of incoming PDUs indicating the Invalid ASP Identifier error.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf err-pdu-dest-status-unknown-rx {
+                tailf:info "Count of incoming PDUs indicating the Destination Status Unknown error.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf err-pdu-parm-field-error-rx {
+                tailf:info "Count of incoming PDUs indicating the Parameter Field Error.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf err-pdu-invalid-routing-ctxt-rx {
+                tailf:info "Count of incoming PDUs indicating the Invalid Routing Context error.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf err-pdu-invalid-streamid-rx {
+                tailf:info "Count of incoming PDUs indicating the Invalid Stream Identifier error.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf err-pdu-unsupported-msg-type-rx {
+                tailf:info "Count of incoming PDUs indicating the Unsupported Message Type error.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf err-pdu-unexpected-msg-rx {
+                tailf:info "Count of incoming PDUs indicating the Unexpected Message error.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf err-pdu-invalid-parm-value-rx {
+                tailf:info "Count of incoming PDUs indicating the Invalid Parameter Value error.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf err-pdu-aspid-required-rx {
+                tailf:info "Count of incoming PDUs indicating the ASP Identifier Required error.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf err-pdu-refused-mgmt-block-rx {
+                tailf:info "Count of incoming PDUs indicating the Refused - Management Blocking error.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf err-pdu-unsupp-msg-class-rx {
+                tailf:info "Count of incoming PDUs indicating the Unsupported Message Class error.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf err-pdu-invalid-version-tx {
+                tailf:info "Count of PDUs sent back to the peer process due to Invalid Version of protocol error.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf err-pdu-unsupp-msg-class-tx {
+                tailf:info "Count of PDUs sent back to the peer process due to Unsupported Message Class error.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf err-pdu-unsupported-msg-type-tx {
+                tailf:info "Count of PDUs sent back to the peer process due to Unsupported Message Type error.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf err-pdu-unsupported-traffic-tx {
+                tailf:info "Count of PDUs sent back to the peer process due to Unsupported Traffic Mode Type error.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf err-pdu-unexpected-msg-tx {
+                tailf:info "Count of PDUs sent back to the peer process due to Unexpected Message Error.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf err-pdu-protocol-error-tx {
+                tailf:info "Count of PDUs sent back to the peer process due to Protocol Error.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf err-pdu-invalid-streamid-tx {
+                tailf:info "Count of PDUs sent back to the peer process due to Invalid Stream Identifier error.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf err-pdu-invalid-parm-value-tx {
+                tailf:info "Count of PDUs sent back to the peer process due to Invalid Parameter Value error.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf err-pdu-parm-field-error-tx {
+                tailf:info "Count of PDUs sent back to the peer process due to Parameter Field Error.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf err-pdu-unexpect-parm-tx {
+                tailf:info "Count of PDUs sent back to the peer process due to Unexpected Parameter error.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf err-pdu-missing-parm-tx {
+                tailf:info "Count of PDUs sent back to the peer process due to Missing Parameter error.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf egress-congest-level {
+                tailf:info "Egress congestion level.";
+                type uint8;
+                tailf:display-groups "detail";
+            }
+            leaf ingress-congest-level {
+                tailf:info "Ingress congestion level.";
+                type uint8;
+                tailf:display-groups "detail";
+            }
+        } /*peer*/
+        
+        list remote-dest {
+            tailf:info "Remote destination status";
+            config false;
+            ordered-by user; // not for use with keyed lists
+
+            tailf:cli-no-key-completion;
+            //key "destination-point-code";
+
+            tailf:callpoint cli_oper_show
+            {
+                // Callpoint Opaque Data Format (255 chars max):
+                // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+                tailf:opaque '0:mme-sgsn interface ss7 remote-dest::1';
+            }
+
+            leaf destination-point-code {
+                tailf:info "Point code instance for each signaling node.";
+                type string;
+                tailf:display-groups "none detail";
+            }
+            leaf location {
+                tailf:info "Location.";
+                type string;
+                tailf:display-groups "none detail";
+            }
+            leaf service {
+                tailf:info "Service.";
+                type string;
+                tailf:display-groups "none detail";
+            }
+            leaf sccp-state {
+                tailf:info "State of the remote point code.";
+                type string;
+                tailf:display-groups "none detail";
+            }
+            leaf m3ua-state {
+                tailf:info "State of the M3UA destination point code.";
+                type string;
+                tailf:display-groups "none detail";
+            }
+            leaf reachable-peer {
+                tailf:info "Routable peer process name.";
+                type string;
+                tailf:display-groups "detail";
+            }
+            leaf unreachable-peer {
+                tailf:info "Unroutable peer process name.";
+                type string;
+                tailf:display-groups "detail";
+            }
+            leaf restricted-peer {
+                tailf:info "Name of routable-restricted peer-process.";
+                type string;
+                tailf:display-groups "detail";
+            }
+            leaf rout-network-failure {
+                tailf:info "Count of routing failures due to inaccessible RPC.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf rout-unequip-sccp {
+                tailf:info "Count of routing failures due to unequipped SCCP at RPC.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf rout-network-congest {
+                tailf:info "Count of routing failures due to RPC congestion.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf unequip-sccp {
+                tailf:info "Count of times that the SCCP is unequipped.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf network-congest {
+                tailf:info "Count of times that the RPC is congested.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf network-failure {
+                tailf:info "Count of RPC state transitions from acccessible to inaccessible.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf msu-tx {
+                tailf:info "Count of outgoing MSUs sent to this destination.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf rf-msu-congest {
+                tailf:info "Count of unroutable outgoing MSUs due to destination being congested.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf rf-msu-unroutable {
+                tailf:info "Count of routing failed outgoing MSUs due to unroutable destination.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf user-part-unavailable {
+                tailf:info "Count of received PDU with MTP3-User unavailability cause of Unknown.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf user-part-inaccessible {
+                tailf:info "Count of received PDU with MTP3-User unavailability cause of Inaccessible Remote User.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf msu-rtx {
+                tailf:info "Count of retransmitted Message Signal Units (MSU).";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf user-part-unequipped {
+                tailf:info "Count of received PDU with MTP3-User unavailability cause of Unequipped Remote User.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+        } /*remote-dest*/
+        
+        
+        list remote-subsystem {
+            tailf:info "Remote subsystem under each peer process";
+            config false;
+            ordered-by user; // not for use with keyed lists
+
+            tailf:cli-no-key-completion;
+            //key "destination-point-code";
+
+            tailf:callpoint cli_oper_show
+            {
+                // Callpoint Opaque Data Format (255 chars max):
+                // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+                tailf:opaque '0:mme-sgsn interface ss7 remote-subsystem::1';
+            }
+
+            leaf destination-point-code {
+                tailf:info "Point code instance for each signaling node.";
+                type string;
+                tailf:display-groups "none detail";
+            }
+            leaf remote-subsystem-num {
+                tailf:info "Remote subsystem number.";
+                type uint8;
+                tailf:display-groups "none detail";
+            }
+            leaf location {
+                tailf:info "Location.";
+                type string;
+                tailf:display-groups "none detail";
+            }
+            leaf service {
+                tailf:info "Service.";
+                type string;
+                tailf:display-groups "none detail";
+            }
+            leaf state {
+                tailf:info "State of the remote subsystem.";
+                type string;
+                tailf:display-groups "none detail";
+            }
+            leaf ludt-rx {
+                tailf:info "Count of LUDT messages received from the remote subsystem.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf xudt-rx {
+                tailf:info "Count of XUDT messages received from the remote subsystem.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf udts-rx {
+                tailf:info "Count of UDTS messages received from the remote subsystem.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf udt-rx {
+                tailf:info "Count of UDT messages received from the remote subsystem.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf xudts-tx {
+                tailf:info "Count of XUDTS messages sent to the remote subsystem.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf xudts-rx {
+                tailf:info "Count of XUDTS messages received from the remote subsystem.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf ludts-tx {
+                tailf:info "Count of LUDTS messages sent to the remote subsystem.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf ludts-rx {
+                tailf:info "Count of LUDTS messages received from the remote subsystem.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf udt-tx {
+                tailf:info "Count of UDT messages sent to the remote subsystem.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf udts-tx {
+                tailf:info "Count of UDTS messages sent to the remote subsystem.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf xudt-tx {
+                tailf:info "Count of XUDT messages sent to the remote subsystem.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf ludt-tx {
+                tailf:info "Count of LUDT messages sent to the remote subsystem.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf routing-failures {
+                tailf:info "Count of routing failures due to remote subsystem not being available.";
+                type uint32;
+                tailf:display-groups "detail";
+            }
+            leaf trans-from-allowed-to-prohib {
+                tailf:info "Count of remote subsystem state transitions to the prohibited state.";
+                type uint32;
+                tailf:display-groups "detail";
+            }            
+        } /*remote-subsystem*/
+    } /*ss7*/
+}/*sigtranCli*/

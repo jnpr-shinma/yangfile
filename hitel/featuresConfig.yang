@@ -1,0 +1,640 @@
+/*
+//////////////////////////////////////////////////////////////////////////////
+/// @file featuresConfig.yang
+/// @brief This file contains configuration related to UPM.
+///
+/// History:
+///
+/// yyyymmmdd Changed by      Change Reason
+/// --------- --------------- -------------------------------------------------
+/// 20140905  Praveen G T  AGW-22561 - Added deactivate-emg-pdn-after-srvcc.
+///
+/// Copyright (c) 2014 Hitachi Limited. All Rights Reserved.
+///
+/// CONFIDENTIALITY AND LIMITED USE
+///
+/// This software, including any software of third parties embodied herein,
+/// contains information and concepts which are confidential to Hitachi
+/// and such third parties. This software is licensed for use
+/// solely in accordance with the terms and conditions of the applicable
+/// license agreement with Hitachi or its authorized distributor.
+///
+//////////////////////////////////////////////////////////////////////////////
+*/
+
+/* featuresConfig.yang generated from featuresConfig.xml */
+submodule featuresConfig{
+
+belongs-to hcta-epc {
+    prefix epc;
+}
+
+import tailf-common {
+    prefix tailf;
+}
+
+include mmeSgsnConfig;
+
+include fgwConfig;
+
+import ietf-inet-types {
+    prefix inet;
+}
+
+augment "/mme-sgsn" {
+    container feature {
+        tailf:info "Feature objects";
+        list mme-feature-control {
+            tailf:alt-name "control";
+            tailf:validate featureControlValidate {
+                tailf:call-once "true";
+            }
+            key "name";
+            tailf:info "Feature status control.";
+            leaf name {
+                tailf:info "Feature name.";
+                type enumeration {
+                    enum "advanced-ta-mgmt" {tailf:code-name feature-name-advanced-ta-mgmt;}
+                    enum "direct-tunnel" {tailf:code-name feature-name-direct-tunnel;}
+                    
+                    enum "equip-id-check" {tailf:code-name feature-name-equip-id-check;}
+                    enum "femto-cell-support" {tailf:code-name feature-name-femto-cell-support;}
+                    enum "fxa" {tailf:code-name feature-name-fxa;}
+                    enum "ge" {tailf:code-name feature-name-ge;}
+                    enum "gs" {tailf:code-name feature-name-gs;}
+                    enum "hspa-plus" {tailf:code-name feature-name-hspa-plus;}
+                    enum "hss-npli" {tailf:code-name feature-name-hss-npli;}
+                    enum "ims-emergency" {tailf:code-name feature-name-ims-emergency;}
+                    enum "lawful-intercept" {tailf:code-name feature-name-lawful-intercept;}
+                    enum "lcs" {tailf:code-name feature-name-lcs;}
+                    enum "local-eps-qos-control" {tailf:code-name feature-name-local-eps-qos-control;}
+                    enum "multimedia-priority-service" {tailf:code-name feature-name-multimedia-priority-service;}
+                    enum "mvno-pgw-type" {tailf:code-name feature-name-mvno-pgw-type;}
+                    enum "pcc-npli" {tailf:code-name feature-name-pcc-npli;}
+                    enum "per-enb-stats" {tailf:code-name feature-name-per-fxa-peer-stats;}
+                    enum "per-fxa-peer-stats" {tailf:code-name feature-name-per-enb-stats;}
+                    enum "per-gtp-path-stats" {tailf:code-name feature-name-per-gtp-path-stats;}
+                    enum "plmn-based-reporting-and-control" {tailf:code-name feature-name-plmn-based-reporting-and-control;}
+                    enum "ran-admission-control" {tailf:code-name feature-name-ran-admission-control;}
+                    enum "ran-info-management" {tailf:code-name feature-name-ran-info-management;}
+                    enum "s101" {tailf:code-name feature-name-s101;}
+                    enum "s102" {tailf:code-name feature-name-s102;}
+                    enum "s4-sgsn"{tailf:code-name feature-name-s4-sgsn;}
+                    enum "sbc" {tailf:code-name feature-name-sbc;}
+                    enum "seamless-national-roaming" {tailf:code-name feature-name-seamless-national-roaming;} 
+                    enum "sgs" {tailf:code-name feature-name-sgs;}
+                    enum "sgsn-sessionless-sub-detach" {tailf:code-name feature-name-sgsn-sessionless-sub-detach;}
+                    enum "srvcc" {tailf:code-name feature-name-srvcc;}
+                    enum "trace" {tailf:code-name feature-name-trace;}
+                    enum "traffic-shaping" {tailf:code-name feature-name-traffic-shaping;}
+                    enum "ue-purge" {tailf:code-name feature-name-ue-purge;}
+                    enum "ue-reachability" {tailf:code-name feature-name-ue-reachability;}
+                } 
+                mandatory true;
+                must "((current() != 'direct-tunnel') or (../status-field != 'on') or (count(../../../interface/gn/mme-ggsn[direct-tunnel = 'enable']) != 0))" {
+                    error-message
+                    "If 'direct-tunnel' is 'on' then at least one 'mme-sgsn interface gn ggsn direct-tunnel' entry should be enabled";
+                }
+                must "((current() != 'femto-cell-support') or (../status-field = 'off') or (count(../../../interface/ss7/mme-ss7-profile) = 0) or (../../../interface/ss7/mme-ss7-profile/version = '10.8.0'))" { 
+                error-message
+                "If 'femto-cell-support' is 'on' and 'mme-sgsn interface ss7 ss7' exists then 'mme-sgsn interface ss7 ss7 version' should be at least '10.8.0'";
+            }
+            must "((current() != 'femto-cell-support') or (../status-field = 'off') or (count(../../../interface/s6/mme-s6-if) = 0) or (../../../interface/s6/mme-s6-if/version = '10.7.0'))" {
+                error-message
+                "If 'femto-cell-support' is 'on' and 'mme-sgsn interface s6 s6-if' exists then 'mme-sgsn interface s6 s6-if version' should be at least '10.7.0'";
+            }
+            must "((current() != 'fxa') or (../status-field != 'on') or (count(../../../interface/fxa/mme-fxa-if) != 0))" {
+                error-message
+                "If 'fxa' is 'on' then 'mme-sgsn interface fxa fxa-if' must exist";
+            }
+            must "((current() != 'fxa') or (../status-field != 'on') or (count(../../../interface/fxa/mme-fxa-apn) != 0))" {
+                error-message
+                "If 'fxa' is 'on' then 'mme-sgsn interface fxa fxa-apn' must exist";
+            }
+            must "((current() != 'ge') or (../status-field != 'on') or (count(../../../interface/ge/mme-ge-if) != 0))" {
+                error-message
+                "If 'ge' is 'on' then 'mme-sgsn interface ge ge-if' must exist";
+            }
+            must "((current() != 'ge') or (../status-field = 'on') or (count(../../../interface/ge/mme-ge-if) = 0))" {
+                error-message
+                "If 'mme-sgsn interface ge ge-if' object exists then 'ge' must be 'on'";
+            }
+            must "((current() != 'gs') or (../status-field != 'on') or (count(../../../interface/gs/mme-gs-if) != 0))" {
+                error-message
+                "If 'gs' is 'on' then 'mme-sgsn interface gs gs-if' must exist";
+            }
+            must "((current() != 'gs') or (../status-field = 'on') or (count(../../../interface/gs/mme-gs-if) = 0))" {
+                error-message
+                "If 'mme-sgsn interface gs gs-if' is configured, 'gs' status must be 'on'";
+            }
+            must "((current() != 'multimedia-priority-service') or (../status-field = 'off') or (count(../../../interface/s6/mme-s6-if) = 0) or (../../../interface/s6/mme-s6-if/version = '10.7.0'))" {
+                error-message
+                "If 'multimedia-priority-service' is 'on' then 'mme-sgsn interface s6 s6-if version' should be at least '10.7.0'";
+            }
+            must "((current() != 'mvno-pgw-type') or (../status-field != 'on') or (count(../../../subscriber/mme-local-eps-qos-entry[name = 'mvno']) != 0))" {
+                error-message
+                "If 'mvno-pgw-type' is 'on' at least one 'mme-sgsn subscriber local-eps-qos-entry mvno' should be provisioned";
+            } 
+            must "((current() != 's101') or (../status-field != 'on') or (count(../../../interface/s101/mme-s101-if) != 0))" {
+                error-message
+                "If 's101' is 'on' then 'mme-sgsn interface s101 s101-if' must exist";     
+            }
+            must "((current() != 's101') or (../status-field = 'on') or (count(../../../interface/s101/mme-s101-if) = 0))" {
+                error-message
+                "If 'mme-sgsn interface s101 s101-if' is configured, 's101' status must be 'on'";     
+            }
+            must "((current() != 's102') or (../status-field != 'on') or (count(../../../interface/s102/mme-s102-if) != 0))" {
+                error-message
+                "If 's102' is 'on' then 'mme-sgsn interface s102 s102-if' must exist";
+            }
+            must "((current() != 's102') or (../status-field = 'on') or (count(../../../interface/s102/mme-s102-if) = 0))" {
+                error-message
+                "If 'mme-sgsn interface s102 s102-if' is configured 's102' status must be 'on'";
+            }
+            /* If s4 is on, its either sgsn or combo node. So atleast gb or iu must exist */
+            must "((current() != 's4-sgsn') or (../status-field = 'off') or (count(../../../interface/gb/mme-gb-if) != 0) or (count(../../../interface/iu/mme-iu-if) != 0))" {
+                error-message
+                "If 's4-sgsn' is 'on' then either 'mme-sgsn interface gb gb-if' or 'mme-sgsn interface iu iu-if' must exist";
+            }
+            /* if status is off, that this is not a combo node with s1 and iu. */
+            must "((current() != 's4-sgsn') or (../status-field = 'on') or (count(../../../interface/gb/mme-gb-if) != 0) or (count(../../../interface/iu/mme-iu-if) = 0) or (count(../../../interface/s1/mme-s1-interface) = 0))" {
+                error-message
+                "If both 'mme-sgsn interface iu iu-if' and 'mme-sgsn interface s1 s1-if' are provisioned then 's4-sgsn' must be 'on'";
+            }
+            /* if status is off, that this is not a combo node with s1 and gb */
+            must "((current() != 's4-sgsn') or (../status-field = 'on') or (count(../../../interface/gb/mme-gb-if) = 0) or (count(../../../interface/iu/mme-iu-if) != 0) or (count(../../../interface/s1/mme-s1-interface) = 0))" { 
+            error-message
+            "If both 'mme-sgsn interface gb gb-if' and 'mme-sgsn interface s1 s1-if' are provisioned then 's4-sgsn' must be 'on'";
+        }
+        /* if status is off, that this is not a combo node with s1 and gb and iu. */
+        must "((current() != 's4-sgsn') or (../status-field = 'on') or (count(../../../interface/gb/mme-gb-if) = 0) or (count(../../../interface/iu/mme-iu-if) = 0) or (count(../../../interface/s1/mme-s1-interface) = 0))" {
+            error-message
+            "If all of 'mme-sgsn interface gb gb-if' , 'mme-sgsn interface iu iu-if' and 'mme-sgsn interface s1 s1-if' are provisioned then 's4-sgsn' must be 'on'";
+        }
+        must "((current() != 'sbc') or (../status-field != 'on') or (count(../../../interface/sbc/mme-sbc-if) != 0))" {
+            error-message
+            "If 'sbc' is 'on' then 'mme-sgsn interface sbc sbc-if' must exist";
+        }
+        must "((current() != 'sbc') or (../status-field = 'on') or (count(../../../interface/sbc/mme-sbc-if) = 0))" {
+            error-message
+            "If 'mme-sgsn interface sbc sbc-if' is configured, 'sbc' status must be 'on'";
+        }
+        must "((current() != 'sgs') or (../status-field != 'on') or (count(../../../interface/sgs/mme-sgs-if) != 0))" {
+            error-message
+            "If 'sgs' is 'on' then 'mme-sgsn interface sgs sgs-if' must exist";
+        }
+        must "((current() != 'sgs') or (../status-field = 'on') or (count(../../../interface/sgs/mme-sgs-if) = 0))" {
+            error-message
+            "If 'mme-sgsn interface sgs sgs-if' is configured, 'sgs' status must be 'on'";
+        }
+        must "((current() != 'srvcc') or (../status-field != 'on') or (count(../../../interface/s6/mme-s6-if) = 0) or (../../../interface/s6/mme-s6-if/version = '10.7.0'))" {
+            error-message
+            "If 'srvcc' is 'on' then 'mme-sgsn interface s6 s6-if version' must be '10.7.0' or above.";
+        }
+        must "((current() != 'srvcc') or (../status-field != 'on') or (count(../../../interface/gtp/mme-gtp-profile[name = 'mobility']) = 0) or  (../../../interface/gtp/gtpv2-version = '10.10.0'))" {
+            error-message
+            "If 'srvcc' is 'on' then 'mme-sgsn interface gtp gtp-profile mobility gtpv2-version' must be '10.10.0' or above.";
+        }
+        must "((current() != 'srvcc') or (../status-field != 'on') or (count(../../../interface/s1/mme-s1-interface) = 0) or (../../../interface/s1/mme-s1-interface/version = '10.6.0'))" {
+            error-message
+            "If 'srvcc' is 'on' then 'mme-sgsn interface s1 s1-if version' must be '10.6.0' or above";
+        }
+        must "((current() != 'lcs') or (../status-field != 'on') or (count(../../../interface/sls/mme-sls-if) != 0))" {
+            error-message
+            "If 'lcs' is 'on' then 'mme-sgsn interface sls sls-if' must exist";
+        }
+        must "((current() != 'lcs') or (../status-field != 'on') or (count(../../../interface/slg/mme-slg-if) != 0))" {
+            error-message
+            "If 'lcs' is 'on' then 'mme-sgsn interface slg slg-if' must exist";
+        }
+    }
+    leaf status-field {
+        tailf:info "Feature status";
+        type enumeration {
+            enum on {tailf:code-name feature-control-on;} 
+            enum off {tailf:code-name feature-control-off;} 
+        } 
+        tailf:alt-name "status";
+        default off;
+    }
+} /* mme-feature-control */
+list mme-purge-trigger {
+    tailf:alt-name "purge-trigger";
+    tailf:validate purgeTriggerValidate {
+        tailf:call-once "true";
+    }
+    key "detach-type ue-type";
+    tailf:info "Purge Trigger Table.";
+    leaf detach-type {
+        tailf:info "Detach type.";
+        type enumeration {
+            enum "oam-forced" {tailf:code-name mme-purge-trigger-detach-type-oam-forced;}
+            enum "explicit" {tailf:code-name mme-purge-trigger-detach-type-explicit;}
+            enum "implicit" {tailf:code-name mme-purge-trigger-detach-type-implicit;}
+            enum "all" {tailf:code-name mme-purge-trigger-detach-type-all;}
+        }
+        mandatory true;
+    }
+    leaf ue-type {
+        tailf:info "Subscriber type.";
+        type enumeration {
+            enum "homer" {tailf:code-name mme-purge-trigger-ue-type-homer;}
+            enum "roamer" {tailf:code-name mme-purge-trigger-ue-type-roamer;}
+            enum "all" {tailf:code-name mme-purge-trigger-ue-type-all;}
+        }
+        mandatory true;
+    }
+    leaf inactive-age {
+        type string {
+            pattern 'immediate|[1-9]|[1-9][0-9]|[1-6][0-9][0-9]|7[0-3][0-9]|74[0-4]' {
+                tailf:info "Valid values are: immediate, 1..744";
+            }  
+        }
+        tailf:info "Inactive age. Default immediate";
+        default "immediate";
+    }
+} /* mme-purge-trigger */
+container mme-equip-identity-check {
+    tailf:alt-name "equip-identity-check";
+    presence "";
+    tailf:info "Equipment Identity Checking.";
+    leaf allow-grey-mobile {
+        tailf:info "Grey list subscriber inclusion decision. Default enable";
+        type enumeration {
+            enum "enable" {tailf:code-name mme-equip-identity-check-allow-grey-mobile-enable;}
+            enum "disable" {tailf:code-name mme-equip-identity-check-allow-grey-mobile-disable;}
+        }
+        default "enable";
+    }
+    leaf log-black-grey-mobile {
+        tailf:info "Log black or grey listed mobiles. Default disable";
+        type enumeration {
+            enum "enable" {tailf:code-name mme-equip-identity-check-log-black-grey-mobile-enable;}
+            enum "disable" {tailf:code-name mme-equip-identity-check-log-black-grey-mobile-disable;}
+        }
+        default "disable";
+    }
+    leaf imei-check-lifetime {
+        type string {
+            pattern 'disable|[1-9]|[1-9][0-9]|1[0-5][0-9]|16[0-8]' {
+                tailf:info "Valid values are: disable, 1..168";
+            }  
+        }
+        tailf:info "Life time of a IMEI Check. Default disable";
+        default "disable";
+    }
+    leaf imei-check-during-internode {
+        tailf:info "IMEI Check Procedure during ITAU or IRAU. Default on";
+        type enumeration {
+            enum "on" {tailf:code-name mme-equip-identity-check-imei-check-during-internode-on;}
+            enum "off" {tailf:code-name mme-equip-identity-check-imei-check-during-internode-off;}
+        }
+        default "on";
+    }
+} /* mme-equip-identity-check */
+container mme-advanced-ta-mgmt {
+    tailf:alt-name "advanced-ta-mgmt";
+    presence "";	  
+    tailf:info "Advanced-tracking-area-management";
+    leaf relative-tau-page-ratio {
+        tailf:info "Relative processing ratio of TAU v/s  paging requests. Default 25";
+        type uint8 {
+            range "0..100";
+        }
+        default 25;
+    }
+    leaf tai-list-generation {
+        tailf:info "Probability list inclusion mode in TAI list. Default disable";
+        type enumeration {
+            enum "enable" {tailf:code-name mme-advanced-ta-mgmt-tai-list-generation-enable;}
+            enum "disable" {tailf:code-name mme-advanced-ta-mgmt-tai-list-generation-disable;}
+        }
+        default "disable";
+    }
+} /* mme-advanced-ta-mgmt */
+container traffic-shaping {
+    list mme-profile-traffic-shaping {
+        tailf:alt-name "profile";
+        key "priority-field traffic-class";
+        max-elements  18;	  
+        tailf:info "This represents the differentiated service on SGSN, that governs the behavior of packets that pass through this node.";
+        leaf priority-field  {
+            tailf:alt-name "priority";
+            tailf:info "The allocation and retention priority on the SGSN.";
+            type uint8 {
+                range 1..3;
+            } 
+        }
+        leaf traffic-class {
+            tailf:info "The traffic class on the SGSN.";
+            type enumeration {
+                enum "conversational" {tailf:code-name mme-profile-traffic-shaping-traffic-class-conversational;}
+                enum "streaming" {tailf:code-name mme-profile-traffic-shaping-traffic-class-streaming;}
+                enum "interactive-thp1" {tailf:code-name mme-profile-traffic-shaping-traffic-class-interactive-thp1;}
+                enum "interactive-thp2" {tailf:code-name mme-profile-traffic-shaping-traffic-class-interactive-thp2;}
+                enum "interactive-thp3" {tailf:code-name mme-profile-traffic-shaping-traffic-class-interactive-thp3;}
+                enum "background" {tailf:code-name mme-profile-traffic-shaping-traffic-class-background;}
+            }
+            mandatory true;
+        }
+        leaf data-dscp-mark {
+            type string {
+                pattern '([0-9]|[1-5][0-9]|[6][0-3])|de|af[1-4][1-3]|cs[1-7]|ef' {
+                    tailf:info "Valid values are: 0..63, de, af11, af12, af13, af21, af22, af23, af31, af32, af33, af41, af42, af43, cs1, cs2, cs3, cs4, cs5, cs6, cs7, ef";
+                }  
+            }
+            tailf:info "DSCP mark. Valid values are: 0..63, de, af11, af12, af13, af21, af22, af23, af31, af32, af33, af41, af42, af43, cs1, cs2, cs3, cs4, cs5, cs6, cs7, ef. Default de";
+            default "de";
+        }
+        leaf preemption-capability {
+            tailf:info "The pre-emption capability for the traffic class. Default auto-configure";
+            type enumeration {
+                enum "disabled" {tailf:code-name mme-profile-traffic-shaping-preemption-capability-disabled;}
+                enum "enabled" {tailf:code-name mme-profile-traffic-shaping-preemption-capability-enabled;}
+                enum "auto-configure" {tailf:code-name mme-profile-traffic-shaping-preemption-capability-auto-configure;}
+            }
+            default "auto-configure";
+        }
+        leaf preemption-vulnerable {
+            tailf:info "The pre-emption vulnerablity for the traffic class. Default auto-configure";
+            type enumeration {
+                enum "disabled" {tailf:code-name mme-profile-traffic-shaping-preemption-vulnerable-disabled;}
+                enum "enabled" {tailf:code-name mme-profile-traffic-shaping-preemption-vulnerable-enabled;}
+                enum "auto-configure" {tailf:code-name mme-profile-traffic-shaping-preemption-vulnerable-auto-configure;}
+            }
+            default "auto-configure";
+        }
+        leaf queuing-allowed {
+            tailf:info "This attribute specifies if queuing is allowed for the traffic class. Default auto-configure";
+            type enumeration {
+                enum "disabled" {tailf:code-name mme-profile-traffic-shaping-queuing-allowed-disabled;}
+                enum "enabled" {tailf:code-name mme-profile-traffic-shaping-queuing-allowed-enabled;}
+                enum "auto-configure" {tailf:code-name mme-profile-traffic-shaping-queuing-allowed-auto-configure;}
+            }
+            default "auto-configure";
+        }
+    } /* mme-profile-traffic-shaping */
+    container mme-control-traffic-shaping {
+        tailf:alt-name "control";
+        presence "";	  
+        tailf:info "This represents the differentiated service on SGSN, that controls the behavior of roamers and signalling messages through this node.";
+        must "count(../../mme-feature-control[name = 'traffic-shaping' and status-field = 'on']) != 0" {
+            error-message
+            "If 'control' object exists then 'mme-sgsn feature control traffic-shaping' must be 'on'";
+        }
+        leaf signaling-dscp-mark {
+            type string {
+                pattern '([0-9]|[1-5][0-9]|[6][0-3])|de|af[1-4][1-3]|cs[1-7]|ef' {
+                    tailf:info "Valid values are: 0..63, de, af11, af12, af13, af21, af22, af23, af31, af32, af33, af41, af42, af43, cs1, cs2, cs3, cs4, cs5, cs6, cs7, ef";
+                }  
+            }
+            tailf:info "DSCP mark. Valid values are: 0..63, de, af11, af12, af13, af21, af22, af23, af31, af32, af33, af41, af42, af43, cs1, cs2, cs3, cs4, cs5, cs6, cs7, ef. Default de";
+            default "de";
+        }
+        leaf default-roamer-ar {
+            tailf:info "The allocation and retention priority assigned to a mobile that is a roamer. Default 3";
+            type uint8 {
+                range "1..3";
+            }
+            default 3;
+        }
+    } /* mme-control-traffic-shaping */
+} /* traffic-shaping */
+container mme-lcs {
+    tailf:alt-name "lcs";
+    presence "";  
+    must "count(../mme-feature-control[name = 'lcs' and status-field = 'on']) != 0" {
+        error-message
+        "If 'lcs' object exists then 'mme-sgsn feature control lcs status' must be 'on'";
+    }
+    tailf:info "MME Location Services.";
+    leaf loc-notification-timer-tlcsn {
+        tailf:info "Location notification response timer. Default 10";
+        type uint8 {
+            range "1..60";
+        }
+        default 10;
+    }
+/*
+// LCS_FUTURE_RELEASE
+    leaf emergency-target-notification {
+        tailf:info "Controls target node Id update. Default target";
+        type enumeration {
+            enum "source" {tailf:code-name mme-lcs-emergency-target-notification-source;}
+            enum "target" {tailf:code-name mme-lcs-emergency-target-notification-target;}
+        }
+        default "target";
+    }
+// LCS_FUTURE_RELEASE
+*/
+    leaf lcs-over-sgs {
+        tailf:info "Controls LCS over SGs. Default disable";
+        type enumeration {
+            enum "disable" {tailf:code-name mme-lcs-lcs-over-sgs-disable;}
+            /* enum "enable" {tailf:code-name mme-lcs-lcs-over-sgs-enable;}  //LCS_FUTURE_RELEASE */
+        }
+        default "disable";
+    }
+} /* mme-lcs */
+container sgsn-sessionless-sub-detach {
+    tailf:alt-name "sgsn-sessionless-sub-detach";
+    tailf:validate featureSessionlessSubDetachValidate;
+    presence "";	  
+    tailf:info "SGSN initiated sessionless subscriber detach.";
+    leaf cause-code {
+        tailf:info "GMM cause code. Default no-detach-msg";
+        type string {
+            length "1..50";
+        }
+        default "no-detach-msg";
+    }
+    leaf apn-ni-list {
+        type string {
+            pattern
+	   
+'((((([A-Za-z0-9]+[\-]*[A-Za-z0-9]*){1,}[.]){0,}([A-Za-z0-9]+[\-]*[A-Za-z0-9]*){1,},){0,39}((([A-Za-z0-9]+[\-]*[A-Za-z0-9]*){1,}[.]){0,}([A-Za-z0-9]+[\-]*[A-Za-z0-9]*){1,}))|(none))' {
+                tailf:info "Valid values are: none, or up to 40 comma-separated APN-NI labels comprised of alphabetical characters, digits, and hyphen";
+            }  
+        }
+        tailf:info "List of APN-NIs. Default none";
+        default "none";
+    }
+} /* sgsn-sessionless-sub-detach */
+container mme-ims-emergency {
+    tailf:alt-name "ims-emergency";
+    presence "";	  
+    tailf:info "Provisioning for IMS Emergency Call";
+    leaf emg-user-option {
+        tailf:info "User category to allow IMS emergency call. Default all-ues";
+        type enumeration {
+            enum "valid-ues-only" {tailf:code-name mme-ims-emergency-emg-user-option-valid-ues-only;}
+            enum "only-authenticated-ues" {tailf:code-name mme-ims-emergency-emg-user-option-only-authenticated-ues;}
+            enum "imsi-only-ues" {tailf:code-name mme-ims-emergency-emg-user-option-imsi-only-ues;}
+            enum "all-ues" {tailf:code-name mme-ims-emergency-emg-user-option-all-ues;}
+        }
+        default "all-ues";
+    }
+    leaf apn-network-id {
+        type string {
+            length "1..63";   	     
+            pattern '(([a-zA-Z0-9])+((-|.)[A-Za-z0-9]+)*)' {
+                tailf:info "Valid values are: apn-network-id comprised of alphabetical characters, digits, hyphen and dot wherein continuous hyphens and dots are not allowed";
+            }  
+        }
+        tailf:info "Emergency APN network id. Default emergency";
+        default "emergency";
+    }
+    leaf apn-operator-id {
+        tailf:info "Emergency APN operator id. Default use-serving-plmn";
+        type string {
+            length "1..100";
+        }
+        default "use-serving-plmn";
+    }
+    leaf qci-default-bearer {
+        tailf:info "Emergency QoS Class Identifier (QCI) for default bearer. Default 5";
+        type uint8 {
+            range "5..9";
+        }
+        default 5;
+    }
+    leaf arp-priority-default-bearer {
+        tailf:info "Emergency Allocation and Retention Priority (ARP) priority for default bearer. Default 1";
+        type uint8 {
+            range "1..5";
+        }
+        default 1;
+    }
+    leaf apn-ul-ambr {
+        tailf:info "Emergency APN Uplink AMBR. Default 32";
+        type uint32 {
+            range "0..256000";
+        }
+        default 32;
+    }
+    leaf apn-dl-ambr {
+        tailf:info "Emergency APN Downlink AMBR. Default 32";
+        type uint32 {
+            range "0..256000";
+        }
+        default 32;
+    }
+    leaf pgw-hostname {
+        tailf:info "FQDN of P-GW. Default none";
+        type string {
+            length "3..127";
+        }
+        default "none";
+    }
+    leaf pdn-type {
+        tailf:info "PDN type chosen for the UE emergency session. Default ipv4";
+        type enumeration {
+            enum "ipv4" {tailf:code-name mme-ims-emergency-pdn-type-ipv4;}
+            enum "ipv6" {tailf:code-name mme-ims-emergency-pdn-type-ipv6;}
+            enum "ipv4ipv6" {tailf:code-name mme-ims-emergency-pdn-type-ipv4ipv6;}
+        }
+        default "ipv4";
+    }
+    leaf pgw-ip-address1 {
+        tailf:info "IPv4/IPv6 address of primary P-GW. Default 0.0.0.0";
+        type inet:ip-address;
+        default 0.0.0.0;
+    }
+    leaf pgw-ip-address2 {
+        tailf:info "IPv4/IPv6 address of alternative P-GW. Default 0.0.0.0";
+        type inet:ip-address;
+        default 0.0.0.0;
+    }
+    leaf pgw-protocol-type {
+        tailf:info "Protocol type for P-GW. Default gtp";
+        type enumeration {
+            enum "gtp" {tailf:code-name mme-ims-emergency-pgw-protocol-type-gtp;}
+            enum "pmip" {tailf:code-name mme-ims-emergency-pgw-protocol-type-pmip;}
+        }
+        default "gtp";
+    }
+    leaf imei-check-during-emg-attach {
+        tailf:info "IMEI check during emergency attach. Default disable";
+        type enumeration {
+            enum "enable" {tailf:code-name mme-ims-emergency-imei-check-during-emg-attach-enable;}
+            enum "disable" {tailf:code-name mme-ims-emergency-imei-check-during-emg-attach-disable;}
+        }
+        default "disable";
+    }
+    leaf skip-authentication {
+        tailf:info "Skip authentication during emergency attach. Applicable when emg-user-option is imsi-only-ues or all-ues. Default enable";
+        type enumeration {
+            enum "enable" {tailf:code-name mme-ims-emergency-skip-authentication-enable;}
+            enum "disable" {tailf:code-name mme-ims-emergency-skip-authentication-disable;}
+        }
+        default "enable";
+    }
+    leaf emg-mobile-reachable-timer {
+        type string {
+            pattern '(t3412plus1|[3-9][0-9]|[1-2][0-9][0-9]|300)' {
+                tailf:info "Valid values are: 30..300, t3412plus1";
+            }  
+        }
+        tailf:info "Mobile reachable timer for emergency attached UEs. Default t3412plus1";
+        default "t3412plus1";
+    }
+    leaf deactivate-emg-pdn-after-srvcc {
+        tailf:info "Emergency PDN deactivation after SRVCC Handover. Default enable";
+        type enumeration {
+            enum "disable" {tailf:code-name mme-ims-emergency-deactivate-emg-pdn-after-srvcc-disable;}
+            enum "enable" {tailf:code-name mme-ims-emergency-deactivate-emg-pdn-after-srvcc-enable;}            
+        }
+        default "enable";
+    }
+} /* mme-ims-emergency */
+container mme-s4-sgsn {
+    tailf:alt-name "s4-sgsn";
+    presence "";	  
+    tailf:info "Support of EPC interfaces on SGSN";
+    leaf non-epc-aware-ue-activation {
+        tailf:info "GGSN or SGW selection for UEs. Default gn";
+        type enumeration {
+            enum "gn" {tailf:code-name mme-s4-sgsn-non-epc-aware-ue-activation-gn;}
+            enum "s4" {tailf:code-name mme-s4-sgsn-non-epc-aware-ue-activation-s4;}
+        }
+        default "gn";
+    }
+    leaf data-plane {
+        tailf:info "Preference of S4-SGSN data path. Default never";
+        type enumeration {
+            enum "never" {tailf:code-name mme-s4-sgsn-data-plane-never;}
+            enum "always" {tailf:code-name mme-s4-sgsn-data-plane-always;}
+        }
+        default "never";
+    }
+} /* mme-s4-sgsn */
+} /* feature */
+} /* mme-sgsn */
+augment "/fgw" {
+    container feature {
+        tailf:info "Feature objects";
+        list mme-fgw-feature-control {
+            tailf:alt-name "control";
+            key "name";
+            tailf:info "Feature status control.";
+            leaf name {
+                tailf:info "Feature name.";
+                type enumeration {
+                    enum "trace" {tailf:code-name fgw-feature-name-trace;}
+                } 
+                mandatory true;
+            }
+            leaf status-field {
+                tailf:info "Feature status";
+                type enumeration {
+                    enum on {tailf:code-name feature-control-on;} 
+                    enum off {tailf:code-name feature-control-off;} 
+                } 
+                tailf:alt-name "status";
+                default off;
+            }
+        } /* mme-fgw-feature-control */
+    }  /*  feature */ 
+}  /* fgw */
+} /*submodule*/
+

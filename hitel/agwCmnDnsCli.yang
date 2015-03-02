@@ -1,0 +1,338 @@
+//////////////////////////////////////////////////////////////////////////
+/// @file epcCmnNmCli.yang
+/// @brief Yang definitions for operational commands.
+///        "request mme-sgsn dns dynamic-cache flush"
+///        "show mme-sgsn dns dynamic-cache"
+///        "show mme-sgsn dns server"
+///
+/// Maintained by: HCTA
+/// History:
+///
+/// yyyymmmdd Changed by      Change Reason
+/// --------- --------------- --------------------------------------------
+/// 2014Jan15 Mike Lesko      AGW-21104 - Initial development
+/// 2014Jan28 Akshay Wani     AGW-21104 - Added show commands for DNS.
+/// 2014Feb28 Mike Lesko      AGW-21104 - Updated action/callpoint info
+/// 2014Mar05 Hardik W        AGW-21104 - Updated server-oper model
+/// 2014Apr17 Adam Floyd      AGW-21104 - Add sort-flag to cp opaque data
+/// 2014Apr13 Mukund K        AGW-21104 - Dns Dynamic Cache Modelling Changes
+/// 2014Aug15 Adam Floyd      AGW-23534 - Remove fake-key kludge
+/// 2014Sep15 Lakshmi Priya   AGW-22082 - Schema upgrade
+/// 2014Sep29 Swaheel K       AGW-23556 - Fixed request flush command
+///
+/// Copyright (c) 2014 HCTA. All Rights Reserved.
+///
+/// CONFIDENTIALITY AND LIMITED USE
+///
+/// This software, including any software of third parties embodied herein,
+/// contains information and concepts which are confidential to HCTA
+/// and such third parties. This software is licensed for use
+/// solely in accordance with the terms and conditions of the applicable
+/// license agreement with HCTA or its authorized distributor.
+//////////////////////////////////////////////////////////////////////////
+
+submodule agwCmnDnsCli{
+
+  belongs-to hcta-epc {
+     prefix epc; 
+  }
+
+  import tailf-common {
+     prefix tailf;
+  }
+
+  import ietf-inet-types {
+      prefix inet;
+  }
+
+  include mmeSgsnConfig;
+  include cmdCommonHcta;
+  include agwCmnDnsConfig;
+
+  augment "/mme-sgsn/dns" {
+    container dynamic-cache {
+      tailf:action flush {
+        tailf:actionpoint cli-request-command;
+        input {
+          leaf domain-name {
+            type string {
+              length "1..254";
+            }
+          }
+          leaf record-type {
+            type dnsRecordTypes-enum;
+          }
+          leaf service {
+            type string{
+              pattern 'callp[0-14]'{
+                tailf:info "Valid values are: callp0..callp14";
+              }          
+            }
+          }
+        }
+        output {
+           uses request-cmd-output;
+        }
+      }
+    }
+
+    container  dynamic-cache-oper {
+       tailf:alt-name "dynamic-cache";
+       tailf:info "DNS dynamic cache contents";
+       config false;
+       list  a{
+          tailf:info "'A' record";
+          key "service domain-name index";
+          tailf:cli-no-key-completion;
+          tailf:cli-suppress-wildcard;
+          // ordered-by user; // not for use with keyed lists
+          tailf:cli-incomplete-show-path
+          {
+            tailf:cli-min-keys "2";
+          }
+          tailf:callpoint cli_oper_show 
+          {
+           // Callpoint Opaque Data Format (255 chars max):
+           // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+           tailf:opaque '2:mme-sgsn dns dynamic-cache a:service/string domain-name/string index/uint16:0';
+          }
+          leaf service {
+             tailf:info "VM name";
+             type string;
+             tailf:display-groups "none detail";
+          }
+          leaf domain-name {
+             tailf:info "Domain name in the dynamic cache";
+             type string;
+             tailf:display-groups "none detail";
+          }
+          leaf index {
+             tailf:info "An index which uniquely identifies this record";
+             type uint16;
+             tailf:display-groups "none detail";
+          }
+          leaf full-domain-name {
+             tailf:info "Full domain name in the dynamic cache";
+             type string;
+             tailf:display-groups "none detail";
+             tailf:display-when "contains(../domain-name,'*')";
+          }
+          leaf node-ip-address {
+             tailf:info "IP address of the node for 'A' record";
+             type inet:ip-address;
+             tailf:display-groups "none detail";
+          }
+       }/*Record Type a*/
+       
+       list  aaaa{
+          tailf:info "'AAAA' record";
+          key "service domain-name index";
+          tailf:cli-no-key-completion;
+          tailf:cli-suppress-wildcard;
+          // ordered-by user; // not for use with keyed lists
+          tailf:cli-incomplete-show-path
+          {
+            tailf:cli-min-keys "2";
+          }
+          tailf:callpoint cli_oper_show
+          {
+            // Callpoint Opaque Data Format (255 chars max):
+            // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+            tailf:opaque '2:mme-sgsn dns dynamic-cache aaaa:service/string domain-name/string index/uint16:0';
+          }
+          leaf service {
+             tailf:info "VM name";
+             type string;
+             tailf:display-groups "none detail";
+          }
+          leaf domain-name {
+             tailf:info "Domain name in the dynamic cache";
+             type string;
+             tailf:display-groups "none detail";
+          }
+          leaf index {
+             tailf:info "An index which uniquely identifies this record";
+             type uint16;
+             tailf:display-groups "none detail";
+          }
+          leaf full-domain-name {
+             tailf:info "Full domain name in the dynamic cache";
+             type string;
+             tailf:display-groups "none detail";
+             tailf:display-when "contains(../domain-name,'*')";
+          }
+          leaf node-ip-address {
+             tailf:info "IPv6 address of the node for 'AAAA' record";
+             type inet:ip-address;
+             tailf:display-groups "none detail";
+          }
+       }/*Record Type aaaa*/
+
+       list  srv{
+          tailf:info "'SRV' record";
+          key "service domain-name index";
+          tailf:cli-no-key-completion;
+          tailf:cli-suppress-wildcard;
+          // ordered-by user; // not for use with keyed lists
+          tailf:cli-incomplete-show-path
+          {
+            tailf:cli-min-keys "2";
+          }
+          tailf:callpoint cli_oper_show
+          {
+            // Callpoint Opaque Data Format (255 chars max):
+            // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+            tailf:opaque '2:mme-sgsn dns dynamic-cache srv:service/string domain-name/string index/uint16:0';
+          }
+          leaf service {
+             tailf:info "VM name";
+             type string;
+             tailf:display-groups "none detail";
+          }
+          leaf domain-name {
+             tailf:info "Domain name in the dynamic cache";
+             type string;
+             tailf:display-groups "none detail";
+          }
+          leaf index {
+             tailf:info "An index which uniquely identifies this record";
+             type uint16;
+             tailf:display-groups "none detail";
+          }
+          leaf full-domain-name {
+             tailf:info "Full domain name in the dynamic cache";
+             type string;
+             tailf:display-groups "none detail";
+             tailf:display-when "contains(../domain-name,'*')";
+          }
+          leaf srv-priority {
+             tailf:info "Priority for 'SRV' record";
+             type uint32;
+             tailf:display-groups "none detail";
+          }
+          leaf srv-weight {
+             tailf:info "Weight for 'SRV' record";
+             type uint32;
+             tailf:display-groups "none detail";
+          }
+          leaf srv-port {
+             tailf:info "Port for 'SRV' record";
+             type uint32;
+             tailf:display-groups "none detail";
+          }
+          leaf srv-target-name {
+             tailf:info "Target name for 'SRV' record";
+             type string;
+             tailf:display-groups "none detail";
+          }
+       }/*Record Type srv*/
+
+       list  naptr{
+          tailf:info "'NAPTR' record";
+          key "service domain-name index";
+          tailf:cli-no-key-completion;
+          tailf:cli-suppress-wildcard;
+          // ordered-by user; // not for use with keyed lists
+          tailf:cli-incomplete-show-path
+          {
+            tailf:cli-min-keys "2";
+          }
+          tailf:callpoint cli_oper_show
+          {
+            // Callpoint Opaque Data Format (255 chars max):
+            // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+            tailf:opaque '2:mme-sgsn dns dynamic-cache naptr:service/string domain-name/string index/uint16:0';
+          }
+          leaf service {
+             tailf:info "VM name";
+             type string;
+             tailf:display-groups "none detail";
+          }
+          leaf domain-name {
+             tailf:info "Domain name in the dynamic cache";
+             type string;
+             tailf:display-groups "none detail";
+          }
+          leaf index {
+             tailf:info "An index which uniquely identifies this record";
+             type uint16;
+             tailf:display-groups "none detail";
+          }
+          leaf full-domain-name {
+             tailf:info "Full domain name in the dynamic cache";
+             type string;
+             tailf:display-groups "none detail";
+             tailf:display-when "contains(../domain-name,'*')";
+          }
+          leaf naptr-preference {
+             tailf:info "Preference for NAPTR record";
+             type uint16;
+             tailf:display-groups "none detail";
+          }
+          leaf naptr-order {
+             tailf:info "Order for NAPTR record";
+             type uint16;
+             tailf:display-groups "none detail";
+          }
+          leaf naptr-flags {
+             tailf:info "Flags for NAPTR record";
+             type string;
+             tailf:display-groups "none detail";
+          }
+          leaf naptr-services {
+             tailf:info "Services for NAPTR record";
+             type string;
+             tailf:display-groups "none detail";
+          }
+          leaf naptr-replacement {
+             tailf:info "Replacement for NAPTR record";
+             type string;
+             tailf:display-groups "none detail";
+          }
+        }/*Record Type naptr*/
+      } /* dynamic-cache-oper */
+
+      list server-oper {
+         tailf:alt-name "server";
+         config false;
+         ordered-by user; // not for use with keyed lists
+         tailf:info "DNS server status";
+         tailf:cli-no-key-completion;
+
+         tailf:callpoint cli_oper_show
+         {      
+           // Callpoint Opaque Data Format (255 chars max):
+           // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+           tailf:opaque '0:mme-sgsn dns server::1';
+         }
+
+         leaf service {
+            tailf:info "";
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf server-name {
+            tailf:info "the name for this DNS server";
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf server-ip-address {
+            tailf:info "The IP Address for this DNS server";
+            type inet:ip-address;
+            tailf:display-groups "none detail";
+         }
+         leaf weight {
+            tailf:info "The weight for this DNS server";
+            type uint16;
+            tailf:display-groups "none detail";
+         }
+         leaf status-str {
+            tailf:alt-name "status";
+            tailf:info "The connectivity status for this DNS server";
+            type string;
+            tailf:display-groups "none detail";
+         }
+      } /* server-oper */
+   } /* mme-sgsn */
+} /*submodule*/
+

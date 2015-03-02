@@ -1,0 +1,49 @@
+submodule template-management {
+    yang-version 1;
+    belongs-to "juniper"{
+        prefix "juniper";
+    }
+    import ietf-inet-types { prefix "inet"; }
+    import ietf-yang-types { prefix "yang"; }
+    import iq-ifmap-types { prefix "ifmap"; }
+    contact "JUNOS Space <jspace@juniper.net>";
+    organization "Juniper Networks";
+    description
+        "YANG definition of the device-management";
+    revision "2014-07-26" {
+        description "draft.";
+    }
+
+    list template {
+       description "Device template";
+       uses ifmap:Identity;
+       key uuid;
+
+       leaf deploymentStatus {
+           type string;
+           description "Deployment Status";
+       }
+       leaf description {
+           type string;
+           description "Description";
+       }
+       leaf lastUpdatedBy {
+           type uint32;
+           description "Last updated by";
+       }
+       leaf displayState {
+           type uint32;
+           description "Display state";
+       }
+       leaf lastUploadTime {
+           type yang:timestamp;
+           description "last upload time";
+       }
+       leaf configType {
+           type string;
+           description "Config type";
+       }
+    }
+
+
+}

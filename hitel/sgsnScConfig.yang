@@ -1,0 +1,1164 @@
+/* sgsnScConfig.yang generated from sgsnScConfig.xml */
+submodule sgsnScConfig{
+
+belongs-to hcta-epc {
+    prefix epc;
+}
+
+import tailf-common {
+    prefix tailf;
+}
+
+include mmeSgsnConfig;
+
+include fgwConfig;
+
+include upmConfig;
+include scConfig;
+include s1MasterConfig;
+
+import ietf-inet-types {
+    prefix inet;
+}
+
+import hcta-timezone {
+    prefix timezone;
+}
+
+augment "/mme-sgsn/interface" {
+    container gd {
+        tailf:info "Gd interface to SMS Gateway";
+        presence ""; 
+        container mme-gd-if {
+            tailf:alt-name "gd-if";
+            presence ""; 
+            tailf:info "This represents the interface between a Serving GPRS Support Node (SGSN) and a Short Message Service Gateway MSC (SMS-GMSC).";
+            must "((count(../../ss7/mme-ss7-profile) = 0) or (../../ss7/mme-ss7-profile/map-subsystem-number != 'unused'))" {
+                error-message "If 'gd-if' object exists then 'mme-sgsn interface ss7 ss7 map-subsystem-number' must not be set to 'unused'";
+            }
+            leaf sms-fraud-counter-measures {
+                tailf:info "SMS fraud counter measures. Default disable";
+                type enumeration {
+                    enum "disable" {tailf:code-name mme-gd-if-sms-fraud-counter-measures-disable;}
+                    enum "mo-only" {tailf:code-name mme-gd-if-sms-fraud-counter-measures-mo-only;}
+                    enum "mt-only" {tailf:code-name mme-gd-if-sms-fraud-counter-measures-mt-only;}
+                    enum "both-mo-mt" {tailf:code-name mme-gd-if-sms-fraud-counter-measures-both-mo-mt;}
+                }
+                default "disable";
+            }
+            leaf sms-data-retention-timer {
+                tailf:info "SMS data retention timer. Default 5";
+                type uint8 {
+                    range "1..30";
+                }
+                default 5;
+            }
+            leaf cp-response-timer {
+                tailf:info "CP response timer. Default 20";
+                type uint8 {
+                    range "1..60";
+                }
+                default 20;
+            }
+            leaf cp-response-retry {
+                tailf:info "CP response retries.";
+                type uint8 {
+                    range "1..3";
+                }
+                mandatory true;
+            }
+            leaf rp-response-timer {
+                tailf:info "RP response timer. Default 78";
+                type uint16 {
+                    range "8..333";
+                }
+                default 78;
+            }
+            leaf iwm-sc-response-timer {
+                tailf:info "IWM service center response timer. Default 5";
+                type uint16 {
+                    range "1..1803";
+                }
+                default 5;
+            }
+            leaf mt-teleservice-isd-ack {
+                tailf:info "MT teleservice ISD ack. Default per-sgsn";
+                type enumeration {
+                    enum "per-sgsn" {tailf:code-name mme-gd-if-mt-teleservice-isd-ack-per-sgsn;}
+                    enum "per-mobile" {tailf:code-name mme-gd-if-mt-teleservice-isd-ack-per-mobile;}
+                }
+                default "per-sgsn";
+            }
+        } /* mme-gd-if */
+        list mme-sms-trusted-operator {
+            tailf:alt-name "sms-trusted-operator";
+            key "node-address"; 
+            max-elements 100;
+            tailf:info "This component represents an SMS trusted operator (an SMS-GMSC or an SMS-IWMSC).";
+            leaf node-address {
+                type string {
+                    pattern '[0-9]{1,15}' {
+                        tailf:info "Valid values are: digits of length 1..15";
+                    }
+                }               
+                tailf:info "Trusted operator node address.";
+                mandatory true;
+            }
+            leaf number-of-digits {
+                tailf:info "Trusted operator number of digits.";
+                type uint8 {
+                    range "1..15";
+                }
+                mandatory true;
+            }
+        } /* mme-sms-trusted-operator */
+    } /* gd */
+    container gf {
+        tailf:info "Gf interface to EIR";
+        presence "";
+        container mme-gf-if {
+            tailf:alt-name "gf-if";
+            presence "";
+            tailf:info "This component represents the interface between a SGSN and an EIR.";
+            must "((count(../../ss7/mme-ss7-profile) = 0) or (../../ss7/mme-ss7-profile/map-subsystem-number != 'unused'))" {
+                error-message "If 'gf-if' object exists then 'mme-sgsn interface ss7 ss7 map-subsystem-number' must not be set to 'unused'";
+            }
+            leaf eir-address {
+                type string {
+                    pattern '[0-9]{1,15}' {
+                        tailf:info "Valid values are: digits of length 1..15";
+                    }
+                }
+                tailf:info "E.164 address for EIR.";
+                mandatory true;
+            }
+            leaf check-imei-timer {
+                tailf:info "Check IMEI timer. Default 4";
+                type uint8 {
+                    range "1..32";
+                }
+                default 4;
+            }
+            leaf check-imei-retry {
+                tailf:info "Check IMEI retry. Default 0";
+                type uint8 {
+                    range "0..4";
+                }
+                default 0;
+            }
+            leaf include-imsi {
+                tailf:info "IMSI inclusion decision. Default enable";
+                type enumeration {
+                    enum "enable" {tailf:code-name mme-gf-if-include-imsi-enable;}
+                    enum "disable" {tailf:code-name mme-gf-if-include-imsi-disable;}
+                }
+                default "enable";
+            }
+        } /* mme-gf-if */
+    } /* gf */
+    container gs {
+        tailf:info "Gs interface to MSC (VLR)";
+        presence "";
+        container mme-gs-if {
+            tailf:alt-name "gs-if";
+            presence "";
+            must "(count(../../../feature/mme-feature-control[name = 'gs' and status-field = 'on']) != 0)" {
+                error-message "If 'gs-if' object exists then 'mme-sgsn feature control gs' must be 'on'";
+            }
+            must "((count(../../ss7/mme-ss7-profile) = 0) or (../../ss7/mme-ss7-profile/bssap-subsystem-number != 'unused'))" {
+                error-message "If 'gs-if' object exists then 'mme-sgsn interface ss7 ss7 bssap-subsystem-number' must not be set to 'unused'";
+            }
+            tailf:info "This component represents the interface between a SGSN and a VLR. The BSSAP+ protocol is used on this interface.";
+            leaf global-title {
+                type string {
+                    pattern '[0-9]{1,15}' {
+                        tailf:info "Valid values are: digits of length 1..15";
+                    }
+                }
+                tailf:info "Global title address.";
+                mandatory true;
+            }
+            leaf cgpa-routing-indicator {
+                tailf:info "BSSAP routing indicator. Default point-code";
+                type enumeration {
+                    enum "global-title" {tailf:code-name mme-gs-if-cgpa-routing-indicator-global-title;}
+                    enum "point-code" {tailf:code-name mme-gs-if-cgpa-routing-indicator-point-code;}
+                }
+                default "point-code";
+            }
+            leaf nature-of-address {
+                tailf:info "BSSAP nature of address. Default international-number";
+                type enumeration {
+                    enum "subscriber-number" {tailf:code-name mme-gs-if-nature-of-address-subscriber-number;}
+                    enum "reserve-national-use" {tailf:code-name mme-gs-if-nature-of-address-reserve-national-use;}
+                    enum "national-specific-number" {tailf:code-name mme-gs-if-nature-of-address-national-specific-number;}
+                    enum "international-number" {tailf:code-name mme-gs-if-nature-of-address-international-number;}
+                }
+                default "international-number";
+            }
+            leaf return-option {
+                tailf:info "BSSAP return option. Default ret-undeliverable";
+                type enumeration {
+                    enum "no-ret-undeliverable" {tailf:code-name mme-gs-if-return-option-no-ret-undeliverable;}
+                    enum "ret-undeliverable" {tailf:code-name mme-gs-if-return-option-ret-undeliverable;}
+                }
+                default "ret-undeliverable";
+            }
+            leaf xudt-option {
+                tailf:info "BSSAP extended unitdata messages. Default disable";
+                type enumeration {
+                    enum "enable" {tailf:code-name mme-gs-if-xudt-option-enable;}
+                    enum "disable" {tailf:code-name mme-gs-if-xudt-option-disable;}
+                }
+                default "disable";
+            }
+            leaf registration-request-timer {
+                tailf:info "BSSAP registration request timer. Default 5";
+                type uint8 {
+                    range "1..60";
+                }
+                default 5;
+            }
+            leaf loc-upd-on-lai-mismatch {
+                tailf:info "Perform Lu on LAI mismatch. Default disable";
+                type enumeration {
+                    enum "enable" {tailf:code-name mme-gs-if-loc-upd-on-lai-mismatch-enable;}
+                    enum "disable" {tailf:code-name mme-gs-if-loc-upd-on-lai-mismatch-disable;}
+                }
+                default "disable";
+            }
+            leaf loc-upd-timer {
+                tailf:info "Location update timer. Default 10";
+                type uint8 {
+                    range "10..90";
+                }
+                default 10;
+            }
+            leaf explicit-gprs-detach-timer {
+                tailf:info "Explicit GPRS detach timer. Default 4";
+                type uint8 {
+                    range "1..30";
+                }
+                default 4;
+            }
+            leaf explicit-gprs-detach-retry {
+                tailf:info "Explicit GPRS detach retries. Default 2";
+                type uint8 {
+                    range "0..8";
+                }
+                default 2;
+            }
+            leaf explicit-imsi-detach-timer {
+                tailf:info "Explicit IMSI detach timer. Default 4";
+                type uint8 {
+                    range "1..30";
+                }
+                default 4;
+            }
+            leaf explicit-imsi-detach-retry {
+                tailf:info "Explicit IMSI detach retries. Default 2";
+                type uint8 {
+                    range "0..9";
+                }
+                default 2;
+            }
+            leaf implicit-imsi-detach-timer {
+                tailf:info "Implicit IMSI detach timer. Default 4";
+                type uint8 {
+                    range "1..30";
+                }
+                default 4;
+            }
+            leaf implicit-imsi-detach-retry {
+                tailf:info "Implicit IMSI detach retries. Default 2";
+                type uint8 {
+                    range "0..10";
+                }
+                default 2;
+            }
+            leaf reset-timer {
+                tailf:info "SGSN reset timer. Default 4";
+                type uint8 {
+                    range "1..120";
+                }
+                default 4;
+            }
+            leaf reset-retry {
+                tailf:info "SGSN reset retries. Default 2";
+                type uint8 {
+                    range "0..12";
+                }
+                default 2;
+            }
+            leaf version {
+                tailf:info "3GPP spec applicable to this interface is TS29.018. Default 10.7.0";
+                type enumeration {
+                    enum "9.3.0" {tailf:code-name mme-gs-if-version-9-3-0;}
+                    enum "10.7.0" {tailf:code-name mme-gs-if-version-10-7-0;}
+                }
+                default "10.7.0";
+            }
+        } /* mme-gs-if */
+    } /* gs */
+} /* interface */
+augment "/mme-sgsn/interface/nas" {
+    container mme-nas-gmm {
+        tailf:alt-name "gmm";
+        tailf:validate nasGmmValidate;
+        presence "";
+        tailf:info "NAS gmm interface.";
+        leaf mobile-reachable-timer {
+            must "((current() - (../periodic-ra-update-timer-t3312)) >= 4)" {
+                error-message "The value of 'mobile-reachable-timer' must be at least four minutes longer than the value of the 'periodic-ra-update-timer-t3312'";
+            }
+            tailf:info "Mobile reachable timer. Default 58";
+            type uint8 {
+                range "0..255";
+            }
+            default 58;
+        }
+        leaf cancel-location-timer {
+            tailf:info "Cancel location timer. Default 20";
+            type uint8 {
+                range "10..30";
+            }
+            default 20;
+        }
+        leaf paging-timer-t3313 {
+            tailf:info "Paging timer. Default 8";
+            type uint8 {
+                range "1..255";
+            }
+            default 8;
+        }
+        leaf paging-retry-n3313 {
+            tailf:info "Paging retries. Default 1";
+            type uint8 {
+                range "0..4";
+            }
+            default 1;
+        }
+        leaf nwk-init-detach-timer-t3322 {
+            tailf:info "Netwrok initiated detach timer. Default 6";
+            type uint8 {
+                range "1..255";
+            }
+            default 6;
+        }
+        leaf nwk-init-detach-retry-n3322 {
+            tailf:info "Netwrok initiated detach retries. Default 4";
+            type uint8 {
+                range "0..8";
+            }
+            default 4;
+        }
+        leaf id-request-timer-t3370 {
+            tailf:info "ID request timer. Default 6";
+            type uint8 {
+                range "1..255";
+            }
+            default 6;
+        }
+        leaf id-request-retry-n3370 {
+            tailf:info "ID request retries. Default 4";
+            type uint8 {
+                range "0..8";
+            }
+            default 4;
+        }
+        leaf radio-priority-level {
+            tailf:info "Radio priority Level. Default 4";
+            type uint8 {
+                range "1..4";
+            }
+            default 4;
+        }
+        leaf auth-ciphering-timer-t3360 {
+            tailf:info "Authentication and ciphering timer. Default 6";
+            type uint8 {
+                range "1..255";
+            }
+            default 6;
+        }
+        leaf auth-ciphering-retry-n3360 {
+            tailf:info "Authentication and ciphering retries. Default 4";
+            type uint8 {
+                range "0..8";
+            }
+            default 4;
+        }
+        leaf reset-ppf-radio-status {
+            tailf:info "Reset PPF upon Radio status indicator. Default disable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-nas-gmm-reset-ppf-radio-status-enable;}
+                enum "disable" {tailf:code-name mme-nas-gmm-reset-ppf-radio-status-disable;}
+            }
+            default "disable";
+        }
+        leaf ptmsi-realloc-timer-t3350 {
+            tailf:info "PTMSI reallocation timer. Default 6";
+            type uint8 {
+                range "1..255";
+            }
+            default 6;
+        }
+        leaf ptmsi-realloc-retry-n3350 {
+            tailf:info "PTMSI realloc retries. Default 4";
+            type uint8 {
+                range "0..8";
+            }
+            default 4;
+        }
+        leaf t3-tunnel-timer {
+            tailf:info "T3 tunnel timer. Default 12";
+            type uint8 {
+                range "1..40";
+            }
+            default 12;
+        }
+        leaf opt-authentication-control {
+            tailf:info "Authentication control. Valid values are 'off' or one or more of the following: unciphered-sm-pdu,service-request,detach,irau. Default off";
+            type string {
+                length "1..64";
+            }
+            default "off";
+        }
+        leaf send-old-and-new-tlli {
+            tailf:info "Send old and new TLLI. Default enable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-nas-gmm-send-old-and-new-tlli-enable;}
+                enum "disable" {tailf:code-name mme-nas-gmm-send-old-and-new-tlli-disable;}
+            }
+            default "enable";
+        }
+        leaf second-auth-attempts {
+            tailf:info "Second auth events. Default disable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-nas-gmm-second-auth-attempts-enable;}
+                enum "disable" {tailf:code-name mme-nas-gmm-second-auth-attempts-disable;}
+            }
+            default "disable";
+        }
+        leaf ready-timer-t3314 {
+            type string {
+                pattern '(([6-9])|([1-9][0-9]{1,3})|([1][0][0-9]{3})|([1][1][0][0-9]{2})|([1][1][1][0-5][0-9])|(11160)|(use-ms-value))' {
+                    tailf:info "Valid values are: 6..11160, use-ms-value";
+                }
+            }
+            tailf:info "Ready timer. Default 44";
+            default "44";
+        }
+        leaf periodic-ra-update-timer-t3312 {
+            tailf:info "Periodic routing area update. Default 28";
+            type uint8 {
+                range "1..186";
+            }
+            default 28;
+        }
+        leaf gprs-ciphering-algorithms {
+            type string {
+                pattern 'no-ciphering|((gea[1-3]|gea1,gea[23]|gea2,gea[13]|gea3,gea[12]|gea1,gea2,gea3|gea1,gea3,gea2|gea2,gea1,gea3|gea2,gea3,gea1|gea3,gea2,gea1|gea3,gea1,gea2)(,no-ciphering)?)' {
+                    tailf:info "Valid values in any order or combination, with order indicating preference are: gea3, gea1, no-ciphering";
+                }
+            }
+            tailf:info "GPRS ciphering algorithms. Valid values in any order or combination, with order indicating preference are: gea3,gea1,no-ciphering. Default no-ciphering";
+            default "no-ciphering";
+        }
+        leaf umts-ciphering-algorithms {
+            type string {
+                pattern 'uea1(,uea2)?(,no-ciphering)?|uea2(,uea1)?(,no-ciphering)?|uea1(,no-ciphering)?(,uea2)?|uea2(,no-ciphering)?(,uea1)?|no-ciphering(,uea1)?(,uea2)?|no-ciphering(,uea2)?(,uea1)?' {
+                    tailf:info "Valid values in any order or combination, with order indicating preference are: uea2, uea1, no-ciphering";
+                }
+            }
+            tailf:info "UMTS ciphering algorithms. Valid values in any order or combination, with order indicating preference are: uea2,uea1,no-ciphering. Default no-ciphering";
+            default "no-ciphering";
+        }
+        leaf attach-acc-force-standby {
+            tailf:info "Force standby for SGSN during attach accept. Default disable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-nas-gmm-attach-acc-force-standby-enable;}
+                enum "disable" {tailf:code-name mme-nas-gmm-attach-acc-force-standby-disable;}
+            }
+            default "disable";
+        }
+        leaf detach-req-force-standby {
+            tailf:info "Force standby for SGSN during network initiated detach request. Default disable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-nas-gmm-detach-req-force-standby-enable;}
+                enum "disable" {tailf:code-name mme-nas-gmm-detach-req-force-standby-disable;}
+            }
+            default "disable";
+        }
+        leaf detach-acc-force-standby {
+            tailf:info "Force standby for SGSN during mobile initiated detach accept. Default disable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-nas-gmm-detach-acc-force-standby-enable;}
+                enum "disable" {tailf:code-name mme-nas-gmm-detach-acc-force-standby-disable;}
+            }
+            default "disable";
+        }
+        leaf intra-rau-acc-force-standby {
+            tailf:info "Force standby for SGSN during intra-SGSN-RAU accept. Default disable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-nas-gmm-intra-rau-acc-force-standby-enable;}
+                enum "disable" {tailf:code-name mme-nas-gmm-intra-rau-acc-force-standby-disable;}
+            }
+            default "disable";
+        }
+        leaf inter-rau-acc-force-standby {
+            tailf:info "Force standby for SGSN during inter-SGSN-RAU accept. Default disable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-nas-gmm-inter-rau-acc-force-standby-enable;}
+                enum "disable" {tailf:code-name mme-nas-gmm-inter-rau-acc-force-standby-disable;}
+            }
+            default "disable";
+        }
+        leaf rau-reject-force-standby {
+            tailf:info "Force standby for SGSN during RAU reject. Default disable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-nas-gmm-rau-reject-force-standby-enable;}
+                enum "disable" {tailf:code-name mme-nas-gmm-rau-reject-force-standby-disable;}
+            }
+            default "disable";
+        }
+        leaf umts-integrity-algorithms {
+            type string {
+                pattern 'uia[1-2]$,uia[1-2]|uia[1-2]|uia1,uia2|uia2,uia1$,uia1,uia2$,uia2,uia1|uia1,uia2|uia1,uia2|uia2,uia1|uia2,uia1' {
+                    tailf:info "Valid values in any order or combination, with order indicating preference are: uia1, uia2";
+                }
+            }
+            tailf:info "UMTS integrity algorithms. Valid values in any order or combination, with order indicating preference are: uia1,uia2. Default uia1";
+            default "uia1";
+        }
+        leaf ptmsi-lifetime {
+            tailf:info "PTMSI lifetime. Default 12";
+            type string;
+            default "12";
+        }
+        leaf periodic-rau-tmr-t3312-offload {
+            tailf:info "Periodic routing area update for offload. Default 4";
+            type uint16 {
+                range "2..1860";
+            }
+            default 4;
+        }
+        leaf ims-voice-sgsn {
+            tailf:info "IMS voice over PS Session support for SGSN. Default disable";
+            type enumeration {
+                enum "enable" {tailf:code-name nas-gmm-ims-voice-sgsn-enable;}
+                enum "disable" {tailf:code-name nas-gmm-ims-voice-sgsn-disable;}
+            }
+        }
+	leaf cancel-location-detach-cause {
+                tailf:info "Detach cause for cancel location . Default gprs-service-not-allowed-7";
+                type enumeration {
+                    enum "none" {tailf:code-name mme-nas-gmm-cancel-location-detach-cause-none;}
+                    enum "imsi-unknown-in-hlr-2" {tailf:code-name mme-nas-gmm-cancel-location-detach-cause-imsi-unknown-in-hss-2;}
+                    enum "illegal-ms-3" {tailf:code-name mme-nas-gmm-cancel-location-detach-cause-illegal-ms-3;}
+                    enum "illegal-me-6" {tailf:code-name mme-nas-gmm-cancel-location-detach-cause-illegal-me-6;}
+                    enum "gprs-service-not-allowed-7" {tailf:code-name mme-nas-gmm-cancel-location-detach-cause-gprs-service-not-allowed-7;}
+                    enum "gprs-and-non-gprs-service-not-allowed-8" {tailf:code-name mme-nas-gmm-cancel-location-detach-cause-gprs-and-non-gprs-service-not-allowed-8;}
+                    enum "plmn-not-allowed-11" {tailf:code-name mme-nas-gmm-cancel-location-detach-cause-plmn-not-allowed-11;}
+                    enum "location-area-not-allowed-12" {tailf:code-name mme-nas-gmm-cancel-location-detach-cause-loation-area-not-allowed-12;}
+                    enum "roaming-not-allowed-in-this-la-13" {tailf:code-name mme-nas-gmm-cancel-location-detach-cause-roaming-not-allowed-in-this-la-13;}
+                    enum "gprs-service-not-allowed-in-this-plmn-14" {tailf:code-name mme-nas-gmm-cancel-location-detach-cause-gprs-service-not-allowed-in-this-plmn-14;}
+                    enum "no-suitable-cells-in-la-15" {tailf:code-name mme-nas-gmm-cancel-location-detach-cause-no-suitable-cells-in-la-15;}
+            }
+            default "gprs-service-not-allowed-7";
+       }
+    } /* mme-nas-gmm */
+    list mme-gmm-cause-mapping {
+        tailf:alt-name "gmm-cause-mapping";
+        key "error";
+        tailf:info "This group contains provisionable attributes for mapping 3GPP TS 29.00 MAP and DNS errors to GMM cause codes.";
+        leaf error {
+            tailf:info "GMM Error description.";
+            type enumeration {
+                enum "system-failure" {tailf:code-name mme-gmm-cause-mapping-error-system-failure;}
+                enum "data-missing" {tailf:code-name mme-gmm-cause-mapping-error-data-missing;}
+                enum "unexpected-data-value" {tailf:code-name mme-gmm-cause-mapping-error-unexpected-data-value;}
+                enum "unknown-subscriber" {tailf:code-name mme-gmm-cause-mapping-error-unknown-subscriber;}
+                enum "unknown-scptn-no-gprs-data" {tailf:code-name mme-gmm-cause-mapping-error-unknown-scptn-no-gprs-data;}
+                enum "unknown-scptn-gprs-data" {tailf:code-name mme-gmm-cause-mapping-error-unknown-scptn-gprs-data;}
+                enum "unidentified-subscriber" {tailf:code-name mme-gmm-cause-mapping-error-unidentified-subscriber;}
+                enum "roaming-not-allowed-odb-vplmn" {tailf:code-name mme-gmm-cause-mapping-error-roaming-not-allowed-odb-vplmn;}
+                enum "roaming-not-allowed-odb-hplmn" {tailf:code-name mme-gmm-cause-mapping-error-roaming-not-allowed-odb-hplmn;}
+                enum "roaming-not-allowed-odb-all-apn" {tailf:code-name mme-gmm-cause-mapping-error-roaming-not-allowed-odb-all-apn;}
+                enum "roaming-not-allowed" {tailf:code-name mme-gmm-cause-mapping-error-roaming-not-allowed;}
+                enum "plmn-roaming-not-allowed" {tailf:code-name mme-gmm-cause-mapping-error-plmn-roaming-not-allowed;}
+                enum "operator-determined-barring" {tailf:code-name mme-gmm-cause-mapping-error-operator-determined-barring;}
+                enum "illegal-subscriber" {tailf:code-name mme-gmm-cause-mapping-error-illegal-subscriber;}
+                enum "illegal-equipment" {tailf:code-name mme-gmm-cause-mapping-error-illegal-equipment;}
+                enum "resource-limitation" {tailf:code-name mme-gmm-cause-mapping-error-resource-limitation;}
+                enum "resource-unavailable" {tailf:code-name mme-gmm-cause-mapping-error-resource-unavailable;}
+                enum "provider-resource-limitation" {tailf:code-name mme-gmm-cause-mapping-error-provider-resource-limitation;}
+                enum "unknown-hlr-hss" {tailf:code-name mme-gmm-cause-mapping-error-unknown-hlr-hss;}
+                enum "roaming-restricted-in-sgsn" {tailf:code-name mme-gmm-cause-mapping-error-roaming-restricted-in-sgsn;}
+                enum "no-ipaddress-list-returned" {tailf:code-name mme-gmm-cause-mapping-error-no-ipaddress-list-returned;}
+                enum "ptmsi-collision-attach-reject" {tailf:code-name mme-gmm-cause-mapping-error-ptmsi-collision-attach-reject;}
+                enum "ptmsi-collision-rau-reject" {tailf:code-name mme-gmm-cause-mapping-error-ptmsi-collision-rau-reject;}
+                enum "access-restriction-data" {tailf:code-name mme-gmm-cause-mapping-error-access-restriction-data;}
+                enum "user-unknown" {tailf:code-name mme-gmm-cause-mapping-error-user-unknown;}
+                enum "rat-not-allowed" {tailf:code-name mme-gmm-cause-mapping-error-rat-not-allowed;}
+                enum "unable-to-comply" {tailf:code-name mme-gmm-cause-mapping-error-unable-to-comply;}
+                enum "authorization-rejected" {tailf:code-name mme-gmm-cause-mapping-error-authorization-rejected;}
+                enum "invalid-avp-value" {tailf:code-name mme-gmm-cause-mapping-error-invalid-avp-value;}
+                enum "application-unsupported" {tailf:code-name mme-gmm-cause-mapping-error-application-unsupported;}
+                enum "command-unsupported" {tailf:code-name mme-gmm-cause-mapping-error-command-unsupported;}
+                enum "out-of-space" {tailf:code-name mme-gmm-cause-mapping-error-out-of-space;}
+                enum "too-busy" {tailf:code-name mme-gmm-cause-mapping-error-too-busy;}
+                enum "unknown-serving-node" {tailf:code-name mme-gmm-cause-mapping-error-unknown-serving-node;}
+                enum "roaming-restricted-in-mme-due-to-unsupported-feature" {tailf:code-name mme-gmm-cause-mapping-error-roaming-restricted-in-mme-due-to-unsupported-feature;}
+            }
+            mandatory true;
+        }
+        leaf cause-code {
+            tailf:info "GMM Cause Code. Default varies per error";
+                type union {
+                    type string {
+                        tailf:info "GMM cause code, ranged 1..255";
+                        pattern '([a-zA-Z]+(-[a-zA-Z]+)*-)?([0-9]{1,2}|1[0-9]{1,2}|2[0-4][0-9]|25[0-5])' {
+                            tailf:info "Valid values are: 1..255 or pre-defined strings";                        
+                    }
+                }                  
+                    type enumeration {
+                        enum "imsi-unknown-in-hlr-2" {tailf:code-name mme-gmm-cause-mapping-cause-code-imsi-unknown-in-hlr-2;}
+                        enum "illegal-ue-3" {tailf:code-name mme-gmm-cause-mapping-cause-code-illegal-ue-3;}
+                        enum "illegal-me-6" {tailf:code-name mme-gmm-cause-mapping-cause-code-illegal-me-6;} 
+                        enum "gprs-service-not-allowed-7" {tailf:code-name mme-gmm-cause-mapping-cause-code-gprs-service-not-allowed-7;}  
+                        enum "gprs-and-non-gprs-service-not-allowed-8" {tailf:code-name mme-gmm-cause-mapping-cause-code-gprs-and-non-gprs-service-not-allowed-8;}   
+                        enum "ms-id-not-derived-by-network-9" {tailf:code-name mme-gmm-cause-mapping-cause-code-ms-id-not-derived-by-network-9;}    
+                        enum "implicitly-detached-10" {tailf:code-name mme-gmm-cause-mapping-cause-code-implicitly-detached-10;}     
+                        enum "plmn-not-allowed-11" {tailf:code-name mme-gmm-cause-mapping-cause-code-plmn-not-allowed-11;}    
+                        enum "location-area-not-allowed-12" {tailf:code-name mme-gmm-cause-mapping-cause-code-location-area-not-allowed-12;}
+                        enum "roaming-not-allowed-in-location-area-13" {tailf:code-name mme-gmm-cause-mapping-cause-code-roaming-not-allowed-in-location-area-13;}
+                        enum "gprs-service-not-allowed-in-this-plmn-14" {tailf:code-name mme-gmm-cause-mapping-cause-code-gprs-service-not-allowed-in-this-plmn-14;}
+                        enum "no-suitable-cells-in-la-15" {tailf:code-name mme-gmm-cause-mapping-cause-code-no-suitable-cells-in-la-15;}            
+                        enum "msc-temp-not-reachable-16" {tailf:code-name mme-gmm-cause-mapping-cause-code-msc-temp-not-reachable-16;}     
+                        enum "network-failure-17" {tailf:code-name mme-gmm-cause-mapping-cause-code-network-failure-17;}     
+                        enum "congestion-22" {tailf:code-name mme-gmm-cause-mapping-cause-code-congestion-22;}    
+                    }  
+                }
+        }
+    } /* mme-gmm-cause-mapping */
+    container mme-nas-sgsn-sm {
+        tailf:alt-name "sm";
+        presence "";
+        tailf:info "This component represents the SM protocol layer of the SGSN.";
+        leaf nwk-pdp-deact-timer-t3395 {
+            tailf:info "Network PDP deact timer. Default 8";
+            type uint8 {
+                range "1..255";
+            }
+            default 8;
+        }
+        leaf nwk-pdp-deact-retry-n3395 {
+            tailf:info "Network PDP deact retries. Default 4";
+            type uint8 {
+                range "0..4";
+            }
+            default 4;
+        }
+        leaf nwk-pdp-modify-timer-t3386 {
+            tailf:info "Network PDP modify timer. Default 8";
+            type uint8 {
+                range "1..255";
+            }
+            default 8;
+        }
+        leaf nwk-pdp-modify-retry-n3386 {
+            tailf:info "Network PDP modify retries. Default 4";
+            type uint8 {
+                range "1..20";
+            }
+            default 4;
+        }
+        leaf pdp-activations-per-mobile {
+            tailf:info "PDP activations per mobile. Default 8";
+            type uint8 {
+                range "1..8";
+            }
+            default 8;
+        }
+        leaf ipv6-enduser-address {
+            tailf:info "IPv6 functionality for end user. Default disable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-nas-sgsn-sm-ipv6-enduser-address-enable;}
+                enum "disable" {tailf:code-name mme-nas-sgsn-sm-ipv6-enduser-address-disable;}
+            }
+            default "disable";
+        }
+        leaf route-advance {
+            tailf:info "Route advance on GTP auth failure. Default enable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-nas-sgsn-sm-route-advance-enable;}
+                enum "disable" {tailf:code-name mme-nas-sgsn-sm-route-advance-disable;}
+            }
+            default "enable";
+        }
+        leaf qos-negotiation {
+            tailf:info "Quality of Service negotiation functionality. Default enable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-nas-sgsn-sm-qos-negotiation-enable;}
+                enum "disable" {tailf:code-name mme-nas-sgsn-sm-qos-negotiation-disable;}
+            }
+            default "enable";
+        }
+        leaf qos-upgrade-support {
+            tailf:info "Quality of Service upgrade supported. Default disable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-nas-sgsn-sm-qos-upgrade-support-enable;}
+                enum "disable" {tailf:code-name mme-nas-sgsn-sm-qos-upgrade-support-disable;}
+            }
+            default "disable";
+        }
+        leaf local-qos-control {
+            tailf:info "Local Quality of Service control. Default never";
+            type enumeration {
+                enum "never" {tailf:code-name mme-nas-sgsn-sm-local-qos-control-never;}
+                enum "requested-qos-subscribed" {tailf:code-name mme-nas-sgsn-sm-local-qos-control-requested-qos-subscribed;}
+                enum "always" {tailf:code-name mme-nas-sgsn-sm-local-qos-control-always;}
+            }
+            default "never";
+        }
+        leaf old-sgsn-buffering {
+            tailf:info "Old SGSN buffering functionality. Default enable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-nas-sgsn-sm-old-sgsn-buffering-enable;}
+                enum "disable" {tailf:code-name mme-nas-sgsn-sm-old-sgsn-buffering-disable;}
+            }
+            default "enable";
+        }
+        leaf secondary-pdp-context {
+            tailf:info "Secondary PDP context activation control. Default disable";
+            type enumeration {
+                enum "disable" {tailf:code-name mme-nas-sgsn-sm-secondary-pdp-context-disable;}
+                enum "enable" {tailf:code-name mme-nas-sgsn-sm-secondary-pdp-context-enable;}
+            }
+            default "disable";
+        }
+    } /* mme-nas-sgsn-sm */
+} /* nas */
+augment "/mme-sgsn/service-area"{
+    list mme-location-area {
+        tailf:alt-name "location-area";
+        tailf:validate locationAreaValidate {
+            tailf:call-once "true";
+        }
+        key "plmn lac";
+        max-elements 255;
+        tailf:info "This represents the mapping between location area code and the VLR pool table.";
+        leaf plmn {
+            /* Foreign Key */
+            type leafref {
+                path "/mme-sgsn/service-area/mme-plmn/plmn-id";
+            }
+            tailf:info "PLMN identifier.";
+            mandatory true;
+        }
+        leaf lac {
+            type string {
+                pattern '0x[0-9a-f]{1,4}' {
+                    tailf:info "Valid values are: hexadecimal value of length 3..6 including a leading '0x'";
+                }
+            }
+            tailf:info "Location area code.";
+            mandatory true;
+        }
+        leaf vlr-pool-name {
+            /* Foreign Key */
+            must "count(../../mme-vlr-pool[vlr-pool-name = current()]) != 0" {
+                error-message "There is no 'mme-sgsn service-area vlr-pool' object with this 'vlr-pool-name'";
+            }
+            tailf:info "VLR pool name.";
+            mandatory true;
+            type string {
+                length "0..31";
+            }
+        }
+    } /* mme-location-area */
+    list mme-routing-area {
+        tailf:alt-name "routing-area";
+        tailf:validate serviceAreaRoutingAreaValidate {
+            tailf:call-once "true";
+        }
+        key "plmn lac rac";
+        max-elements 4096;
+        must "(count(../mme-sgsn-pool) != 0)" {
+            error-message "At least one 'mme-sgsn service-area sgsn-pool' must exist";
+        }
+        tailf:info "Routing area mapped under location area.";
+        leaf plmn {
+            tailf:info "PLMN identifier.";
+            type leafref {
+                path "/mme-sgsn/service-area/mme-plmn/plmn-id";
+            }
+            mandatory true;
+        }
+        leaf lac {
+            type string {
+                pattern '0x[0-9a-f]{1,4}' {
+                    tailf:info "Valid values are: hexadecimal values of length 3..6 including a leading '0x'";
+                }
+            }
+            tailf:info "Location area code.";
+            mandatory true;
+        }
+        leaf rac {
+            type string {
+                pattern '0x[0-9a-f]{1,2}' {
+                    tailf:info "Valid values are: hexadecimal values of length 3..4 including a leading '0x'";
+                }
+            }
+            tailf:info "Routing area code.";
+            mandatory true;
+        }
+        leaf rncid-list {
+            tailf:info "List of RNC ids.";
+            type string {
+                length "0..1535";
+            }
+            mandatory true;
+        }
+        leaf nseid-list {
+            tailf:info "List of NSE ids.";
+            type string {
+                length "0..3599";
+            }
+            mandatory true;
+        }
+        leaf timezone {
+            tailf:info "LINUX timezone values.";
+            type timezone:timezone-string;
+        }
+    } /* mme-routing-area */
+    list mme-sgsn-nri {
+        tailf:alt-name "sgsn-nri";
+        tailf:validate sgsnNriValidate {
+            tailf:call-once "true";
+        }
+        key "nri-number pool-name";
+        max-elements 256;
+        tailf:info "This represents the SGSN identifier NRI in SGSN pool.";
+        leaf nri-number {
+            tailf:info "NRI number.";
+            type uint8 {
+                range "0..255";
+            }
+            mandatory true;
+        }
+        leaf pool-name {
+            tailf:info "SGSN pool name.";
+            type leafref {
+                path "/mme-sgsn/service-area/mme-sgsn-pool/pool-name";
+            }
+            mandatory true;
+        }
+        leaf nri-type {
+            tailf:info "Type of NRI(local or pool).";
+            type enumeration {
+                enum "local-nri" {tailf:code-name mme-sgsn-nri-nri-type-local-nri;}
+                enum "pool-nri" {tailf:code-name mme-sgsn-nri-nri-type-pool-nri;}
+                enum "null-nri" {tailf:code-name mme-sgsn-nri-nri-type-null-nri;}
+            }
+            mandatory true;
+        }
+        leaf ip-address-list {
+            type string {
+                pattern '(null|((([0-9]{1,3})[.]){3}([0-9]{1,3}))(,((([0-9]{1,3})[.]){3}([0-9]{1,3}))){0,9})' {
+                    tailf:info "Valid values are: comma separated IPv4 addresses or 'null' for empty list";
+                }
+            }
+            tailf:info "List of IPv4 addresses.";
+            mandatory true;
+        }
+    } /* mme-sgsn-nri */
+    list mme-sgsn-pool {
+        tailf:alt-name "sgsn-pool";
+        tailf:validate serviceAreaSgsnPoolValidate;
+        key "pool-name";
+        max-elements 1;
+        tailf:info "A radio coverage area served by this SGSN along with other SGSNs.";
+        leaf pool-name {
+            tailf:info "SGSN pool name.";
+            type string {
+                length "0..31";
+            }
+            mandatory true;
+        }
+        leaf nri-bit-length {
+            tailf:info "NRI bit length. Default 0";
+            type uint8 {
+                range "0..8";
+            }
+            default 0;
+        }
+        leaf load-balancing {
+            tailf:info "Load balancing functionality. Default disable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-sgsn-pool-load-balancing-enable;}
+                enum "disable" {tailf:code-name mme-sgsn-pool-load-balancing-disable;}
+            }
+            default "disable";
+        }
+        leaf non-broadcast-rai {
+            tailf:info "Non broadcast RAI. Default none";
+            type string {
+                length "1..18";
+            }
+            default "none";
+        }
+        leaf cn-id {
+            tailf:info "Core network node ID. Default 0";
+            type uint16 {
+                range "0..4095";
+            }
+            default 0;
+        }
+    } /* mme-sgsn-pool */
+} /* service-area */
+augment "/mme-sgsn/subscriber" {
+    list mme-local-qos-profile {
+        tailf:alt-name "local-qos-profile";
+        key "name";
+        max-elements 11;
+        tailf:info "This represents a Quality of Service (QoS) profile, specific to an SGSN, for use in the QoS negotiation process.";
+        leaf name {
+            type string {
+                pattern 'profile[0-9]||apn-selection-qos' {
+                    tailf:info "Valid values are: profile0 ... profile9 or apn-selection-qos";
+                }
+            }
+            tailf:info "Local QoS profile name.";
+            mandatory true;
+        }
+        leaf delivery-order {
+            tailf:info "Local QoS delivery order. Default use-subscribed";
+            type enumeration {
+                enum "use-subscribed" {tailf:code-name mme-local-qos-profile-delivery-order-use-subscribed;}
+                enum "with-delivery-order" {tailf:code-name mme-local-qos-profile-delivery-order-with-delivery-order;}
+                enum "without-delivery-order" {tailf:code-name mme-local-qos-profile-delivery-order-without-delivery-order;}
+            }
+            default "use-subscribed";
+        }
+        leaf delivery-of-erroneous-sdus {
+            tailf:info "Local QoS delivery of erroneous SDUs. Default use-subscribed";
+            type enumeration {
+                enum "use-subscribed" {tailf:code-name mme-local-qos-profile-delivery-of-erroneous-sdus-use-subscribed;}
+                enum "no-detect" {tailf:code-name mme-local-qos-profile-delivery-of-erroneous-sdus-no-detect;}
+                enum "err-sdus-delivered" {tailf:code-name mme-local-qos-profile-delivery-of-erroneous-sdus-err-sdus-delivered;}
+                enum "err-sdus-not-delivered" {tailf:code-name mme-local-qos-profile-delivery-of-erroneous-sdus-err-sdus-not-delivered;}
+            }
+            default "use-subscribed";
+        }
+        leaf traffic-class {
+            tailf:info "QoS traffic class. Default use-subscribed";
+            type enumeration {
+                enum "use-subscribed" {tailf:code-name mme-local-qos-profile-traffic-class-use-subscribed;}
+                enum "conversation" {tailf:code-name mme-local-qos-profile-traffic-class-conversation;}
+                enum "streaming" {tailf:code-name mme-local-qos-profile-traffic-class-streaming;}
+                enum "interactive" {tailf:code-name mme-local-qos-profile-traffic-class-interactive;}
+                enum "background" {tailf:code-name mme-local-qos-profile-traffic-class-background;}
+            }
+            default "use-subscribed";
+        }
+        leaf max-sdu-size-str {
+            tailf:info "QoS max SDU size. Default use-subscribed";
+            type string {
+                pattern '(([1-9][0-9]{0,2})|([1][0-4][0-9]{2})|(1500)|(1502)|(1510)|(1520)|(use-subscribed))' {
+                    tailf:info "Valid values are: use-subscribed, 1..1500, 1502, 1510, 1520";
+                }
+            }     
+            default "use-subscribed";
+        }
+        leaf traffic-handling-priority {
+            tailf:info "QoS traffic handling priority. Default use-subscribed";
+            type enumeration {
+                enum "use-subscribed" {tailf:code-name mme-local-qos-profile-traffic-handling-priority-use-subscribed;}
+                enum "priority-level1" {tailf:code-name mme-local-qos-profile-traffic-handling-priority-priority-level1;}
+                enum "priority-level2" {tailf:code-name mme-local-qos-profile-traffic-handling-priority-priority-level2;}
+                enum "priority-level3" {tailf:code-name mme-local-qos-profile-traffic-handling-priority-priority-level3;}
+            }
+            default "use-subscribed";
+        }
+        leaf sdu-error-ratio {
+            tailf:info "SDU error ratio. Default use-subscribed";
+            type enumeration {
+                enum "use-subscribed" {tailf:code-name mme-local-qos-profile-sdu-error-ratio-use-subscribed;}
+                enum "sdu-err-ratio-1hundredth" {tailf:code-name mme-local-qos-profile-sdu-error-ratio-sdu-err-ratio-1hundredth;}
+                enum "sdu-err-ratio-7thousandth" {tailf:code-name mme-local-qos-profile-sdu-error-ratio-sdu-err-ratio-7thousandth;}
+                enum "sdu-err-ratio-1thousandth" {tailf:code-name mme-local-qos-profile-sdu-error-ratio-sdu-err-ratio-1thousandth;}
+                enum "sdu-err-ratio-1tenth" {tailf:code-name mme-local-qos-profile-sdu-error-ratio-sdu-err-ratio-1tenth;}
+                enum "sdu-err-ratio-1hunthousandth" {tailf:code-name mme-local-qos-profile-sdu-error-ratio-sdu-err-ratio-1hunthousandth;}
+                enum "sdu-err-ratio-1tenthousandth" {tailf:code-name mme-local-qos-profile-sdu-error-ratio-sdu-err-ratio-1tenthousandth;}
+            }
+            default "use-subscribed";
+        }
+        leaf residual-biterror-rate {
+            tailf:info "Local QoS residual bit error rate. Default use-subscribed";
+            type enumeration {
+                enum "use-subscribed" {tailf:code-name mme-local-qos-profile-residual-biterror-rate-use-subscribed;}
+                enum "residualber-5hundredth" {tailf:code-name mme-local-qos-profile-residual-biterror-rate-residualber-5hundredth;}
+                enum "residualber-1hundredth" {tailf:code-name mme-local-qos-profile-residual-biterror-rate-residualber-1hundredth;}
+                enum "residualber-5thousandth" {tailf:code-name mme-local-qos-profile-residual-biterror-rate-residualber-5thousandth;}
+                enum "residualber-4thousandth" {tailf:code-name mme-local-qos-profile-residual-biterror-rate-residualber-4thousandth;}
+                enum "residualber-1thousandth" {tailf:code-name mme-local-qos-profile-residual-biterror-rate-residualber-1thousandth;}
+                enum "residualber-1tenthousandth" {tailf:code-name mme-local-qos-profile-residual-biterror-rate-residualber-1tenthousandth;}
+                enum "residualber-1hundredthousandth" {tailf:code-name mme-local-qos-profile-residual-biterror-rate-residualber-1hundredthousandth;}
+                enum "residualber-1millionth" {tailf:code-name mme-local-qos-profile-residual-biterror-rate-residualber-1millionth;}
+                enum "residualber-6hundredmillionth" {tailf:code-name mme-local-qos-profile-residual-biterror-rate-residualber-6hundredmillionth;}
+            }
+            default "use-subscribed";
+        }
+        leaf max-bitrate-uplink-str {
+            tailf:info "Qos max bitrate. Default use-subscribed";
+            type string {
+                pattern '(([1-9][0-9]{0,4})|([1][0-9]{5})|([2][0-4][0-9]{4})|([2][5][0-5][0-9]{3})|(256000)|(use-subscribed))' {
+                    tailf:info "Valid values are: 1..256000, use-subscribed";
+                }
+            }
+            default "use-subscribed";
+        }
+        leaf max-bitrate-downlink-str {
+            tailf:info "Qos max bitrate. Default use-subscribed";
+            type string {
+                pattern '(([1-9][0-9]{0,4})|([1][0-9]{5})|([2][0-4][0-9]{4})|([2][5][0-5][0-9]{3})|(256000)|(use-subscribed))' {
+                    tailf:info "Valid values are: 1..256000, use-subscribed";
+                }
+            }
+            default "use-subscribed";
+        }
+        leaf guaranteed-bitrate-uplink-str {
+            type string {
+                pattern '(([1-9][0-9]{0,4})|([1][0-9]{5})|([2][0-4][0-9]{4})|([2][5][0-5][0-9]{3})|(256000)|(use-subscribed))' {
+                    tailf:info "Valid values are: 1..256000, use-subscribed";
+                }
+            }
+            default "use-subscribed";
+        }
+        leaf guaranteed-bitrate-downlink-str {
+            type string {
+                pattern '(([1-9][0-9]{0,4})|([1][0-9]{5})|([2][0-4][0-9]{4})|([2][5][0-5][0-9]{3})|(256000)|(use-subscribed))' {
+                    tailf:info "Valid values are: 1..256000, use-subscribed";
+                }
+            }
+            default "use-subscribed";
+        }
+        leaf allocation-retention {
+            tailf:info "Allocation retention priority. Default use-subscribed";
+            type enumeration {
+                enum "use-subscribed" {tailf:code-name mme-local-qos-profile-allocation-retention-use-subscribed;}
+                enum "allocation-retention-level1" {tailf:code-name mme-local-qos-profile-allocation-retention-allocation-retention-level1;}
+                enum "allocation-retention-level2" {tailf:code-name mme-local-qos-profile-allocation-retention-allocation-retention-level2;}
+                enum "allocation-retention-level3" {tailf:code-name mme-local-qos-profile-allocation-retention-allocation-retention-level3;}
+            }
+            default "use-subscribed";
+        }
+        leaf transfer-delay {
+            tailf:info "Transfer delay. Default use-subscribed";
+            type string;
+            default "use-subscribed";
+        }
+    } /* mme-local-qos-profile */
+} /* subscriber */
+augment "/mme-sgsn/interface/gn" {
+    list mme-ggsn {
+        tailf:alt-name "ggsn";
+        key "ip-address";
+        max-elements 200;
+        tailf:info "Gateway GPRS Support Node";
+        leaf ip-address {
+            tailf:info "IP address of GGSN.";
+            type inet:ip-address;
+            mandatory true;
+        }
+        leaf ggsn-name {
+            tailf:alt-name "name";
+            tailf:info "A unique GGSN name.";
+            type string {
+                length "1..32";
+            }
+            mandatory true;
+        }
+        leaf direct-tunnel {
+            tailf:info "Direct Tunnel functionality. Default disable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-sgsn-interface-gn-ggsn-direct-tunnel-enable;}
+                enum "disable" {tailf:code-name mme-sgsn-interface-gn-ggsn-direct-tunnel-disable;}
+            }
+            default "disable";
+            must "((current() != 'enable') or (count(../../../../feature/mme-feature-control[name = 'direct-tunnel' and status-field = 'on']) != 0))" {
+                error-message "If 'direct-tunnel' is 'enable' then 'mme-sgsn feature control direct-tunnel' must be on";
+            }
+        }
+        leaf blacklisted {
+            tailf:info "GGSN blacklisting. Default false";
+            type boolean;
+            default false;
+        }
+    } /* mme-ggsn */
+} /* gn */
+augment "/mme-sgsn/interface" {
+    container ge {
+        tailf:info "Ge interface to Service Control Point (SCP)";
+        presence "";
+        container mme-ge-if {
+            tailf:alt-name "ge-if";
+            presence "";
+            must "(count(../../../feature/mme-feature-control[name = 'ge' and status-field = 'on']) != 0)" {
+                error-message "If 'ge-if' object exists then 'mme-sgsn feature control ge' must be 'on'";
+            }
+            must "((count(../../ss7/mme-ss7-profile) = 0) or (../../ss7/mme-ss7-profile/cap-subsystem-number != 'unused'))" {
+                error-message "If 'ge-if' object exists then 'mme-sgsn interface ss7 ss7 cap-subsystem-number' must not be set to 'unused'";
+            }
+            tailf:info "This component represents the interface between the SGSN and the Service Control Point (SCP). It uses the CAP protocol.";
+            leaf max-camel-dialogues {
+                tailf:info "Maximum number of CAMEL dialogues active at any time per SC process. Default 5000";
+                type uint16 {
+                    range "1..64000";
+                }
+                default 5000;
+            }
+            leaf ssf-timer {
+                tailf:info "Time to wait for an SCP response while in the Waiting for Instructions state. Default 3";
+                type uint8 {
+                    range "1..20";
+                }
+                default 3;
+            }
+            leaf charging-guard-timer {
+                tailf:info "TC guard timer value. Default 3";
+                type uint8 {
+                    range "1..20";
+                }
+                default 3;
+            }
+            leaf charging-guard-retry {
+                tailf:info "Number of retries after the charging-guard-timer expires. Default 0";
+                type uint8 {
+                    range "0..5";
+                }
+                default 0;
+            }
+            leaf subscriber-service {
+                tailf:info "Type of subscribers using CAMEL service. Default all";
+                type enumeration {
+                    enum "homers" {tailf:code-name mme-ge-if-subscriber-service-homers;}
+                    enum "roamers" {tailf:code-name mme-ge-if-subscriber-service-roamers;}
+                    enum "all" {tailf:code-name mme-ge-if-subscriber-service-all;}
+                }
+                default "all";
+            }
+            leaf version {
+                tailf:info "Standard version of interface. Default 10.1.0";
+                type enumeration {
+                    enum "9.2.0" {tailf:code-name mme-ge-if-version-9-2-0;}
+                    enum "10.1.0" {tailf:code-name mme-ge-if-version-10-1-0;}
+                }
+                default "10.1.0";
+            }
+        } /* mme-ge-if */
+    } /* ge */
+} /* interface */
+} /*submodule*/
+

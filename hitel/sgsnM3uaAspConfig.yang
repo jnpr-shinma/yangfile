@@ -1,0 +1,248 @@
+/*
+//////////////////////////////////////////////////////////////////////////////
+/// @file sgsnM3uaAspConfig.yang
+/// @brief This file contains configuration related to agwSgsnIpSp.
+///
+/// History:
+///
+/// yyyymmmdd Changed by      Change Reason
+/// --------- --------------- -------------------------------------------------
+/// 2014Sep12 Irina Pershwitz AGW-23702 Fixed ipsp-instance escapes
+/// 2014Sep18 Lakshmi Priya   AGW-22082 Schema upgrade
+/// 20140918  Lakshmi Priya   AGW-22082 Schema upgrade
+/// 2014Oct10 Matt Kloppmann  AGW-24242 - Incorrect local port range
+/// 2014Oct10  Sravya          AGW-23949 ANSI Iu Support
+///
+/// Copyright (c) 2014 Hitachi Limited. All Rights Reserved.
+///
+/// CONFIDENTIALITY AND LIMITED USE
+///
+/// This software, including any software of third parties embodied herein,
+/// contains information and concepts which are confidential to Hitachi
+/// and such third parties. This software is licensed for use
+/// solely in accordance with the terms and conditions of the applicable
+/// license agreement with Hitachi or its authorized distributor.
+///
+//////////////////////////////////////////////////////////////////////////////
+*/
+
+submodule sgsnM3uaAspConfig{
+
+belongs-to hcta-epc {
+    prefix epc;
+}
+
+import tailf-common {
+    prefix tailf;
+}
+
+include mmeSgsnConfig;
+
+include fgwConfig;
+
+include rncConfig;
+include cmdCommonHcta;
+include sigtranConfig;
+import ietf-inet-types {
+    prefix inet;
+}
+
+augment "/mme-sgsn/interface/iu"{
+    list mme-iu-m3ua {
+        tailf:alt-name "m3ua";
+        key "local-point-code";
+        max-elements 1;
+        tailf:info "Provisionable attributes of iu-m3ua.";
+        tailf:validate iuM3uaValidate;
+
+        leaf local-point-code {
+            type string {
+                pattern '((([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])[.]){2}([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5]))|[1-9][0-9]{0,7}' {
+                    tailf:info "Valid values in pointcode format are: ITU 1-16383 or 0-7.0-255.0-7, ANSI 1-16777215 or 0-255.0-255.0-255";
+                }
+            }
+            must "current() != '0.0.0'" {
+                error-message
+                "The 'local-point-code' must not be '0.0.0'";
+            }                                                                  
+            tailf:info "Point code instance, valid values in pointcode format are: ITU 1-16383 or 0-7.0-255.0-7, ANSI 1-16777215 or 0-255.0-255.0-255";
+            mandatory true;
+        }
+        leaf m3ua-profile {
+            tailf:info "A unique m3ua-profile name.";
+            type leafref {
+                path "/mme-sgsn/interface/mme-m3ua/name";
+            }
+            mandatory true;
+            must "(count(../../../ss7/mme-g-m3ua) = 0) or (../../../ss7/mme-g-m3ua/m3ua-prof-name != current())" {
+                error-message
+                "The 'm3ua-profile' must not be same as 'mme-sgsn interface ss7 m3ua m3ua-prof-name'";
+            }
+        }
+    } /* mme-iu-m3ua */
+    list mme-iu-peer {
+        tailf:alt-name "peer";
+        key "iu-peer-name";
+        unique "ip-address1 port-str"; 
+        max-elements 255;
+        tailf:validate iuPeerValidate {
+            tailf:call-once "true";
+        }
+        tailf:info "Provisionable attributes for iu-peer.";
+        leaf iu-peer-name {
+            type string {
+                pattern '[0-9A-Za-z_]+' {
+                    tailf:info "Valid values are: alphanumeric and underscore only";
+                }
+            }               
+            tailf:info "Peer Process name.";
+            mandatory true;
+        }
+        leaf port-str {
+            tailf:alt-name "port";
+            tailf:info "Port number of the M3UA peer process.";
+            type string {
+                pattern '(auto-discovery|[1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])' {
+                    tailf:info "Valid values are: auto-discovery, 1..65535";
+                }
+            }    
+            default "2905";
+        }
+        leaf ip-address1 {
+            must "((../ip-address1 != '0.0.0.0') or (../ip-address2 != '0.0.0.0'))" {
+                error-message
+                "Both the IP addresses must not be '0.0.0.0'";
+            }
+            tailf:info "IP address of the M3UA peer process.";
+            type inet:ipv4-address;
+            mandatory true;
+        }
+        leaf ip-address2 {
+            must "current() != ../ip-address1" {
+                error-message
+                "The 'ip-address2' and 'ip-address1' configured must not be same";
+            }
+            tailf:info "IP address of the M3UA peer process. Default 0.0.0.0";
+            type inet:ipv4-address;
+            default 0.0.0.0;
+        }
+        leaf peer-type {
+            tailf:info "Type of the M3UA peer process.";
+            type enumeration {
+                enum "sgp" {tailf:code-name mme-iu-peer-peer-type-sgp;}
+                enum "ipspSe" {tailf:code-name mme-iu-peer-peer-type-ipspSe;}
+            }
+            mandatory true;
+        }
+        leaf compat-mode {
+            tailf:info "Compatible M3UA mode. Default standard";
+            type enumeration {
+                enum "standard" {tailf:code-name mme-iu-peer-compat-mode-standard;}
+                enum "usp" {tailf:code-name mme-iu-peer-compat-mode-usp;}
+                enum "mode1" {tailf:code-name mme-iu-peer-compat-mode-mode1;}
+                enum "mode2" {tailf:code-name mme-iu-peer-compat-mode-mode2;}
+                enum "mode3" {tailf:code-name mme-iu-peer-compat-mode-mode3;}
+            }
+            default "standard";
+        }
+        leaf association-creation {
+            tailf:info "SCTP association to the peer.";
+            type enumeration {
+                enum "initiate" {tailf:code-name mme-iu-peer-association-creation-initiate;}
+                enum "accept" {tailf:code-name mme-iu-peer-association-creation-accept;}
+            }
+            mandatory true;
+        }
+        leaf network-appearance {
+            tailf:info "Network appearance of M3UA peer process. Default unused";
+            type string {
+                length "1..6";
+            }
+            default "unused";
+        }
+    } /* mme-iu-peer */
+    list mme-iu-dest-peer-map {
+        tailf:alt-name "dest-peer-map";
+        key "destination-point-code iu-peer-name";
+        max-elements 200;
+        tailf:validate iuDestPeerMapValidate {
+            tailf:call-once "true";
+        }
+        tailf:info "Map of Iu peers and destinations.";
+        leaf destination-point-code {
+            type string {
+                pattern '((([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])[.]){2}([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5]))|[1-9][0-9]{0,7}' {
+                    tailf:info "Valid values in pointcode format are: ITU 1-16383 or 0-7.0-255.0-7, ANSI 1-16777215 or 0-255.0-255.0-255";
+                }
+            }
+            must "((count(../../mme-rnc[destination-point-code = current()]) != 0) or (count(../../mme-fgw-rnc[destination-point-code = current()]) != 0))" {
+                error-message
+                "There is no 'mme-sgsn interface iu rnc' or 'mme-sgsn interface iu fgw-rnc' object with this 'destination-point-code'";
+            }                                                                  
+            tailf:info "Point code instance for each signaling node, valid values in pointcode format are: ITU 1-16383 or 0-7.0-255.0-7, ANSI 1-16777215 or 0-255.0-255.0-255";
+            mandatory true;
+        }
+        leaf iu-peer-name {
+            tailf:info "A unique profile name."; 
+            type leafref {
+                path "/mme-sgsn/interface/iu/mme-iu-peer/iu-peer-name";
+            }
+            mandatory true;
+        }  
+    } /* mme-iu-dest-peer-map */
+    list mme-ipsp-instance {
+        tailf:alt-name "ipsp-instance";
+        key "unit-id";
+        unique "ip-address1";
+        max-elements 200;
+        must "count(../mme-iu-m3ua) != 0" {
+            error-message
+            "If 'ipsp-instance' object exists then 'mme-sgsn interface iu m3ua' must be configured";
+        }
+        tailf:info "Provisioning for ipsp-instance, representing a particular M3UA ASP.";
+        leaf unit-id {
+            tailf:alt-name "unit";
+            tailf:info "Signaling VM unit identifier.";
+            type leafref {
+                path "/mme-sgsn/system/sig/unit/unit-id";  
+            }
+            mandatory true;
+        }
+        leaf ip-address1 {
+	    must "current() != '0.0.0.0'" {
+                error-message
+                "The 'ip-address1' must not be '0.0.0.0'";
+            }
+            must "(count(/mme-sgsn/interface/iu/mme-ipsp-instance[ip-address2 = current()]) = 0)" {
+                error-message
+                "IP addresses must be unique across all 'mme-sgsn interface iu ipsp-instance' objects";
+            }
+            tailf:info "Local IP address.";
+            type inet:ipv4-address;
+            mandatory true;
+        }
+        leaf ip-address2 {
+            must "(count(/mme-sgsn/interface/iu/mme-ipsp-instance[ip-address1 = current()]) = 0)" {
+                error-message 
+                "IP addresses must be unique across all 'mme-sgsn interface iu ipsp-instance' objects";
+            }            
+            must "(current() = '0.0.0.0' or count(/mme-sgsn/interface/iu/mme-ipsp-instance[ip-address2 = current()]) =  1)" {
+                error-message 
+                "IP addresses must be unique across all 'mme-sgsn interface iu ipsp-instance' objects";
+            }            
+            tailf:info "Local IP address2. Default 0.0.0.0";
+            type inet:ipv4-address;
+            default 0.0.0.0;
+        }
+        uses routing-instance-name-multiple;
+        leaf port {
+            tailf:info "Local port number.";
+            type uint16 {
+                range "1..65534";
+            }
+            mandatory true;
+        }
+    } /* mme-ipsp-instance */
+} /* iu */
+} /*submodule*/
+

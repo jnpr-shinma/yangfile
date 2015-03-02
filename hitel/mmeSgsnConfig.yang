@@ -1,0 +1,505 @@
+//////////////////////////////////////////////////////////////////////////
+/// @file mmeSgsnConfig.yang
+/// @brief Yang definitions mme-sgsn system config.
+///
+/// Maintained by: HCTA
+/// History:
+///
+/// yyyymmmdd Changed by      Change Reason
+/// --------- --------------- --------------------------------------------
+/// 2014Feb05 Irina Pershwitz AGW-21103 - Initial development
+/// 2014Feb28 Mike Lesko      AGW-21104 - Removed commented callpoint
+/// 2014Mar07 Senthil Kumar   AGW-21103 - Added must checks for HvEpc
+/// 2014Mar19 Haritha Kasi    AGW-21103 - MME IT fix
+/// 2014Apr01 Adam Floyd      AGW-21104 - Add status container w/o presence
+/// 2014Apr03 Lakshmi Priya   AGW-21103 - Cardinality of system data unit
+///                           has been changed from 2 to 32.
+/// 2014Apr17 Adam Floyd      AGW-21104 - Block global show-all
+/// 2014Apr11 Senthil Kumar   AGW-21103 - Added plmn check under callp,sig
+/// 2014Apr29 Senthil Kumar   AGW-21103 - Modified the must check under sig
+/// 2014May09 Kaori Tong      AGW-22080 - Remove external-ip-address and
+///                           add oam-ip-address
+/// 2014May15 Adam Floyd      AGW-22345 - Change steering mode enum vals
+/// 2014May15 Irina Pershwitz AGW-21105 - Load Balancer VM
+/// 2014May20 Matt Kloppmann  AGW-22444 - Add Support for 3 CallP VMs
+/// 2014May30 Adam Floyd      AGW-22346 - Hide steering mode leaf
+/// 2014Jun26 Ajit Singh      AGW-22812 - remove hidden flags.
+/// 2014Jul20 Sujay R         AGW-22082 - RM VM support
+/// 2014Aug15 Adam Floyd      AGW-23534 - summary string leaf and callpoint
+/// 2014Aug20 R Lam           AGW-22143 - increased subscriber capacity
+/// 2014Aug27 Irina Pershwitz AGW-22082 - Tail-f OAM Enhancements
+/// 2014Sep08 Irina Pershwitz AGW-22082 - Tail-f OAM Enhancements
+/// 2014Sep10 Irina Pershwitz AGW-23761 - Removed must escape as temp fix
+/// 2014Oct01 Irina Pershwitz AGW-23761 - Clean up routing must escapes
+/// 2014Oct23 Terri Hennessy  AGW-22104 - Modify "must" related to gtp-profile
+/// 2014Oct24 Irina Pershwitz AGW-24023 - NTP config - oam ip
+///
+/// Copyright (c) 2014 HCTA. All Rights Reserved.
+///
+/// CONFIDENTIALITY AND LIMITED USE
+///
+/// This software, including any software of third parties embodied herein,
+/// contains information and concepts which are confidential to HCTA
+/// and such third parties. This software is licensed for use
+/// solely in accordance with the terms and conditions of the applicable
+/// license agreement with HCTA or its authorized distributor.
+//////////////////////////////////////////////////////////////////////////
+
+submodule mmeSgsnConfig {
+
+  belongs-to hcta-epc {
+     prefix epc;
+  }
+
+  import tailf-common {
+    prefix tailf;
+  }
+
+  import ietf-inet-types {
+    prefix inet;
+  }
+  
+  include mtuConfig;
+
+  container mme-sgsn {
+      presence "";
+      tailf:info "Mobility Management Entity Serving GPRS Support Node configuration";
+      tailf:cli-incomplete-show-path;
+
+      must "count(../fgw) = 0" {
+         error-message
+            "Either 'mme-sgsn' or 'fgw' could be configured.";
+            tailf:dependency "../fgw";
+      }
+
+
+      leaf instance-name {
+        tailf:info "The MME-SGSN instance name";
+        type string {
+            length "1..64";
+        }
+        mandatory true;
+        must "not(/fgw[instance-name = current()])"{
+	  error-message
+              "The 'instance-name' is already used by an 'fgw' object";
+          tailf:dependency "/fgw";
+        }
+      }
+      leaf instance-number {
+        tailf:info "The MME-SGSN instance number";
+        type uint16 {
+            range 1..254;
+        }
+        mandatory true;
+        must "not(/fgw[instance-number = current()])"{
+	    error-message
+              "The 'instance-number' is already used by an 'fgw' object";
+            tailf:dependency "/fgw";
+        }
+      }
+      leaf oam-ip-address {
+         tailf:info "Floating IP address for interface towards NMS.";
+         type inet:ip-address;
+      }
+
+      container status {
+        tailf:info "Status objects";
+      } /* status */
+
+      container system {
+        tailf:info "MME-SGSN System Configuration";
+        leaf opmode {
+          tailf:info "Operating mode";
+          type enumeration {
+            enum "product";
+            enum "desktop";
+            enum "lab";
+          }
+          default "product";
+          /*hidden internal;*/
+        }
+        leaf steering {
+          tailf:info "Steering mechanism";
+          type enumeration {
+            enum "contrail";
+            enum "off";
+            enum "load-balancer";
+          }
+          default "contrail";
+        }
+	
+        uses system-mtu;
+
+        container mgmt {
+          tailf:info "Management VM";
+          list unit {
+            tailf:info "Management VM unit";
+            key "unit-id";
+            max-elements 2;
+            leaf unit-id{
+              tailf:info "Management VM unit identifier";
+              type uint16 {
+                range "0..1";
+              }
+            }
+            leaf vm-instance {
+              tailf:info "Virtual machine instance";
+              mandatory true;
+              type string {
+                length "1..64";
+              }
+              must "(count(../../../mgmt/unit[vm-instance = current()]) = 1) or (../../../opmode = 'lab')"
+              {
+                  error-message "The 'vm-instance' is already used by another 'mme-sgsn system mgmt unit'";
+                  tailf:dependency "../../../";
+              }
+              must "(count(../../../sig/unit[vm-instance = current()]) = 0) or (../../../opmode = 'lab')"
+              {
+                  error-message "The 'vm-instance' is already used by another 'mme-sgsn system sig unit'";
+                  tailf:dependency "../../../";
+              } 	       	       	      
+              must "(count(../../../data/unit[vm-instance = current()]) = 0) or (../../../opmode = 'lab')"
+              {
+                  error-message "The 'vm-instance' is already used by another 'mme-sgsn system data unit'";
+                  tailf:dependency "../../../";
+              } 	       	       	      
+              must "(count(../../../lb/unit[vm-instance = current()]) = 0) or (../../../opmode = 'lab')"
+              {
+                  error-message "The 'vm-instance' is already used by another 'mme-sgsn system lb unit'";
+                  tailf:dependency "../../../";
+              }
+              must "(count(../../../callp/unit[vm-instance = current()]) = 0) or (../../../opmode = 'lab')"
+              {
+                  error-message "The 'vm-instance' is already used by another 'mme-sgsn system callp unit'";
+                  tailf:dependency "../../../";
+              }
+              must "(count(../../../rm/unit[vm-instance = current()]) = 0) or (../../../opmode = 'lab')"
+              {
+                  error-message "The 'vm-instance' is already used by another 'mme-sgsn system rm unit'";
+                  tailf:dependency "../../../";
+              }
+            }
+            leaf mgmt-oam-ip-address {
+                tailf:info "The OAM IP address";
+                tailf:display-when "../../../steering = 'contrail'";   	    
+                type tailf:ip-address-and-prefix-length;
+            }	     
+          } /* unit */
+        } /* mgmt */
+        list callp {
+          tailf:info "Call Processing VM";
+          max-elements 15;
+          key "service-id";
+          must "(count(../../service-area/mme-plmn) != 0)" {
+                error-message
+                "If 'callp' object exists then 'service-area plmn' must exist";
+          }
+          leaf service-id {
+             tailf:info "Call Processing VM identifier";
+               type uint16 {
+               range "0..14";
+             }
+          }
+          list unit {
+            tailf:info "Call Processing VM unit";
+            max-elements 2;
+            key "unit-id";
+            leaf unit-id {
+              tailf:info "Call Processing VM unit identifier";
+              type uint16 {
+                range "0..1";
+              }
+            }
+            leaf vm-instance {
+              tailf:info "Virtual machine instance";
+              mandatory true;
+              type string {
+                 length "1..64";
+              }
+              must "(count(../../../mgmt/unit[vm-instance = current()]) = 0) or (../../../opmode = 'lab')"
+              {
+                  error-message "The 'vm-instance' is already used by another 'mme-sgsn system mgmt unit'";
+                  tailf:dependency "../../../";
+              }
+              must "(count(../../../sig/unit[vm-instance = current()]) = 0) or (../../../opmode = 'lab')"
+              {
+                  error-message "The 'vm-instance' is already used by another 'mme-sgsn system sig unit'";
+                  tailf:dependency "../../../";
+              } 	       	       	      
+              must "(count(../../../data/unit[vm-instance = current()]) = 0) or (../../../opmode = 'lab')"
+              {
+                  error-message "The 'vm-instance' is already used by another 'mme-sgsn system data unit'";
+                  tailf:dependency "../../../";
+              } 	       	       	      
+              must "(count(../../../lb/unit[vm-instance = current()]) = 0) or (../../../opmode = 'lab')"
+              {
+                  error-message "The 'vm-instance' is already used by another 'mme-sgsn system lb unit'";
+                  tailf:dependency "../../../";
+              }
+              must "(count(../../../callp/unit[vm-instance = current()]) = 1) or (../../../opmode = 'lab')"
+              {
+                  error-message "The 'vm-instance' is already used by another 'mme-sgsn system callp unit'";
+                  tailf:dependency "../../../";
+              }
+              must "(count(../../../rm/unit[vm-instance = current()]) = 0) or (../../../opmode = 'lab')"
+              {
+                  error-message "The 'vm-instance' is already used by another 'mme-sgsn system rm unit'";
+                  tailf:dependency "../../../";
+              }
+            }
+          } /* unit */
+        } /* callp */
+        container data {
+          tailf:info "Data VM";
+
+          list unit{
+            tailf:info "Data VM unit";
+            max-elements 15;
+            key "unit-id";
+            must "(count(../../../interface/mme-gtp-u) != 0)" {
+             error-message "If 'data' object exists then 'mme-sgsn interface gtp-u' must be configured";
+            }
+            must "(count(../../../interface/gn/mme-gn-if) != 0)" {
+             error-message "If 'data' object exists then 'mme-sgsn interface gn gn-if' must be configured";
+            }
+            leaf unit-id{
+              tailf:info "Data VM unit identifier";
+              type uint16 {
+                range "0..14";
+              }
+            }
+
+            leaf vm-instance {
+              tailf:info "Virtual machine instance";
+              mandatory true;
+
+              type string {
+                 length "1..64";
+              }
+              must "(count(../../../mgmt/unit[vm-instance = current()]) = 0) or (../../../opmode = 'lab')"
+              {
+                  error-message "The 'vm-instance' is already used by another 'mme-sgsn system mgmt unit'";
+                  tailf:dependency "../../../";
+              }
+              must "(count(../../../sig/unit[vm-instance = current()]) = 0) or (../../../opmode = 'lab')"
+              {
+                  error-message "The 'vm-instance' is already used by another 'mme-sgsn system sig unit'";
+                  tailf:dependency "../../../";
+              } 	       	       	      
+              must "(count(../../../data/unit[vm-instance = current()]) = 1) or (../../../opmode = 'lab')"
+              {
+                  error-message "The 'vm-instance' is already used by another 'mme-sgsn system data unit'";
+                  tailf:dependency "../../../";
+              } 	       	       	      
+              must "(count(../../../lb/unit[vm-instance = current()]) = 0) or (../../../opmode = 'lab')"
+              {
+                  error-message "The 'vm-instance' is already used by another 'mme-sgsn system lb unit'";
+                  tailf:dependency "../../../";
+              }
+              must "(count(../../../callp/unit[vm-instance = current()]) = 0) or (../../../opmode = 'lab')"
+              {
+                  error-message "The 'vm-instance' is already used by another 'mme-sgsn system callp unit'";
+                  tailf:dependency "../../../";
+              }
+              must "(count(../../../rm/unit[vm-instance = current()]) = 0) or (../../../opmode = 'lab')"
+              {
+                  error-message "The 'vm-instance' is already used by another 'mme-sgsn system rm unit'";
+                  tailf:dependency "../../../";
+              }
+            }
+          } /* unit */
+        } /* data */
+        container sig {
+          tailf:info "Signaling VM";
+	  
+          list unit{
+            tailf:info "Signaling VM unit";
+            max-elements 32;
+            key "unit-id";
+            must "((count(../../../interface/gtp) != 0) and (count(../../../interface/gtp/mme-gtp-profile[name = 'default']) != 0))" {
+             error-message
+             "If 'sig' object exists then 'mme-sgsn interface gtp profile default' must exist";
+            }
+            must "(count(../../../service-area/mme-plmn) != 0)" {
+                error-message
+                "If 'sig' object exists then 'service-area plmn' must exist";
+            }
+            leaf unit-id{
+              tailf:info "Data VM unit identifier";
+              type uint16 {
+                range "0..31";
+              }
+            }
+
+            leaf vm-instance {
+              tailf:info "Virtual machine instance";
+              mandatory true;
+
+              type string {
+                 length "1..64";
+              }
+              must "(count(../../../mgmt/unit[vm-instance = current()]) = 0) or (../../../opmode = 'lab')"
+              {
+                  error-message "The 'vm-instance' is already used by another 'mme-sgsn system mgmt unit'";
+                  tailf:dependency "../../../";
+              }
+              must "(count(../../../sig/unit[vm-instance = current()]) = 1) or (../../../opmode = 'lab')"
+              {
+                  error-message "The 'vm-instance' is already used by another 'mme-sgsn system sig unit'";
+                  tailf:dependency "../../../";
+              } 	       	       	      
+              must "(count(../../../data/unit[vm-instance = current()]) = 0) or (../../../opmode = 'lab')"
+              {
+                  error-message "The 'vm-instance' is already used by another 'mme-sgsn system data unit'";
+                  tailf:dependency "../../../";
+              } 	       	       	      
+              must "(count(../../../lb/unit[vm-instance = current()]) = 0) or (../../../opmode = 'lab')"
+              {
+                  error-message "The 'vm-instance' is already used by another 'mme-sgsn system lb unit'";
+                  tailf:dependency "../../../";
+              }
+              must "(count(../../../callp/unit[vm-instance = current()]) = 0) or (../../../opmode = 'lab')"
+              {
+                  error-message "The 'vm-instance' is already used by another 'mme-sgsn system callp unit'";
+                  tailf:dependency "../../../";
+              }
+              must "(count(../../../rm/unit[vm-instance = current()]) = 0) or (../../../opmode = 'lab')"
+              {
+                  error-message "The 'vm-instance' is already used by another 'mme-sgsn system rm unit'";
+                  tailf:dependency "../../../";
+              }
+            }
+          } /* unit */
+        } /* sig */
+        container lb {
+          tailf:info "Load Balancing Control VM";
+
+          list unit{
+            tailf:info "Load Balancing Control VM unit";
+            max-elements 8;
+            key "unit-id";
+            leaf unit-id{
+              tailf:info "Load Balancing Control VM unit identifier";
+              type uint16 {
+                range "0..7";
+              }
+            }
+            leaf vm-instance {
+              tailf:info "Virtual machine instance";
+              mandatory true;
+              type string {
+                 length "1..64";
+              }
+              must "(count(../../../sig/unit[vm-instance = current()]) = 0) or (../../../opmode = 'lab')"
+              {
+                  error-message "The 'vm-instance' is already used by another 'mme-sgsn system sig unit'";
+                  tailf:dependency "../../../";
+              } 	       	       	      
+              must "(count(../../../data/unit[vm-instance = current()]) = 0) or (../../../opmode = 'lab')"
+              {
+                  error-message "The 'vm-instance' is already used by another 'mme-sgsn system data unit'";
+                  tailf:dependency "../../../";
+              } 	       	       	      
+              must "(count(../../../lb/unit[vm-instance = current()]) = 1) or (../../../opmode = 'lab')"
+              {
+                  error-message "The 'vm-instance' is already used by another 'mme-sgsn system lb unit'";
+                  tailf:dependency "../../../";
+              }
+              must "(count(../../../callp/unit[vm-instance = current()]) = 0) or (../../../opmode = 'lab')"
+              {
+                  error-message "The 'vm-instance' is already used by another 'mme-sgsn system callp unit'";
+                  tailf:dependency "../../../";
+              }
+              must "(count(../../../rm/unit[vm-instance = current()]) = 0) or (../../../opmode = 'lab')"
+              {
+                  error-message "The 'vm-instance' is already used by another 'mme-sgsn system rm unit'";
+                  tailf:dependency "../../../";
+              }
+            }
+          } /* unit */
+        } /* lb */
+        container rm {
+          tailf:info "RM VM";
+	  
+          list unit {
+            tailf:info "RM VM unit";
+            key "unit-id";
+            max-elements 2;
+            leaf unit-id{
+              tailf:info "RM VM unit identifier";
+              type uint16 {
+                range "0..1";
+              }
+            }
+            leaf vm-instance {
+              tailf:info "Virtual machine instance";
+              mandatory true;
+              type string {
+                length "1..64";
+              }
+              must "(count(../../../sig/unit[vm-instance = current()]) = 0) or (../../../opmode = 'lab')"
+              {
+                  error-message "The 'vm-instance' is already used by another 'mme-sgsn system sig unit'";
+                  tailf:dependency "../../../";
+              } 	       	       	      
+              must "(count(../../../data/unit[vm-instance = current()]) = 0) or (../../../opmode = 'lab')"
+              {
+                  error-message "The 'vm-instance' is already used by another 'mme-sgsn system data unit'";
+                  tailf:dependency "../../../";
+              } 	       	       	      
+              must "(count(../../../lb/unit[vm-instance = current()]) = 0) or (../../../opmode = 'lab')"
+              {
+                  error-message "The 'vm-instance' is already used by another 'mme-sgsn system lb unit'";
+                  tailf:dependency "../../../";
+              }
+              must "(count(../../../callp/unit[vm-instance = current()]) = 0) or (../../../opmode = 'lab')"
+              {
+                  error-message "The 'vm-instance' is already used by another 'mme-sgsn system callp unit'";
+                  tailf:dependency "../../../";
+              }
+              must "(count(../../../rm/unit[vm-instance = current()]) = 1) or (../../../opmode = 'lab')"
+              {
+                  error-message "The 'vm-instance' is already used by another 'mme-sgsn system rm unit'";
+                  tailf:dependency "../../../";
+              }
+            }
+          } /* unit */
+        } /* rm */
+	
+        leaf transaction {
+            tailf:hidden full;	
+             tailf:info "Transaction id";
+             type string {
+                length "1..128";
+             }
+        }
+      } /* system */
+
+      container interface {
+        tailf:info "Interface Objects";
+      }
+      container subscriber {
+        tailf:info "Subscriber Objects";
+        tailf:cli-incomplete-show-path;
+      }
+      container engineering {
+        tailf:info "Engineering Objects";
+      }
+      container service-area {
+        tailf:info "Service-area Objects";
+      }
+
+      leaf summary {
+        config false;
+        tailf:callpoint cli_oper_summary
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:summary::0';
+        }
+        tailf:hidden full;
+        type string;
+      }
+
+  } /* mme-sgsn */
+} /* submodule */

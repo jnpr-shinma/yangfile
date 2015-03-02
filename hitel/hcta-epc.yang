@@ -1,0 +1,77 @@
+module hcta-epc {
+
+  namespace "http://hitachi-cta.com/ns/epc";
+  prefix  epc;
+
+  include mmeSgsnConfig;
+  include fgwConfig;
+  include agwCmnDnsConfig;
+  include dcConfig;
+  include sbcConfig;
+  include tcapConfig;
+  include cslConfig;
+  include mmeStatisticsConfig;
+  include sgsConfig;
+  include upmConfig;
+  include featuresConfig;
+  include s1MasterConfig;
+  include scConfig;
+  include upsmConfig;
+  include fgwMmeCommonConfig;
+  include fgwS1MmeConfig;
+  include cmdCommonHcta;
+  include agwCmnDnsCli;
+  include agwGaBillingConfig;
+  include mtuConfig;
+  include agwGaBillingCli;
+  include epcCmnNmCli;
+  include gtlCli;
+  include oamPmServerCli;
+  include scCli;
+  include scOperCli;
+  include supportdCli;
+  include agwLiConfig;
+  include sgsnScConfig;
+  include sigtranConfig;
+  include rncConfig;
+  include sgsnM3uaAspConfig;
+  include gtlConfig;
+  include sdConfig;
+  include cslCli;
+  include sbcCli;
+  include sgsnScCli;
+  include scCommonCli;
+  include sdCli;
+  include epcCmnResmonCli;
+  include rncCli;
+  include fgwS1MmeCli;
+  include fgwScCli;
+  include s1MasterCli;
+  include sgsnM3uaAspCli;
+  include agwCmnDnsCli;
+  include agwLiCli;
+  include sgsCli;
+  include upmCli;
+  include sigtranCli;
+  include rmCli;
+  include dcCli;
+  include upsmCli;
+  include slsConfig;
+  include slsCli;
+
+  organization "Hitachi-CTA";
+  description
+       "The module for entities implementing the 3GPP Evolved Packet Core.";
+
+  revision 2014-09-18 {
+    description  "EPC8.0";
+  }	   
+  
+  typedef loglevel {
+    type enumeration {
+        enum kern;
+        enum mail;
+        enum local7;
+    }
+  }
+}

@@ -1,0 +1,84 @@
+//////////////////////////////////////////////////////////////////////////
+/// @file rmCli.yang
+/// @brief Yang definitions for operational commands.
+///        "show mme-sgsn service-area routing-area-unknown"
+///
+/// Maintained by: HCTA
+/// History:
+///
+/// yyyymmmdd Changed by      Change Reason
+/// --------- --------------- --------------------------------------------
+/// 2014Jan20 Nimesh D        AGW-21104 - Initial development
+/// 2014Feb28 Adam Floyd      AGW-21104 - Updated callpoint info
+/// 2014Apr17 Adam Floyd      AGW-21104 - Add sort-flag to cp opaque data
+/// 2014Aug15 Adam Floyd      AGW-23534 - Remove fake-key kludge
+/// 2014Sep15 Lakshmi Priya   AGW-22082 - Schema upgrade
+///
+/// Copyright (c) 2014 HCTA. All Rights Reserved.
+///
+/// CONFIDENTIALITY AND LIMITED USE
+///
+/// This software, including any software of third parties embodied herein,
+/// contains information and concepts which are confidential to HCTA
+/// and such third parties. This software is licensed for use
+/// solely in accordance with the terms and conditions of the applicable
+/// license agreement with HCTA or its authorized distributor.
+//////////////////////////////////////////////////////////////////////////
+submodule rmCli{
+    belongs-to hcta-epc {
+        prefix epc;
+    }
+    import tailf-common {
+        prefix tailf;
+    }
+    include mmeSgsnConfig;
+
+    augment "/mme-sgsn/service-area" {
+        list routing-area-unknown {
+            tailf:info "Unknown RAI List";
+            config false;
+            ordered-by user; // not for use with keyed lists
+
+            tailf:cli-no-key-completion;
+            //key "plmn lac";
+
+            tailf:callpoint cli_oper_show
+            {
+               // Callpoint Opaque Data Format (255 chars max):
+               // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+               tailf:opaque '0:mme-sgsn service-area routing-area-unknown::1';
+            }
+
+            leaf plmn {
+                type string;
+                tailf:display-groups "none detail";
+                tailf:info "A unique PLMN identifier.";
+            }
+            leaf lac {
+                type string;
+                tailf:display-groups "none detail";
+                tailf:info "Location area code.";
+            }
+            leaf rac {
+                type string;
+                tailf:display-groups "none detail";
+                tailf:info "Routing area code.";
+            }
+            leaf rnc-id {
+                type string;
+                tailf:display-groups "none detail";
+                tailf:info "ID of the Radio Network Controller.";
+            }
+            leaf nse-id {
+                type string;
+                tailf:display-groups "none detail";
+                tailf:info "A unique NSE identifier.";
+            }
+            leaf last-received {
+                type string;
+                tailf:display-groups "none detail";
+                tailf:info "Time stamp (local) of last received unknown RAI.";
+            }
+        } /* routing-area-unknown */
+    } /* service-area */
+}

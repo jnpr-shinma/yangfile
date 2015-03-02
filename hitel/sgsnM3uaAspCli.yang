@@ -1,0 +1,282 @@
+//////////////////////////////////////////////////////////////////////////
+/// @file sgsnM3uaAspCli.yang
+/// @brief Yang definitions for operational commands.
+///        "show mme-sgsn interface iu peer"
+///
+/// Maintained by: HCTA
+/// History:
+///
+/// yyyymmmdd Changed by      Change Reason
+/// --------- --------------- --------------------------------------------
+/// 2014Jan15 Akshay Wani     AGW-21104 - Initial development
+/// 2014Feb28 Adam Floyd      AGW-21104 - Updated callpoint info
+/// 2014Mar05 Hardik W        AGW-21104 - Model updated
+/// 2014Apr17 Adam Floyd      AGW-21104 - Add sort-flag to cp opaque data
+/// 2014Aug15 Adam Floyd      AGW-23534 - Remove fake-key kludge
+/// 2014Sep15 Lakshmi priya   AGW-22082 - Schema upgrade
+/// 2014Aug27 Ajit Singh      AGW-23337 - Added field description.
+///
+/// Copyright (c) 2014 HCTA. All Rights Reserved.
+///
+/// CONFIDENTIALITY AND LIMITED USE
+///
+/// This software, including any software of third parties embodied herein,
+/// contains information and concepts which are confidential to HCTA
+/// and such third parties. This software is licensed for use
+/// solely in accordance with the terms and conditions of the applicable
+/// license agreement with HCTA or its authorized distributor.
+//////////////////////////////////////////////////////////////////////////
+submodule sgsnM3uaAspCli {
+   belongs-to hcta-epc {
+      prefix epc;
+   }
+
+   include mmeSgsnConfig;
+   include rncConfig;
+
+   import tailf-common {
+      prefix tailf;
+   }
+
+   augment "/mme-sgsn/interface/iu" {
+      list peer-oper {
+         tailf:alt-name peer;
+         tailf:info "Iu peer";
+         config false;
+         ordered-by user; // not for use with keyed lists
+
+         tailf:cli-no-key-completion;
+         /* If iu-peer-name and service are made keys,
+            then leaves will need to move and application adjusted. */
+         //key "iu-peer-name service";
+
+         tailf:callpoint cli_oper_show
+         {
+            // Callpoint Opaque Data Format (255 chars max):
+            // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+            tailf:opaque '0:mme-sgsn interface iu peer::1';
+         }
+
+         leaf iu-peer-name {
+            tailf:info "Name of the peer process.";
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf service {
+            tailf:info "Service.";
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf location {
+            tailf:info "Location.";
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf pid {
+            tailf:info "PID of the process.";
+            type uint32;
+            tailf:display-groups "none detail";
+         }
+         leaf state {
+            tailf:info "State of the peer-process.";
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf egress-congest-level {
+            tailf:info "Egress congestion level.";
+            type uint8;
+            tailf:display-groups "detail";
+         }
+         leaf ingress-congest-level {
+            tailf:info "Ingress congestion level.";
+            type uint8;
+            tailf:display-groups "detail";
+         }
+         leaf block-state {
+            tailf:info "SCTP socket state.";
+            type string;
+            tailf:display-groups "detail";
+         }
+         leaf msu-tx {
+            tailf:info "Total MSUs sent to the peer process.";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+         leaf msu-rx {
+            tailf:info "Total MSUs received from this M3UA peer process.";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+         leaf pdu-tx {
+            tailf:info "Total PDUs sent to the peer process.";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+         leaf pdu-rx {
+            tailf:info "Total PDUs received from the peer process.";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+         leaf pdu-invalid-error-rx {
+            tailf:info "Incoming PDUs which indicate protocol error.";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+         leaf pdu-disc-too-big-rx {
+            tailf:info "PDUs discarded by SGSN because of larger size error.";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+         leaf err-pdu-protocol-error-rx {
+            tailf:info "Incoming PDUs with protocol error.";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+         leaf err-pdu-invalid-network-app-rx {
+            tailf:info "Incoming PDUs with invalid Network Appearance error.";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+         leaf err-pdu-invalid-version-rx {
+            tailf:info "Incoming PDUs with invalid version error.";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+         leaf err-pdu-no-configured-as-rx {
+            tailf:info "Incoming PDUs with no configured AS for ASP error.";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+         leaf err-pdu-unsupported-traf-md-rx {
+            tailf:info "Incoming PDUs with unsupported traffic mode type error.";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+         leaf err-pdu-unexpected-parm-rx {
+            tailf:info "Incoming PDUs with unexpected parameter error.";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+         leaf err-pdu-missing-parm-rx {
+            tailf:info "Incoming PDUs with missing parameter error.";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+         leaf err-pdu-invalid-aspid-rx {
+            tailf:info "Incoming PDUs with invalid ASP identifier error.";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+         leaf err-pdu-dest-status-unknown-rx {
+            tailf:info "Incoming PDUs with Dest status unknown error";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+         leaf err-pdu-parm-err-rx {
+            tailf:info "Incoming PDUs with parameter field error.";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+         leaf err-pdu-invalid-routing-rx {
+            tailf:info "Incoming PDUs with invalid routing context error.";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+         leaf err-pdu-invalid-streamid-rx {
+            tailf:info "Incoming PDUs with invalid stream ID error.";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+         leaf err-pdu-unsupported-msg-type-rx {
+            tailf:info "Incoming PDUs with unsupported message type error.";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+         leaf err-pdu-unexpected-msg-rx {
+            tailf:info "Incoming PDUs with unexpected message error.";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+         leaf err-pdu-invalid-parm-value-rx {
+            tailf:info "Incoming PDUs with invalid parameter value error.";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+         leaf err-pdu-aspid-required-rx {
+            tailf:info "Incoming PDUs with ASP ID required error.";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+         leaf err-pdu-refused-mgmt-block-rx {
+            tailf:info "Incoming PDUs with refused-management blocking error.";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+         leaf err-pdu-unsupported-class-rx {
+            tailf:info "Incoming PDUs with unsupported message class error.";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+         leaf err-pdu-unsupported-traf-rx {
+            tailf:info "Incoming PDUs with unsupported traffic mode error.";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+         leaf err-pdu-invalid-version-tx {
+            tailf:info "Incoming PDUs with invalid version of protocol error.";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+         leaf err-pdu-unsupported-class-tx {
+            tailf:info "Incoming PDUs with unsupported message class error.";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+         leaf err-pdu-unsupported-msg-type-tx {
+            tailf:info "Incoming PDUs with unsupported message type error.";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+         leaf err-pdu-unsupported-traffic-tx {
+            tailf:info "Incoming PDUs with unsupported traffic mode type error.";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+         leaf err-pdu-unexpected-msg-tx {
+            tailf:info "Incoming PDUs with unexpected messge error.";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+         leaf err-pdu-protocol-error-tx {
+            tailf:info "Incoming PDUs those are discarded because of protocol error.";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+         leaf err-pdu-invalid-streamid-tx {
+            tailf:info "err-pdu-invalid-streamid-tx";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+         leaf err-pdu-invalid-parm-value-tx {
+            tailf:info "Incoming PDUs those are discarded because of invalid param value error.";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+         leaf err-pdu-parm-field-error-tx {
+            tailf:info "Incoming PDUs those are discarded because of param field error.";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+         leaf err-pdu-unexpect-parm-tx {
+            tailf:info "Incoming PDUs those are discarded because of unexpected param error.";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+         leaf err-pdu-missing-parm-tx {
+            tailf:info "Incoming PDUs those are discarded because of missing param error.";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+      }
+   }
+}

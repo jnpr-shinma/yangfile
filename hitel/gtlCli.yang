@@ -1,0 +1,882 @@
+//////////////////////////////////////////////////////////////////////////
+/// @file gtlCli.yang
+/// @brief Yang definitions for operational commands.
+///        "request mme-sgsn interface gb sig-bvc reset"
+///        "show mme-sgsn interface gb nsvc-ip"
+///        "show mme-sgsn interface gb nsvc-fr"
+///        "show mme-sgsn interface gb ptp-bvc"
+///        "show mme-sgsn interface gb sig-bvc"
+///        "show mme-sgsn interface gb nse"
+///
+/// Maintained by: HCTA
+/// History:
+///
+/// yyyymmmdd Changed by      Change Reason
+/// --------- --------------- --------------------------------------------
+/// 2014Jan15 Mike Lesko      AGW-21104 - Initial development
+/// 2014Jan20 Hardik W        AGW-21104 - Added show commands for GTL-NSE
+/// 2014Feb28 Adam Floyd      AGW-21104 - Updated action/callpoint info
+/// 2014Feb28 Hardik W        AGW-21104 - Updated model for nse command.
+/// 2014Mar20 Mike Lesko      AGW-21104 - Modify nse-oper pid to uint16
+/// 2014Apr17 Adam Floyd      AGW-21104 - Add sort-flag to cp opaque data
+/// 2014Aug15 Adam Floyd      AGW-23534 - Remove fake-key kludge
+/// 2014Sep15 Lakshmi Priya   AGW-22082 - Schema upgrade
+/// 2014Aug21 Vijay V         AGW-23416 - Fix mismatch of attribute name
+///
+/// Copyright (c) 2014 HCTA. All Rights Reserved.
+///
+/// CONFIDENTIALITY AND LIMITED USE
+///
+/// This software, including any software of third parties embodied herein,
+/// contains information and concepts which are confidential to HCTA
+/// and such third parties. This software is licensed for use
+/// solely in accordance with the terms and conditions of the applicable
+/// license agreement with HCTA or its authorized distributor.
+//////////////////////////////////////////////////////////////////////////
+submodule gtlCli{
+  belongs-to hcta-epc {
+     prefix epc; 
+  }
+
+  import tailf-common {
+     prefix tailf;
+  }
+
+  import ietf-inet-types {
+     prefix inet;
+  }
+
+  include mmeSgsnConfig;
+  include cmdCommonHcta;
+  include gtlConfig;
+
+  augment "/mme-sgsn/interface/gb" {
+      container sig-bvc {
+        tailf:info "Signaling BVC protocol layer functionality";
+        tailf:action reset {
+          tailf:actionpoint cli-request-command;
+          input {
+            leaf nse-id {
+              type uint16 {
+                range "1 .. 65535";
+              }
+              mandatory true;
+            }
+          }
+          output {
+            uses request-cmd-output;
+          }
+        }
+      }
+
+      list nsvc-ip {
+        tailf:info "Network Service Virtual Connection (NSVC) over IP interface.";
+        config false;
+        ordered-by user; // not for use with keyed lists
+
+        tailf:cli-no-key-completion;
+        //key "nse-id remote-ip remote-port";
+
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn interface gb nsvc-ip::1';
+        }
+
+        leaf nse-id {
+          type uint16;
+          tailf:display-groups "none detail";
+          tailf:info "ID of parent NSE";
+        }
+        leaf local-ip {
+          type inet:ipv4-address;
+          tailf:display-groups "none detail";
+          tailf:info "Local NSVC IP address";
+        }
+        leaf local-port {
+          type uint16;
+          tailf:display-groups "none detail";
+          tailf:info "Local NSVC port";
+        }
+        /* If remote-ip and remote-port are made keys, 
+           then these leaves will need to move and application adjusted. */
+        leaf remote-ip {
+          type inet:ipv4-address;
+          tailf:display-groups "none detail";
+          tailf:info "Remote NSVC IP address";
+        }
+        leaf remote-port {
+          type uint16;
+          tailf:display-groups "none detail";
+          tailf:info "Remote NSVC port";
+        }
+        leaf state {
+          type string;
+          tailf:display-groups "none detail";
+          tailf:info "Current state of the NSVC";
+        }
+        leaf signaling-weight {
+          type uint16;
+          tailf:display-groups "detail";
+          tailf:info "Signaling weight of the PCU endpoint";
+        }
+        leaf data-weight {
+          type uint16;
+          tailf:display-groups "detail";
+          tailf:info "Data weight of the PCU endpoint";
+        }
+        leaf unit-data-rx {
+          type uint32;
+          tailf:display-groups "none detail";
+          tailf:info "The NS-UNITDATA messages received from the PCU";
+        }
+        leaf unit-data-tx {
+          type uint32;
+          tailf:display-groups "none detail";
+          tailf:info "The NS-UNITDATA messages sent to the PCU";
+        }
+        leaf unit-data-octets-rx {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "The octets received from the PCU";
+        }
+        leaf unit-data-octets-tx {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "The octets sent to the PCU";
+        }
+        leaf alives-rx {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "The NS-ALIVE messages received from the PCU";
+        }
+        leaf alives-tx {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "The NS-ALIVE messages sent to the PCU";
+        }
+        leaf alive-acks-rx {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "The NS-ALIVE-ACK messages received from the PCU";
+        }
+        leaf alive-acks-tx {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "The NS-ALIVE-ACK messages sent to the PCU";
+        }
+        leaf status-rx {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "The NS-STATUS messages received from the PCU";
+        }
+        leaf status-tx {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "The NS-STATUS messages sent to the PCU";
+        }
+        leaf nsvl-group {
+          type uint8;
+          tailf:display-groups "none detail";
+        }
+        leaf nsvl {
+          type uint8;
+          tailf:display-groups "none detail";
+        }
+        leaf service {
+           type string;
+           tailf:display-groups "none detail";
+        }
+        leaf location {
+           type string;
+           tailf:display-groups "detail";
+        }
+        leaf pid {
+          type uint16;
+          tailf:display-groups "detail";
+          tailf:info "Process ID of the NSE process";
+        }
+      } /* list nsvc-ip */
+
+      list nsvc-fr-oper {
+        tailf:alt-name "nsvc-fr";
+        tailf:info "Network Service Virtual Connection (NSVC) Static Frame Relay";
+        config false;
+        ordered-by user; // not for use with keyed lists
+
+        tailf:cli-no-key-completion;
+        //key "nse-id nsvc remote-ip remote-port";
+
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn interface gb nsvc-fr::1';
+        }
+
+        leaf nse-id {
+          type uint16;
+          tailf:display-groups "none detail";
+          tailf:info "An Network Service Entity identifier";
+        }
+        leaf nsvc {
+          type uint16;
+          tailf:display-groups "none detail";
+          tailf:info "NSVC ID";
+        }
+        leaf dlci {
+          type uint16;
+          tailf:display-groups "none detail";
+          tailf:info "The DLCI used for this NSVC";
+        }
+        leaf local-ip {
+          type inet:ipv4-address;
+          tailf:display-groups "none detail";
+          tailf:info "Local NSVC IP address";
+        }
+        leaf local-port {
+          type uint16;
+          tailf:display-groups "none detail";
+          tailf:info "Local NSVC port";
+        }
+        /* If remote-ip and remote-port are made keys, 
+           then these leaves will need to move and application adjusted. */
+        leaf remote-ip {
+          type inet:ipv4-address;
+          tailf:display-groups "none detail";
+          tailf:info "Remote NSVC IP address";
+        }
+        leaf remote-port {
+          type uint16;
+          tailf:display-groups "none detail";
+          tailf:info "Remote NSVC port";
+        }
+        leaf state {
+          type string;
+          tailf:display-groups "none detail";
+          tailf:info "Current state of the NSVC";
+        }
+        leaf unit-data-rx {
+          type uint32;
+          tailf:display-groups "none detail";
+          tailf:info "The NS-UNITDATA messages received from the PCU";
+        }
+        leaf unit-data-tx {
+          type uint32;
+          tailf:display-groups "none detail";
+          tailf:info "The NS-UNITDATA messages sent to the PCU";
+        }
+        leaf unit-data-octets-rx {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "The octets received from the PCU";
+        }
+        leaf unit-data-octets-tx {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "The octets sent to the PCU";
+        }
+        leaf alives-rx {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "The NS-ALIVE messages received from the PCU";
+        }
+        leaf alives-tx {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "The NS-ALIVE messages sent to the PCU";
+        }
+        leaf alive-acks-rx {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "The NS-ALIVE-ACK messages received from the PCU";
+        }
+        leaf alive-acks-tx {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "The NS-ALIVE-ACK messages sent to the PCU";
+        }
+        leaf status-rx {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "The NS-STATUS messages received from the PCU";
+        }
+        leaf status-tx {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "The NS-STATUS messages sent to the PCU";
+        }
+        leaf blocks-rx {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "The NS-BLOCK messages received from the PCU";
+        }
+        leaf blocks-tx {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "The NS-BLOCK messages sent to the PCU.";
+        }
+        leaf block-acks-rx {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "The NS-BLOCK-ACK messages received from the PCU.";
+        }
+        leaf block-acks-tx {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "The NS-BLOCK-ACK messages sent to the PCU.";
+        }
+        leaf unblocks-rx {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "The NS-UNBLOCK messages received from the PCU.";
+        }
+        leaf unblocks-tx {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "The NS-UNBLOCK messages sent to the PCU.";
+        }
+        leaf unblock-acks-rx {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "The NS-UNBLOCK-ACK messages received from the PCU.";
+        }
+        leaf unblock-acks-tx {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "The NS-UNBLOCK-ACK messages sent to the PCU.";
+        }
+        leaf resets-rx {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "The NS-RESET messages received from the PCU.";
+        }
+        leaf resets-tx {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "The NS-RESET messages sent to the PCU.";
+        }
+        leaf reset-acks-rx {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "The NS-RESET-ACK messages received from the PCU.";
+        }
+        leaf reset-acks-tx {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "The NS-RESET-ACK messages sent to the PCU.";
+        }
+        leaf status-indications {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "Number of NS-STATUS indications formatted by the NS for this NSVC.";
+        }
+        leaf fecn-bit-set {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "Frames received with FECN bit set.";
+        }
+        leaf becn-bit-set {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "Frames received with BECN bit set.";
+        }
+        leaf diagnostic-reason {
+          type string;
+          tailf:display-groups "detail";
+          tailf:info "The diagnostic information for a NSVC not in the unblocked state.";
+        }
+        leaf cw-pdus-rx {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "PDUs received by the control word layer.";
+        }
+        leaf cw-pdus-rx-reassembled {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "Fragmented pdus received by the control word layer.";
+        }
+        leaf cw-pdus-rx-unfragmented {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "Unfragmented pdus received by the control word layer.";
+        }
+        leaf cw-pdus-tx {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "PDUs transmitted by the control word layer.";
+        }
+        leaf cw-octets-rx {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "Octets received by the control word layer.";
+        }
+        leaf cw-octets-tx {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "Octets transmitted by the control word layer.";
+        }
+        leaf cw-pdus-lost-or-discarded {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "PDUs lost or discarded by the control word layer.";
+        }
+        leaf cw-fragments-lost-or-discarded {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "Fragments lost or discarded by the control word layer.";
+        }
+        leaf cw-protocol-errors {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "Protocol errors in the control word layer.";
+        }
+        leaf nsvl-group {
+          type uint8;
+          tailf:display-groups "none detail";
+          tailf:info "The nsvl-group identifier";
+        }
+        leaf nsvl {
+          type uint8;
+          tailf:display-groups "none detail";
+          tailf:info "The NSVL instance within the NSVL group";
+        }
+        leaf service {
+          type string;
+          tailf:display-groups "none detail";
+        }
+        leaf location {
+          type string;
+          tailf:display-groups "detail";
+        }
+        leaf pid {
+          type uint16;
+          tailf:display-groups "detail";
+          tailf:info "Process ID of the NSE process.";
+        }
+      } /* list nsvc-fr */
+
+      list ptp-bvc {
+        tailf:info "Point To Point BVC protocol layer functionality";
+        config false;
+        ordered-by user; // not for use with keyed lists
+
+        tailf:cli-no-key-completion;
+        //key "nse-id ptp-bvc-id";
+
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn interface gb ptp-bvc::1';
+        }
+
+        leaf nse-id {
+          type uint16;
+          tailf:display-groups "none detail";
+          tailf:info "A unique NSE identifier.";
+        }
+        leaf ptp-bvc-id {
+          type uint16;
+          tailf:display-groups "none detail";
+          tailf:info "ID of the PTP-BVC.";
+        }
+        leaf bvc-global-cell-id {
+          type string;
+          tailf:display-groups "none detail";
+          tailf:info "Current global cell id of the BVC.";
+        }
+        leaf state {
+          type string;
+          tailf:display-groups "none detail";
+          tailf:info "Current state of the PTP-BVC.";
+        }
+        leaf availability-status {
+          type string;
+          tailf:display-groups "none detail";
+          tailf:info "Current status of the PTP-BVC.";
+        }
+        leaf pdus-rx {
+          type uint32;
+          tailf:display-groups "none detail";
+          tailf:info "PDUs received from PCU.";
+        }
+        leaf pdus-tx {
+          type uint32;
+          tailf:display-groups "none detail";
+          tailf:info "PDUs transmitted to PCU.";
+        }
+        leaf octets-rx {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "Octets received from PCU.";
+        }
+        leaf octets-tx {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "Octets transmitted to PCU.";
+        }
+        leaf blocks-rx {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "BVC-BLOCK PDUs received from PCU.";
+        }
+        leaf unblocks-rx {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "BVC-UNBLOCK PDUs received from PCU.";
+        }
+        leaf resets-rx {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "BVC-RESET PDUs received from PCU.";
+        }
+        leaf resets-tx {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "BVC-RESET PDUs transmitted to PCU.";
+        }
+        leaf status-rx {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "NM-STATUS PDUs received from PCU.";
+        }
+        leaf status-tx {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "NM-STATUS PDUs transmitted to PCU.";
+        }
+        leaf bvc-flow-control-rx {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "FLOW-CONTROL-BVC PDUs received from PCU.";
+        }
+        leaf ms-flow-control-rx {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "FLOW-CONTROL-MS PDUs received from PCU.";
+        }
+        leaf pfc-flow-control-rx {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "FLOW-CONTROL-PFC PDUs received from PCU.";
+        }
+        leaf bvc-bmax {
+          type uint16;
+          tailf:display-groups "detail";
+          tailf:info "Maximum downlink flow control bucket size.";
+        }
+        leaf leak-rate {
+          type uint16;
+          tailf:display-groups "detail";
+          tailf:info "Leak rate for BVC sent by PCU.";
+        }
+        leaf bucket-full-ratio {
+          type string;
+          tailf:display-groups "detail";
+          tailf:info "Percentage of the bucket that is filled or overflowing with data.";
+        }
+        leaf calculated-pcu-buffer {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "Amount of data currently buffered by PCU.";
+        }
+        leaf estimated-traffic-available {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "Estimated traffic available during the next synchronization interval.";
+        }
+        leaf byte-adjustment-factor {
+          type string;
+          tailf:display-groups "detail";
+          tailf:info "Number of bytes BVC adds to its bucket for every byte sent.";
+        }
+        leaf traffic-arrived {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "Amount of data received from LLC during the synchronization interval.";
+        }
+        leaf current-buffered-frames {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "The number of frames currently buffered.";
+        }
+        leaf current-buffered-data {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "The number of octets currently buffered.";
+        }
+        leaf max-frames-in-buffer {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "Maximum number of frames that can be buffered.";
+        }
+        leaf max-buffer-size {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "Maximum number of bytes that can be buffered.";
+        }
+        leaf flow-control-pdus-discarded {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "Number of PDUs discarded by this BVC due to the flow control buffer overflow.";
+        }
+        leaf flow-control-octets-discarded {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "Number of octets discarded by this BVC due to the flow control buffer overflow.";
+        }
+        leaf flow-control-bucket-size {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "Maximum bucket size for BVC sent by PCU.";
+        }
+        leaf bvc-blocked-timeouts {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "Number of times the BVC has been blocked for a span of minutes.";
+        }
+        leaf bvc-bmax-timeouts {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "Number of times the BVC Bmax flow control parameter is 0 for a span of minutes.";
+        }
+        leaf bvc-leak-rate-timeouts {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "Number of times the BVC Leak Rate flow control parameter is 0 for a span of minutes.";
+        }
+        leaf nsvl-group {
+          type uint8;
+          tailf:display-groups "none detail";
+          tailf:info "The nsvl-group identifier.";
+        }
+        leaf nsvl {
+          type uint8;
+          tailf:display-groups "none detail";
+          tailf:info "The NSVL instance within the NSVL group.";
+        }
+        leaf service {
+          type string;
+          tailf:display-groups "none detail";
+        }
+        leaf location {
+          type string;
+          tailf:display-groups "detail";
+        }
+        leaf pid {
+          type uint16;
+          tailf:display-groups "detail";
+          tailf:info "Process ID of the NSE process.";
+        }
+      } /* list ptp-bvc */
+
+      list sig-bvc-oper {
+        tailf:alt-name "sig-bvc";
+        tailf:info "Signaling BVC protocol layer functionality";
+        config false;
+        ordered-by user; // not for use with keyed lists
+
+        tailf:cli-no-key-completion;
+        //key "nse-id";
+
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn interface gb sig-bvc::1';
+        }
+
+        leaf nse-id {
+          type uint16;
+          tailf:display-groups "none detail";
+          tailf:info "A unique NSE identifier.";
+        }
+        leaf cbl-negotiated {
+          type string;
+          tailf:display-groups "none detail";
+          tailf:info "Indicates whether the current bucket level feature is negotiated.";
+        }
+        leaf gif-negotiated {
+          type string;
+          tailf:display-groups "none detail";
+          tailf:info "Indicates whether the gigabit interface feature is negotiated.";
+        }
+        leaf inr-negotiated {
+          type string;
+          tailf:display-groups "none detail";
+          tailf:info "Indicates whether the inter NSE rerouting feature is negotiated.";
+        }
+        leaf pfc-negotiated {
+          type string;
+          tailf:display-groups "none detail";
+          tailf:info "Indicates whether the PFC feature is negotiated.";
+        }
+        leaf pfc-fc-negotiated {
+          type string;
+          tailf:display-groups "none detail";
+          tailf:info "Indicates whether the PFC flow control feature is negotiated.";
+        }
+        leaf rim-negotiated {
+          type string;
+          tailf:display-groups "none detail";
+          tailf:info "Indicates whether the RAN information management feature is negotiated.";
+        }
+        leaf resets-rx {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "The number of BVC-RESET PDUs received from the PCU.";
+        }
+        leaf resets-tx {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "The number of BVC-RESET PDUs transmitted to the PCU.";
+        }
+        leaf blocks-rx {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "The number of BVC-BLOCK PDUs received from the PCU.";
+        }
+        leaf unblocks-rx {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "The number of BVC-UNBLOCK PDUs received from the PCU.";
+        }
+        leaf status-rx {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "The number of NM-STATUS PDUs received from the PCU.";
+        }
+        leaf status-tx {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "The number of NM-STATUS PDUs transmitted to the PCU.";
+        }
+        leaf llc-discarded-pdus {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "The number of LLC-DISCARDED-PDU messages received from the PCU.";
+        }
+        leaf nsvl-group {
+          type uint8;
+          tailf:display-groups "none detail";
+          tailf:info "The nsvl-group identifier.";
+        }
+        leaf nsvl {
+          type uint8;
+          tailf:display-groups "none detail";
+          tailf:info "The NSVL instance within the NSVL group.";
+        }
+        leaf service {
+          type string;
+          tailf:display-groups "none detail";
+        }
+        leaf location {
+          type string;
+          tailf:display-groups "detail";
+        }
+        leaf pid {
+          type uint16;
+          tailf:display-groups "detail";
+          tailf:info "Process ID of the NSE process.";
+        }
+      } /* list sig-bvc-oper */
+
+      list nse-oper {
+        tailf:alt-name "nse";
+        tailf:info "Network Service Entity (NSE)";
+        config false;
+        ordered-by user; // not for use with keyed lists
+
+        tailf:cli-no-key-completion;
+        //key nse-id;
+
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn interface gb nse::1';
+        }
+
+        leaf nse-id {
+          type uint16;
+          tailf:display-groups "none detail";
+          tailf:info "A unique NSE identifier.";
+        }
+        leaf transport-type {
+          type string;
+          tailf:display-groups "none detail";
+          tailf:info "Type of transport used for this NSE. Valid values are: fr, ip.";
+        }
+        leaf service {
+          type string;
+          tailf:display-groups "none detail";
+        }
+        leaf ip-address {
+          type inet:ip-address;
+          tailf:display-groups "none detail";
+          tailf:info "Local NSVC IP address.";
+        }
+        leaf port {
+          type uint16;
+          tailf:display-groups "none detail";
+          tailf:info "Local UDP port.";
+        }
+        leaf location {
+          type string;
+          tailf:display-groups "detail";
+        }
+        leaf oper-state {
+          type string;
+          tailf:display-groups "none detail";
+          tailf:info "Operational state of the NSE.";
+        }
+        leaf sns-state {
+          type string;
+          tailf:display-groups "detail";
+          tailf:info "State of the SNS Manager.";
+        }
+        leaf current-total-sig-nsvcs {
+          type uint8;
+          tailf:display-groups "detail";
+          tailf:info "Current number of signaling NSVCs.";
+        }
+        leaf current-avail-sig-nsvcs {
+          type uint8;
+          tailf:display-groups "detail";
+          tailf:info "Current number of available signaling NSVCs.";
+        }
+        leaf current-total-data-nsvcs {
+          type uint8;
+          tailf:display-groups "detail";
+          tailf:info "Current number of data NSVCs.";
+        }
+        leaf current-avail-data-nsvcs {
+          type uint8;
+          tailf:display-groups "detail";
+          tailf:info "Current number of available data NSVCs.";
+        }
+        leaf current-ptp-bvcs {
+          type uint32;
+          tailf:display-groups "detail";
+          tailf:info "Current number of PTP-BVCs.";
+        }
+        leaf nsvl-group {
+          type uint8;
+          tailf:display-groups "none detail";
+          tailf:info "The nsvl-group identifier.";
+        }
+        leaf nsvl {
+          type uint8;
+          tailf:display-groups "detail";
+          tailf:info "The NSVL instance within the NSVL group.";
+        }
+        leaf pid {
+          type uint16;
+          tailf:display-groups "detail";
+          tailf:info "Process ID of the NSE process.";
+        }
+      } /* nse-oper */
+   } /* gb */
+}

@@ -1,0 +1,2567 @@
+//////////////////////////////////////////////////////////////////////////
+/// @file oamPmServerCli.yang
+/// @brief Yang definitions for operational commands.
+///      "request mme-sgsn statistics clear" and
+///      "request fgw statistics clear"
+///      "show mme-sgsn statistics group-sets"
+///      "show mme-sgsn statistics <group-set> <group>"
+///      "show fgw statistics <group-set> <group>"
+///
+/// Maintained by: HCTA
+/// History:
+///
+/// yyyymmmdd Changed by      Change Reason
+/// --------- --------------- --------------------------------------------
+/// 2014Jan15 Mike Lesko      AGW-16853- Initial development
+/// 2014Feb03 Akshay Wani     AGW-21104- Using grouping for output.
+/// 2014Feb28 Mike Lesko      AGW-21104 - Updated actionpoint names
+/// 2014Mar19 Hardik W        AGW-21104 - Added new models for show statistics
+///                           commands.
+/// 2014Apr17 Adam Floyd      AGW-21104 - Add sort-flag to cp opaque data
+/// 2014Jun24 Shashank Gupta  AGW-16101 - LCS feature update
+/// 2014Aug15 Adam Floyd      AGW-23534 - Remove fake-key kludge
+/// 2014Sep15 Lakshmi Priya   AGW-22082 - Schema upgrade
+/// 2014Oct23 Adam Floyd      AGW-24110 - Pre-filter stats command on service
+///
+/// Copyright (c) 2014 HCTA. All Rights Reserved.
+///
+/// CONFIDENTIALITY AND LIMITED USE
+///
+/// This software, including any software of third parties embodied herein,
+/// contains information and concepts which are confidential to HCTA
+/// and such third parties. This software is licensed for use
+/// solely in accordance with the terms and conditions of the applicable
+/// license agreement with HCTA or its authorized distributor.
+//////////////////////////////////////////////////////////////////////////
+
+submodule oamPmServerCli{
+
+  belongs-to hcta-epc {
+     prefix epc; 
+  }
+
+  import tailf-common {
+     prefix tailf;
+  }
+
+  include mmeSgsnConfig;
+  include fgwConfig;
+  include mmeStatisticsConfig;   
+  include cmdCommonHcta;
+
+
+  augment "/mme-sgsn/statistics" {
+  
+    tailf:action clear {
+      tailf:actionpoint cli-request-command;
+      input {
+        leaf group-set {
+          type string;
+          mandatory true;
+          tailf:info "Group-set name";
+        }
+        leaf group {
+          type string;
+          mandatory true;
+          tailf:info "Group name";
+        }
+        leaf service {
+          type string;
+          tailf:info "VM name";
+        }
+        leaf unit-id {
+          type uint8;
+          tailf:info "Unit id";
+        }
+      }
+      output {
+        uses request-cmd-output;
+      }
+    }
+
+    list group-sets {
+      tailf:info "List of group-sets";
+      tailf:cli-no-key-completion;
+      config false;
+      tailf:callpoint cli_oper_show
+      {
+        // Callpoint Opaque Data Format (255 chars max):
+        // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics group-sets::1';
+      }
+      leaf group-set {
+        type string;
+        tailf:info "Group-set name";
+        tailf:display-groups "none detail";
+      }
+      leaf service {
+        type string;
+        tailf:info "VM name";
+        tailf:display-groups "none detail";
+      }
+    } /* group-sets */
+
+    container cdma {
+      tailf:info "group-set cdma";
+      tailf:cli-incomplete-show-path;
+      config false;
+      list sc {
+        tailf:info "group sc";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics cdma sc:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* sc group */
+    } /* cdma group-set*/
+
+    container diameter {
+      tailf:info "group-set diameter";
+      tailf:cli-incomplete-show-path;
+      config false;
+      list general {
+        tailf:info "group general";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics diameter general:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* general group */
+      list msg {
+        tailf:info "group msg";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics diameter msg:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* msg group */
+    } /* diameter group-set*/
+
+    container dns {
+      tailf:info "group-set dns";
+      tailf:cli-incomplete-show-path;
+      config false;
+      list dns {
+        tailf:info "group dns";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics dns dns:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* dns group */
+    } /* dns group-set*/
+
+    container fxa {
+      tailf:info "group-set fxa";
+      tailf:cli-incomplete-show-path;
+      config false;
+      list sc {
+        tailf:info "group sc";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics fxa sc:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* sc group */
+      list upm {
+        tailf:info "group upm";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics fxa upm:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* upm group */
+    } /* fxa group-set*/
+
+    container fxaPeer {
+      tailf:info "group-set fxaPeer";
+      tailf:cli-incomplete-show-path;
+      config false;
+      list upm {
+        tailf:info "group upm";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics fxaPeer upm:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* upm group */
+    } /* fxaPeer group-set*/
+
+    container ga {
+      tailf:info "group-set ga";
+      tailf:cli-incomplete-show-path;
+      config false;
+      list msg {
+        tailf:info "group msg";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics ga msg:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* msg group */
+    } /* ga group-set*/
+
+    container gb {
+      tailf:info "group-set gb";
+      tailf:cli-incomplete-show-path;
+      config false;
+      list bssgp {
+        tailf:info "group bssgp";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics gb bssgp:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* bssgp group */
+      list llc {
+        tailf:info "group llc";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics gb llc:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* llc group */
+      list nsfr {
+        tailf:info "group nsfr";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics gb nsfr:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* nsfr group */
+      list nsip {
+        tailf:info "group nsip";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics gb nsip:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* nsip group */
+      list sndcp {
+        tailf:info "group sndcp";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics gb sndcp:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* sndcp group */
+    } /* gb group-set*/
+
+    container gprsMm {
+      tailf:info "group-set gprsMm";
+      tailf:cli-incomplete-show-path;
+      config false;
+      list attach {
+        tailf:info "group attach";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics gprsMm attach:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* attach group */
+      list attachFail {
+        tailf:info "group attachFail";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics gprsMm attachFail:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* attachFail group */
+      list detach-group {
+        tailf:alt-name "detach";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:info "group detach";
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics gprsMm detach:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* detach group */
+      list general {
+        tailf:info "group general";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics gprsMm general:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* general group */
+      list irau {
+        tailf:info "group irau";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics gprsMm irau:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* irau group */
+      list irauFail {
+        tailf:info "group irauFail";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics gprsMm irauFail:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* irauFail group */
+      list misc {
+        tailf:info "group misc";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics gprsMm misc:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* misc group */
+      list procedure {
+        tailf:info "group procedure";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics gprsMm procedure:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* procedure group */
+      list rau {
+        tailf:info "group rau";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics gprsMm rau:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* rau group */
+      list rauFail {
+        tailf:info "group rauFail";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics gprsMm rauFail:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* rauFail group */
+      list security {
+        tailf:info "group security";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics gprsMm security:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* security group */
+      list snr {
+        tailf:info "group snr";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics gprsMm snr:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* snr group */
+    } /* gprsMm group-set*/
+
+    container gprsSm {
+      tailf:info "group-set gprsSm";
+      tailf:cli-incomplete-show-path;
+      config false;
+      list camel {
+        tailf:info "group camel";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics gprsSm camel:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* camel group */
+      list deactivation {
+        tailf:info "group deactivation";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics gprsSm deactivation:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* deactivatio group */
+      list general {
+        tailf:info "group general";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics gprsSm general:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* general group */
+      list irau {
+        tailf:info "group irau";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics gprsSm irau:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* irau group */
+      list irauFail {
+        tailf:info "group irauFail";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics gprsSm irauFail:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* irauFail group */
+      list modify {
+        tailf:info "group modify";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics gprsSm modify:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* modify group */
+      list priActGgsnFail {
+        tailf:info "group priActGgsnFail";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics gprsSm priActGgsnFail:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* priActGgsnFail group */
+      list primaryAct {
+        tailf:info "group primaryAct";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics gprsSm primaryAct:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* primaryAct group */
+      list primaryActFail {
+        tailf:info "group primaryActFail";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics gprsSm primaryActFail:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* primaryActFail group */
+      list procedure {
+        tailf:info "group procedure";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics gprsSm procedure:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* procedure group */
+      list secActGgsnFail {
+        tailf:info "group secActGgsnFail";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics gprsSm secActGgsnFail:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* secActGgsnFail group */
+      list secondaryAct {
+        tailf:info "group secondaryAct";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics gprsSm secondaryAct:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* secondaryAct group */
+      list secondaryActFail {
+        tailf:info "secondaryActFail";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics gprsSm secondaryActFail:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* secondaryActFail group */
+    } /* gprsSm group-set*/    
+
+    container gtpV1 {
+      tailf:info "group-set gtpV1";
+      tailf:cli-incomplete-show-path;
+      config false;
+      list accessFlex {
+        tailf:info "group accessFlex";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics gtpV1 accessFlex:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* accessFlex group */
+      list general {
+        tailf:info "group general";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics gtpV1 general:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* general group */
+      list mobility {
+        tailf:info "group mobility";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics gtpV1 mobility:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* mobility group */
+      list path {
+        tailf:info "group path";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics gtpV1 path:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* path group */
+      list tunnel {
+        tailf:info "group tunnel";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics gtpV1 tunnel:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* tunnel group */
+    } /* gtpV1 group-set*/
+
+    container gtpV1Path {
+      tailf:info "group-set gtpV1Path";
+      tailf:cli-incomplete-show-path;
+      config false;
+      list accessFlex{
+        tailf:info "group accessFlex";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics gtpV1Path accessFlex:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* accessFlex group */
+      list mobility {
+        tailf:info "group mobility";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics gtpV1Path mobility:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* mobility group */
+      list path {
+        tailf:info "group path";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics gtpV1Path path:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* path group */
+      list tunnel {
+        tailf:info "group tunnel";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics gtpV1Path tunnel:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* tunnel group */
+    } /* gtpV1Path group-set*/
+
+    container gtpV2 {
+      tailf:info "group-set gtpV2";
+      tailf:cli-incomplete-show-path;
+      config false;
+      list general {
+        tailf:info "group ";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics gtpV2 general:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* general group */
+      list mobility {
+        tailf:info "group mobility";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics gtpV2 mobility:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* mobility group */
+      list mobilitySrvcc {
+        tailf:info "group mobilitySrvcc";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics gtpV2 mobilitySrvcc:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* mobilitySrvcc group */
+      list path {
+        tailf:info "group path";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics gtpV2 path:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* path group */
+      list tunnel {
+        tailf:info "group tunnel";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics gtpV2 tunnel:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* tunnel group */
+    } /* gtpV2 group-set*/
+
+    container gtpV2Path {
+      tailf:info "group-set gtpV2Path";
+      tailf:cli-incomplete-show-path;
+      config false;
+      list mobility {
+        tailf:info "group mobility";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics gtpV2Path mobility:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* mobility group */
+      list mobilitySrvcc {
+        tailf:info "group mobilitySrvcc";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics gtpV2Path mobilitySrvcc:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* mobilitySrvcc group */
+      list path {
+        tailf:info "group path";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics gtpV2Path path:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* path group */
+      list tunnel {
+        tailf:info "group tunnel";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics gtpV2Path tunnel:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* tunnel group */
+    } /* gtpV2Path group-set*/
+
+    container iu {
+      tailf:info "group-set iu";
+      tailf:cli-incomplete-show-path;
+      config false;
+      list m3ua {
+        tailf:info "group m3ua";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics iu m3ua:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* m3ua group */
+      list ranap {
+        tailf:info "group ranap";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics iu ranap:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* ranap group */
+      list sccp {
+        tailf:info "group sccp";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics iu sccp:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* sccp group */
+    } /* iu group-set*/
+
+    container lteLcs {
+      tailf:info "group-set lteLcs";
+      tailf:cli-incomplete-show-path;
+      config false;
+      list procedure {
+        tailf:info "group procedure";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics lteLcs procedure:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* procedure group */
+      list mtlrFail {
+        tailf:info "group mtlrFail";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics lteLcs mtlrFail:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /*mtlrFail group */
+      list molrFail {
+        tailf:info "group molrFail";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics lteLcs molrFail:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /*molrFail group */
+      list nilrFail {
+        tailf:info "group nilrFail";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics lteLcs nilrFail:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /*nilrFail group */
+      list ppnFail {
+        tailf:info "group ppnFail";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics lteLcs ppnFail:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* ppnFail group */
+    } /* lteLcs group-set*/
+
+    container lteHandover {
+      tailf:info "group-set lteHandover";
+      tailf:cli-incomplete-show-path;
+      config false;
+      list interRat {
+        tailf:info "group interRat";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics lteHandover interRat:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* interRat group */
+      list intraRat {
+        tailf:info "group intraRat";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics lteHandover intraRat:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* intraRat group */
+      list srvcc {
+        tailf:info "group srvcc";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics lteHandover srvcc:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* srvcc group */
+    } /* lteHandover group-set*/
+
+    container lteMm {
+      tailf:info "group-set lteMm";
+      tailf:cli-incomplete-show-path;
+      config false;
+      list attach {
+        tailf:info "group attach";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics lteMm attach:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* attach group */
+      list attachFail {
+        tailf:info "group attachFail";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics lteMm attachFail:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* attachFail group */
+      list detach-group {
+        tailf:alt-name "detach";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:info "group detach";
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics lteMm detach:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* detach group */
+      list general {
+        tailf:info "group general";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics lteMm general:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* general group */
+      list itau {
+        tailf:info "group itau";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics lteMm itau:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* itau group */
+      list itauFail {
+        tailf:info "group itauFail";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics lteMm itauFail:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* itauFail group */
+      list paging {
+        tailf:info "group paging";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics lteMm paging:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* paging group */
+      list procedure {
+        tailf:info "group procedure";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics lteMm procedure:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* procedure group */
+      list security {
+        tailf:info "group security";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics lteMm security:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* security group */
+      list serviceRequest {
+        tailf:info "group serviceRequest";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics lteMm serviceRequest:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* serviceRequest group */
+      list snr {
+        tailf:info "group snr";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics lteMm snr:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* snr group */
+      list tau {
+        tailf:info "group tau";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics lteMm tau:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* tau group */
+      list tauFail {
+        tailf:info "group tauFail";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics lteMm tauFail:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* tauFail group */
+    } /* lteMm group-set*/
+
+    container lteSm {
+      tailf:info "group-set lteSm";
+      tailf:cli-incomplete-show-path;
+      config false;
+      list bearerActFail {
+        tailf:info "group bearerActFail";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics lteSm bearerActFail:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* bearerActFail group */
+      list deact {
+        tailf:info "group deact";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics lteSm deact:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* deact group */
+      list eRab {
+        tailf:info "group eRab";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics lteSm eRab:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* eRab group */
+      list general {
+        tailf:info "group general";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics lteSm general:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* general group */
+      list pgwReloc {
+        tailf:info "group pgwReloc";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics lteSm pgwReloc:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* pgwReloc group */
+      list procedure {
+        tailf:info "group procedure";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics lteSm procedure:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* procedure group */
+      list sessionAct {
+        tailf:info "group sessionAct";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics lteSm sessionAct:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* sessionAct group */
+      list sessionActFail {
+        tailf:info "group sessionActFail";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics lteSm sessionActFail:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* sessionActFail group */
+      list sgwReloc {
+        tailf:info "group sgwReloc";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics lteSm sgwReloc:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* sgwReloc group */
+    } /* lteSm group-set*/
+
+    container nodal {
+      tailf:info "group-set nodal";
+      tailf:cli-incomplete-show-path;
+      config false;
+      list s1 {
+        tailf:info "group s1";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics nodal s1:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* s1 group */
+      list upsm {
+        tailf:info "group upsm";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics nodal upsm:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* upsm group */
+    } /* nodal group-set*/
+
+    container platform {
+      tailf:info "group-set platform";
+      tailf:cli-incomplete-show-path;
+      config false;
+      list filesystem {
+        tailf:info "group filesystem";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics platform filesystem:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* filesystem group */
+      list resource {
+        tailf:info "group resource";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics platform resource:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* resource group */
+    } /* platform group-set*/
+
+    container s1 {
+      tailf:info "group-set s1";
+      tailf:cli-incomplete-show-path;
+      config false;
+      list enb {
+        tailf:info "group enb";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics s1 enb:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* enb group */
+      list general {
+        tailf:info "group general";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics s1 general:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* general group */
+      list msg {
+        tailf:info "group msg";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics s1 msg:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* msg group */
+    } /* s1 group-set*/
+
+    container s101 {
+      tailf:info "group-set s101";
+      tailf:cli-incomplete-show-path;
+      config false;
+      list general {
+        tailf:info "group general";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics s101 general:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* general group */
+      list msg {
+        tailf:info "group msg";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics s101 msg:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* msg group */
+    } /* s101 group-set*/
+
+    container s102 {
+      tailf:info "group-set s102";
+      tailf:cli-incomplete-show-path;
+      config false;
+      list general {
+        tailf:info "group general";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics s102 general:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* general group */
+      list msg {
+        tailf:info "group msg";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics s102 msg:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* msg group */
+    } /* s102 group-set*/
+
+    container s13 {
+      tailf:info "group-set s13";
+      tailf:cli-incomplete-show-path;
+      config false;
+      list sc {
+        tailf:info "group sc";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics s13 sc:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* sc group */
+    } /* s13 group-set*/
+
+    container s1Enb {
+      tailf:info "group-set s1Enb";
+      tailf:cli-incomplete-show-path;
+      config false;
+      list enb {
+        tailf:info "group enb";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics s1Enb enb:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* enb group */
+      list msg {
+        tailf:info "group msg";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics s1Enb msg:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* msg group */
+    } /* s1Enb group-set*/
+
+    container s6 {
+      tailf:info "group-set s6";
+      tailf:cli-incomplete-show-path;
+      config false;
+      list s6 {
+        tailf:info "group s6";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics s6 s6:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* s6 group */
+      list sc {
+        tailf:info "group sc";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics s6 sc:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* sc group */
+    } /* s6 group-set*/
+
+    container sbc {
+      tailf:info "group-set sbc";
+      tailf:cli-incomplete-show-path;
+      config false;
+      list sbc {
+        tailf:info "group sbc";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics sbc sbc:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* sbc group */
+    } /* sbc group-set*/
+
+    container sc {
+      tailf:info "group-set sc";
+      tailf:cli-incomplete-show-path;
+      config false;
+      list loadControl {
+        tailf:info "group loadControl";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics sc loadControl:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* loadControl group */
+      list npli {
+        tailf:info "group npli";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics sc npli:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* npli group */
+      list rim {
+        tailf:info "group rim";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics sc rim:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* rim group */
+      list sms {
+        tailf:info "group sms";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics sc sms:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* sms group */
+      list uePurge {
+        tailf:info "group uePurge";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics sc uePurge:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* uePurge group */
+    } /* sc group-set*/
+
+    container sd {
+      tailf:info "group-set sd";
+      tailf:cli-incomplete-show-path;
+      config false;
+      list general {
+        tailf:info "group general";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show 
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics sd general:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* general group */
+      list relay {
+        tailf:info "group relay";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics sd relay:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* relay group */
+    } /* sd group-set*/
+
+    container sGs {
+      tailf:info "group-set sGs";
+      tailf:cli-incomplete-show-path;
+      config false;
+      list detach-group {
+        tailf:alt-name "detach";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:info "group detach";
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics sGs detach:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* detach group */
+      list failure {
+        tailf:info "group failure";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics sGs failure:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* failure group */
+      list general {
+        tailf:info "group general";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics sGs general:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* general group */
+      list procedure {
+        tailf:info "group procedure";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics sGs procedure:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* procedure group */
+      list vlrSelection {
+        tailf:info "group vlrSelection";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics sGs vlrSelection:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* vlrSelection group */
+    } /* sGs group-set*/
+
+    container sgsnAcct {
+      tailf:info "group-set sgsnAcct";
+      tailf:cli-incomplete-show-path;
+      config false;
+      list abnormalClosure {
+        tailf:info "group abnormalClosure";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics sgsnAcct abnormalClosure:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* abnormalClosure group */
+      list mcdr {
+        tailf:info "group mcdr";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics sgsnAcct mcdr:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* mcdr group */
+      list scdr {
+        tailf:info "group scdr";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics sgsnAcct scdr:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* scdr group */
+      list smsCdr {
+        tailf:info "group smsCdr";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics sgsnAcct smsCdr:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* smsCdr group */
+    } /* sgsnAcct group-set*/
+
+    container slg {
+      tailf:info "group-set slg";
+      tailf:cli-incomplete-show-path;
+      config false;
+      list sc {
+        tailf:info "group sc";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics slg sc:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* sc group */
+    } /* slg group-set*/
+
+    container sls {
+      tailf:info "group-set sls";
+      tailf:cli-incomplete-show-path;
+      config false;
+      list sls {
+        tailf:info "group sls";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics sls sls:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;   
+      } /* sls group */
+      list general {
+        tailf:info "group general";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics sls general:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* sls group */
+    } /* sls group-set */
+
+    container ss7 {
+      tailf:info "group-set ss7";
+      tailf:cli-incomplete-show-path;
+      config false;
+      list bssap {
+        tailf:info "group bssap";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics ss7 bssap:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* bssap group */
+      list cap {
+        tailf:info "group cap";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics ss7 cap:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* cap group */
+      list m3ua {
+        tailf:info "group m3ua";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics ss7 m3ua:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* m3ua group */
+      list map {
+        tailf:info "group map ";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics ss7 map:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* map group */
+      list sccp {
+        tailf:info "group sccp";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics ss7 sccp:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* sccp group */
+      list tcap {
+        tailf:info "group tcap";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics ss7 tcap:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* tcap group */
+    } /* ss7 group-set */
+   
+    container umtsHandover {
+      tailf:info "group-set umtsHandover";
+      tailf:cli-incomplete-show-path;
+      config false;
+      list interRat {
+        tailf:info "group interRat";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics umtsHandover interRat:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* interRat group */
+      list intraRat {
+        tailf:info "group intraRat";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics umtsHandover intraRat:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* intraRat group */ 
+    } /* umtsHandover group-set*/
+
+    container umtsMm {
+      tailf:info "group-set umtsMm";
+      tailf:cli-incomplete-show-path;
+      config false;
+      list attach {
+        tailf:info "group attach";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics umtsMm attach:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* attach group */
+      list attachFail {
+        tailf:info "group attachFail";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics umtsMm attachFail:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* attachFail group */
+      list detach-group {
+        tailf:alt-name "detach";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:info "group detach";
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics umtsMm detach:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* detach group */
+      list general {
+        tailf:info "group general";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics umtsMm general:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* general group */
+      list irau {
+        tailf:info "group irau";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics umtsMm irau:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* irau group */
+      list irauFail {
+        tailf:info "group irauFail";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics umtsMm irauFail:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* irauFail group */      
+      list misc {
+        tailf:info "group misc";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics umtsMm misc:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* misc group */
+      list procedure {
+        tailf:info "group procedure";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics umtsMm procedure:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* procedure group */
+      list rau {
+        tailf:info "group rau";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics umtsMm rau:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* rau group */
+      list rauFail {
+        tailf:info "group rauFail";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics umtsMm rauFail:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* rauFail group */
+      list security {
+        tailf:info "group security";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics umtsMm security:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* security group */
+      list snr {
+        tailf:info "group snr";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics umtsMm snr:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* snr group */
+    } /* umtsMm group-set*/
+
+    container umtsSm {
+      tailf:info "group-set umtsSm";
+      tailf:cli-incomplete-show-path;
+      config false;
+      list camel {
+        tailf:info "group camel";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics umtsSm camel:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* camel group */
+      list deactivation {
+        tailf:info "group deactivation";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics umtsSm deactivation:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* deactivation group */
+      list general {
+        tailf:info "group general";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics umtsSm general:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* general group */
+      list irau {
+        tailf:info "group irau";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics umtsSm irau:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* irau group */
+      list irauFail {
+        tailf:info "group irauFail";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics umtsSm irauFail:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* irauFail group */
+      list modify {
+        tailf:info "group modify";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics umtsSm modify:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* modify group */
+      list priActGgsnFail {
+        tailf:info "group priActGgsnFail";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics umtsSm priActGgsnFail:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* priActGgsnFail group */
+      list primaryAct {
+        tailf:info "group primaryAct";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics umtsSm primaryAct:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* primaryAct group */
+      list primaryActFail {
+        tailf:info "group primaryActFail";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics umtsSm primaryActFail:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* primaryActFail group */
+      list procedure {
+        tailf:info "group procedure";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics umtsSm procedure:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* procedure group */
+      list  secActGgsnFail {
+        tailf:info "group secActGgsnFail";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics umtsSm secActGgsnFail:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* secActGgsnFail group */
+      list secondaryAct {
+        tailf:info "group secondaryAct";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics umtsSm secondaryAct:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* secondaryAct group */
+      list secondaryActFail {
+        tailf:info "group secondaryActFail";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:mme-sgsn statistics umtsSm secondaryActFail:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* secondaryActFail group */
+    } /* umtsSm group-set*/
+  } /*mme-sgsn */
+
+  augment "/fgw/statistics" {
+    tailf:action clear {
+      tailf:actionpoint cli-request-command;
+      input {
+        leaf group-set {
+          type string;
+          mandatory true;
+          tailf:info "Group-set name";
+        }
+        leaf group {
+          type string;
+          mandatory true;
+          tailf:info "Group name";
+        }
+        leaf service {
+          type string;
+          tailf:info "VM name";
+        }
+        leaf unit {
+          type uint8;
+          tailf:info "Unit id";
+        }
+      }
+      output {
+        uses request-cmd-output;
+      }
+    }
+    
+    container fgwBm {
+      tailf:info "group-set fgwBm";
+      tailf:cli-incomplete-show-path;
+      config false;
+      list eRabRelease {
+        tailf:info "group eRabRelease";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:fgw statistics fgwBm eRabRelease:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* eRabRelease group */
+      list procedure {
+        tailf:info "group procedure";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:fgw statistics fgwBm procedure:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* procedure group */
+    } /* fgwBm group-set*/
+    
+    container fgwCm {
+      tailf:info "group-set fgwCm";
+      tailf:cli-incomplete-show-path;
+      config false;
+      list general {
+        tailf:info "group general";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:fgw statistics fgwCm general:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* general group */
+      list procedure {
+        tailf:info "group procedure";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:fgw statistics fgwCm procedure:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* procedure group */
+      list ueConnect {
+        tailf:info "group ueConnect";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:fgw statistics fgwCm ueConnect:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* ueConnect group */
+      list ueRelease {
+        tailf:info "group ueRelease";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:fgw statistics fgwCm ueRelease:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* ueRelease group */
+    } /* fgwCm group-set*/
+    
+    container fgwHandover {
+      tailf:info "group-set fgwHandover";
+      tailf:cli-incomplete-show-path;
+      config false;
+      list lteIntraRat {
+        tailf:info "group lteIntraRat";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:fgw statistics fgwHandover lteIntraRat:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* lteIntraRat group */
+    } /* fgwHandover group-set*/
+    
+    container s1MmePeer {
+      tailf:info "group-set s1MmePeer";
+      tailf:cli-incomplete-show-path;
+      config false;
+      list general {
+        tailf:info "group general";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:fgw statistics s1MmePeer general:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* general group */
+      list mme {
+        tailf:info "group mme";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:fgw statistics s1MmePeer mme:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* mme group */
+      list msg {
+        tailf:info "group msg";
+        key "service ref-entity-type ref-entity-tag ref-subentity-info register-name";
+
+        tailf:cli-no-key-completion;
+        tailf:callpoint cli_oper_show
+        {
+          // Callpoint Opaque Data Format (255 chars max):
+          // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+          tailf:opaque '0:fgw statistics s1MmePeer msg:service/string ref-entity-type/string ref-entity-tag/string ref-subentity-info/string register-name/string:1';
+        }
+        uses register-group;
+      } /* msg group */
+    } /* s1MmePeer group-set*/
+  } /* fgw */
+}

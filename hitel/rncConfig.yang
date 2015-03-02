@@ -1,0 +1,450 @@
+//////////////////////////////////////////////////////////////////////////
+/// @file rncConfig.yang
+/// @brief Yang groups definitions for RNC operational commands.
+///
+/// Maintained by: HCTA
+/// History:
+///
+/// yyyymmmdd Changed by      Change Reason
+/// --------- --------------- --------------------------------------------
+/// 2014Oct07 P Visuthisen    AGW-23943 Prop from MME7.0 to MME8.0
+///
+/// Copyright (c) 2014 HCTA. All Rights Reserved.
+///
+/// CONFIDENTIALITY AND LIMITED USE
+///
+/// This software, including any software of third parties embodied herein,
+/// contains information and concepts which are confidential to HCTA
+/// and such third parties. This software is licensed for use
+/// solely in accordance with the terms and conditions of the applicable
+/// license agreement with HCTA or its authorized distributor.
+//////////////////////////////////////////////////////////////////////////
+submodule rncConfig{
+
+belongs-to hcta-epc {
+    prefix epc;
+}
+
+import tailf-common {
+    prefix tailf;
+}
+
+include mmeSgsnConfig;
+
+include fgwConfig;
+
+include cmdCommonHcta;
+import ietf-inet-types {
+    prefix inet;
+}
+
+augment "/mme-sgsn/interface" {
+    container iu {
+        tailf:info "Iu interface to UMTS access (RNC)";
+        presence ""; 
+        container mme-iu-if {
+            tailf:alt-name "iu-if";
+            presence "";
+            must "(count(../../../service-area/mme-plmn) != 0)" {
+                error-message
+                "If 'iu-if' exists then 'service-area plmn' must exist";
+            } 
+            tailf:info "Iu interface.";
+            must "((count(../../s1/mme-s1-interface) = 0) or (count(../../../feature/mme-feature-control[name = 's4-sgsn' and status-field = 'on']) != 0))" {
+                error-message
+                "The 'mme-sgsn feature control s4-sgsn' must be 'on' if 'mme-sgsn interface s1 s1-if' exists";
+            }
+            leaf reset-ack-timer-tratr {
+                tailf:info "Guard period in the core network. Default 60";
+                type uint8 {
+                    range "60..120";
+                }
+                default 60;
+            }
+            leaf reset-timer-trafr {
+                tailf:info "Time to wait for reset ack from RNC. Default 90";
+                type uint8 {
+                    range "70..240";
+                }
+                default 90;
+            }
+            leaf reset-retry-trafr {
+                tailf:info "Number of reset retries. Default 1";
+                type uint8 {
+                    range "0..3";
+                }
+                default 1;
+            }
+            leaf sccp-class-of-service {
+                tailf:info "Type of service provided by the SCCP layer. Default connection-less,connection-oriented";
+                type enumeration {
+                    enum "connection-less" {tailf:code-name sccp-class-of-service-connection-less;}
+                    enum "connection-oriented" {tailf:code-name sccp-class-of-service-connection-oriented;}
+                    enum "connection-less,connection-oriented" {tailf:code-name  sccp-class-of-service-connection-less-connection-oriented;}
+                }
+            }
+            leaf sccp-connection-establish-timer {
+                tailf:info "Time to wait for a connection confirm message. Default 60";
+                type uint8 {
+                    range "60..120";
+                }
+                default 60;
+            }
+            leaf sccp-inactivity-test-timer {
+                tailf:info "Time to wait before sending an inactivity test message. Default 300";
+                type uint16 {
+                    range "300..600";
+                }
+                default 300;
+            }
+            leaf sccp-inactivity-receive-timer {
+                tailf:info "Period of time to wait on receiving a message for a connection. Default 660";
+                type uint16 {
+                    range "660..1260";
+                }
+                default 660;
+            }
+            leaf sccp-timer-release {
+                tailf:info "This is the period of time to wait for a release complete message. Default 10";
+                type uint8 {
+                    range "10..20";
+                }
+                default 10;
+            }
+            leaf sccp-timer-repeat-release {
+                tailf:info "The period of time to wait for a SCCP release complete. Default 20";
+                type uint8 {
+                    range "10..20";
+                }
+                default 20;
+            }
+            leaf sccp-pause-delay-timer {
+                type string {
+                    pattern '(([1-9][0-9]{0,2})|([1-2][0-9]{3})|([3][0][0][0])|(no-delay)|(ignore-pause))' {
+                        tailf:info "Valid values are: 1..3000, no-delay, ignore-pause";
+                    }
+                }                                                                  
+                tailf:info "Specifies how SCCP processes an mtp-pause indication from MTP3. Default 120";
+                default "120";
+            }
+            leaf trab-assgt-timer {
+                tailf:info "Rab assignement timer. Default 4";
+                type uint8 {
+                    range "1..20";
+                }
+                default 4;
+            }
+            leaf trab-assgt-retry {
+                tailf:info "Rab assignement retry. Default 4";
+                type uint8 {
+                    range "1..20";
+                }
+                default 4;
+            }
+            leaf reloc-alloc-timer {
+                tailf:info "Time to wait for RNC response to relocation request message. Default 10";
+                type uint8 {
+                    range "1..60";
+                }
+                default 10;
+            }
+            leaf reloc-complete-timer {
+                tailf:info "Time to wait for for relocation completion. Default 25";
+                type uint8 {
+                    range "1..60";
+                }
+                default 25;
+            }
+            leaf iu-release-timer {
+                tailf:info "Time to wait for response to IU release command message. Default 5";
+                type uint8 {
+                    range "1..60";
+                }
+                default 5;
+            }
+            leaf iu-signaling-act-timer {
+                tailf:info "Period of IU signaling inactivity after which the connection is considered inactive. Default 5";
+                type string {
+                    length "1..10";
+                }
+                default "5";
+            }
+            leaf security-mode-timer {
+                tailf:info "Time to wait for RNC response to security mode command message. Default 5";
+                type uint8 {
+                    range "1..10";
+                }
+                default 5;
+            }
+            leaf security-mode-retry {
+                tailf:info "Security mode retry. Default 2";
+                type uint8 {
+                    range "0..5";
+                }
+                default 2;
+            }
+            leaf srns-rau-timer {
+                must "current() <= ../indirect-tunnel-hold-timer" {
+                    error-message
+                    "The value of 'srns-rau-timer' should be less than or equal to the value of 'indirect-tunnel-hold-time'";
+                }
+                tailf:info "Time to wait for routing area update request message. Default 5";
+                type uint8 {
+                    range "1..10";
+                }
+                default 5;
+            }
+            leaf inter-rat-indirect-forwarding {
+                tailf:info "Indirect data forwarding on the SGSN. Default never";
+                type enumeration {
+                    enum "never" {tailf:code-name mme-iu-if-inter-rat-indirect-forwarding-never;}
+                    enum "always" {tailf:code-name mme-iu-if-inter-rat-indirect-forwarding-always;}
+                    enum "inter-plmn-inter-rat" {tailf:code-name mme-iu-if-inter-rat-indirect-forwarding-inter-plmn-inter-rat;}
+                }
+                default "never";
+            }
+            leaf indirect-data-fwd-ip-address {
+                tailf:info "IP address for a dedicated SGW used when setting up indirect forwarding. Default 0.0.0.0";
+                type inet:ip-address;
+                default 0.0.0.0;
+            }
+            leaf indirect-tunnel-hold-timer {
+                tailf:info "The time the target SGSN keeps the indirect forwarding tunnel. Default 5";
+                type uint8 {
+                    range "1..30";
+                }
+                default 5;
+            }
+            leaf version {
+                tailf:info "3GPP spec applicable to this interface is TS25.413. Default 10.9.0";
+                type enumeration {
+                    enum "9.5.0" {tailf:code-name mme-iu-if-version-9-5-0;}
+                    enum "10.9.0" {tailf:code-name mme-iu-if-version-10-9-0;}
+                }
+                default "10.9.0";
+            }
+            leaf reloc-resource-release-timer {
+                tailf:info "Source RNC or S-GW handover release timer. Default 5";
+                type uint8 {
+                    range "0..30";
+                }
+                default 5;
+            }
+            uses dscp; 
+            leaf csg-expiration-release-timer {
+                tailf:info "CSG expiration release timer. Default 5";
+                type uint8 {
+                    range "1..30";
+                }
+                default 5;
+            }
+            leaf signaling-variant {
+                tailf:info "Signaling Variant based on E.212/E.214. Default itu";
+                type enumeration {
+                    enum "itu" {tailf:code-name mme-iu-if-signaling-variant-itu;}
+                    enum "ansi" {tailf:code-name mme-iu-if-signaling-variant-ansi;}
+                }
+                default "itu";
+            }
+        } /* mme-iu-if */
+        list mme-rnc {
+            tailf:alt-name "rnc";
+            unique destination-point-code;
+            must "((count(../../../feature/mme-feature-control[name = 'hspa-plus' and status-field = 'off']) = 0) or (count(/mme-sgsn/interface/iu/mme-rnc) <= 256))" {
+                error-message
+                "If 'mme-sgsn feature control hspa' is 'off' then the maximum records that can be configured is 256";
+            }
+            key "rnc-id";
+            max-elements 4096;
+            tailf:validate rncValidate {
+                tailf:call-once "true";
+            }
+            tailf:info "Provisionable attributes of RNC.";
+            leaf rnc-id {
+                must "(count(../../mme-fgw-rnc[rnc-id = current()]) = 0)" {
+                    error-message
+                    "An 'mme-sgsn interface iu fgw-rnc' object with this 'rnc-id' already exists";
+                }
+                tailf:info "ID of the radio network controller.";
+                type uint16;
+                mandatory true;
+            }
+            leaf destination-point-code {
+                type string {
+                    pattern '((([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])[.]){2}([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5]))|[1-9][0-9]{0,7}' {
+                        tailf:info "Valid values in pointcode format are: ITU 1-16383 or 0-7.0-255.0-7, ANSI 1-16777215 or 0-255.0-255.0-255";
+                    }
+                }
+                must "current() != '0.0.0'" {
+                    error-message
+                    "The 'destination-point-code' must not be '0.0.0'";
+                }                                                                  
+                tailf:info "Specifies the RNC point code.";
+                mandatory true;
+            }
+            uses callp-service-identifier;
+            leaf direct-tunnel {
+                tailf:info "Support direct tunnel functionality. Default disable";
+                type enumeration {
+                    enum "enable" {tailf:code-name mme-rnc-direct-tunnel-enable;}
+                    enum "disable" {tailf:code-name mme-rnc-direct-tunnel-disable;}
+                }
+                default "disable";
+            }
+            leaf max-iu-connections {
+                tailf:info "Total number of SCCP connections supported per RNC. Default 1000";
+                type uint32 {
+                    range "0..300000";
+                }
+                default 1000;
+            }
+        } /* mme-rnc */
+    } /* iu */
+} /* interface */
+augment "/mme-sgsn/engineering"{
+    container mme-iu-congestion-control {
+        tailf:alt-name "iu-congestion-control";
+        presence "";
+        must "critical-onset >= critical-abate and " +
+        "critical-abate >= major-onset and " +
+        "major-onset >= major-abate and " +
+        "major-abate >= minor-onset and " +
+        "minor-onset >= minor-abate" {
+            error-message
+            "The values configured for the fields " +
+            "in the entity 'iu-congestion-control' must be " +
+            "in the following order " +
+            "'critical-onset' >= 'critical-abate' >= 'major-onset' >= 'major-abate' >= 'minor-onset' >= 'minor-abate'";
+        }                        
+        tailf:info "MME processing IU congestion overload control configuration.";
+        leaf minor-onset {
+            tailf:info "Congestion overload minor alarm set. Default 70";
+            type uint8 {
+                range "0..100";
+            }
+            default 70;
+        }
+        leaf minor-abate {
+            tailf:info "Congestion overload minor alarm clear. Default 65";
+            type uint8 {
+                range "0..100";
+            }
+            default 65;
+        }
+        leaf minor-action {
+            tailf:info "Congestion overload minor alarm action. Default ignore";
+            type enumeration {
+                enum "none" {tailf:code-name mme-iu-congestion-control-minor-action-none;}
+                enum "reject" {tailf:code-name mme-iu-congestion-control-minor-action-reject;}
+                enum "ignore" {tailf:code-name mme-iu-congestion-control-minor-action-ignore;}
+            }
+            default "ignore";
+        }
+        leaf major-onset {
+            tailf:info "Congestion overload major alarm set. Default 80";
+            type uint8 {
+                range "0..100";
+            }
+            default 80;
+        }
+        leaf major-abate {
+            tailf:info "Congestion overload major alarm clear. Default 75";
+            type uint8 {
+                range "0..100";
+            }
+            default 75;
+        }
+        leaf major-action {
+            tailf:info "Congestion overload major alarm action. Default ignore";
+            type enumeration {
+                enum "none" {tailf:code-name mme-iu-congestion-control-major-action-none;}
+                enum "reject" {tailf:code-name mme-iu-congestion-control-major-action-reject;}
+                enum "ignore" {tailf:code-name mme-iu-congestion-control-major-action-ignore;}
+            }
+            default "ignore";
+        }
+        leaf critical-onset {
+            tailf:info "Congestion overload critical alarm set. Default 90";
+            type uint8 {
+                range "0..100";
+            }
+            default 90;
+        }
+        leaf critical-abate {
+            tailf:info "Congestion overload critical alarm clear. Default 85";
+            type uint8 {
+                range "0..100";
+            }
+            default 85;
+        }
+        leaf critical-action {
+            tailf:info "Congestion overload critical alarm action. Default ignore";
+            type enumeration {
+                enum "none" {tailf:code-name mme-iu-congestion-control-critical-action-none;}
+                enum "reject" {tailf:code-name mme-iu-congestion-control-critical-action-reject;}
+                enum "ignore" {tailf:code-name mme-iu-congestion-control-critical-action-ignore;}
+            }
+            default "ignore";
+        }
+    } /* mme-iu-congestion-control */
+} /* engineering */ 
+augment "/mme-sgsn/interface/iu"{
+    list mme-fgw-rnc {
+        tailf:alt-name "fgw-rnc";
+        key "rnc-id";
+        unique destination-point-code;
+        max-elements 100;
+        tailf:validate fgwRncValidate {
+            tailf:call-once "true";
+        }
+        tailf:info "Provisionable attributes of FGW-RNC.";
+        must "(count(../../../feature/mme-feature-control[name = 'femto-cell-support' and status-field = 'on']) != 0)" {
+            error-message
+            "If 'fgw-rnc' object exists then 'femto-cell-support' must be 'on' in 'mme-sgsn feature control'";
+        }
+        leaf rnc-id {
+            must "(count(../../mme-rnc[rnc-id = current()]) = 0)" { 
+            error-message
+            "An 'mme-sgsn interface iu rnc' object with this 'rnc-id' already exists";
+        }
+        tailf:info "FGW ID of the RNC.";
+        type uint16;
+        mandatory true;
+    }
+    leaf destination-point-code {
+        type string {
+            pattern '((([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])[.]){2}([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5]))|[1-9][0-9]{0,7}' {
+                        tailf:info "Valid values in pointcode format are: ITU 1-16383 or 0-7.0-255.0-7, ANSI 1-16777215 or 0-255.0-255.0-255";
+            }
+        }
+        must "(count(../../mme-rnc[destination-point-code = current()]) = 0)" {
+            error-message
+            "An 'mme-sgsn interface iu rnc' object with this 'destination-point-code' already exists";
+        }
+        must "current() != '0.0.0'" {
+            error-message
+            "The 'destination-point-code' must not be '0.0.0'";
+        }
+        tailf:info "Specifies the RNC point code.";
+        mandatory true;
+    }
+    uses callp-service-identifier;
+    leaf direct-tunnel {
+        tailf:info "Support direct tunnel functionality. Default disable";
+        type enumeration {
+            enum "enable" {tailf:code-name mme-fgw-rnc-direct-tunnel-enable;}
+            enum "disable" {tailf:code-name mme-fgw-rnc-direct-tunnel-disable;}
+        }
+        default "disable";
+    }
+    leaf max-iu-connections {
+        tailf:info "Total number of SCCP connections supported per RNC. Default 3000";
+        type uint32 {
+            range "0..1000000";
+        }
+        default 3000;
+    }
+} /* mme-fgw-rnc */
+} /* iu */
+} /*submodule*/
+

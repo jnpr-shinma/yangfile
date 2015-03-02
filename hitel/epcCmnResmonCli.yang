@@ -1,0 +1,183 @@
+//////////////////////////////////////////////////////////////////////////
+/// @file epcCmnResmonCli.yang
+/// @brief Yang definitions for operational commands.
+///        "show mme-sgsn status storage"
+///        "show fgw status storage"
+///
+/// Maintained by: HCTA
+/// History:
+///
+/// yyyymmmdd Changed by      Change Reason
+/// --------- --------------- --------------------------------------------
+/// 2014Jan15 Hardik W        AGW-21104 - Initial development
+/// 2014Feb28 Mike Lesko      AGW-21104 - Updated callpoint info
+/// 2014Apr01 Adam Floyd      AGW-21104 - Change some leaf types to match app
+/// 2014Apr17 Adam Floyd      AGW-21104 - Add sort-flag to cp opaque data
+/// 2014May25 Sujay R         AHW-22082 - Added System Version Command 
+/// 2014Aug15 Adam Floyd      AGW-23534 - Remove fake-key kludge
+/// 2014Sep15 Lakshmi Priya   AGW-22082 - Schema upgrade
+///
+/// Copyright (c) 2014 HCTA. All Rights Reserved.
+///
+/// CONFIDENTIALITY AND LIMITED USE
+///
+/// This software, including any software of third parties embodied herein,
+/// contains information and concepts which are confidential to HCTA
+/// and such third parties. This software is licensed for use
+/// solely in accordance with the terms and conditions of the applicable
+/// license agreement with HCTA or its authorized distributor.
+//////////////////////////////////////////////////////////////////////////
+submodule epcCmnResmonCli{
+   belongs-to hcta-epc {
+      prefix epc;
+   }
+
+   import tailf-common {
+      prefix tailf;
+   }
+
+   include mmeSgsnConfig;
+   include fgwConfig;
+   include scConfig;
+   include s1MasterConfig;
+
+   augment "/mme-sgsn/status" {
+      list mme-sgsn-storage {
+         config false;
+         ordered-by user; // not for use with keyed lists
+         tailf:info "File system status per VM";
+         tailf:alt-name "storage";
+         tailf:cli-no-key-completion;
+
+         tailf:callpoint cli_oper_show
+         {      
+           // Callpoint Opaque Data Format (255 chars max):
+           // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+           tailf:opaque '0:mme-sgsn status storage::1';
+         }
+
+         leaf location {
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf service {
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf unit-id {
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf standby {
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf fs-usage {
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf size {
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf file-system {
+            type string;
+            tailf:display-groups "none detail";
+         }
+      } /* mme-sgsn-storage */
+   }
+
+   augment "/fgw/status" {
+      list fgw-storage {
+         config false;
+         ordered-by user; // not for use with keyed lists
+         tailf:alt-name "storage";
+         tailf:info "File system status per VM";
+         tailf:cli-no-key-completion;
+
+         tailf:callpoint cli_oper_show
+         {      
+           // Callpoint Opaque Data Format (255 chars max):
+           // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+           tailf:opaque '0:fgw status storage::1';
+         }
+
+         leaf location {
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf service {
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf unit-id {
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf standby {
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf fs-usage {
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf size {
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf file-system {
+            type string;
+            tailf:display-groups "none detail";
+         }
+      } /* fgw-storage */
+   }
+
+   augment "/mme-sgsn/status" {
+      list mme-sgsn-version {
+         config false;
+         ordered-by user; // not for use with keyed lists
+         tailf:info "Version status per VM";
+         tailf:alt-name "version";
+         tailf:cli-no-key-completion;
+
+         tailf:callpoint cli_oper_show
+         {
+           // Callpoint Opaque Data Format (255 chars max):
+           // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)'
+           tailf:opaque '0:mme-sgsn status version::1';
+         }
+
+         leaf location {
+            tailf:info "Location.";
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf service {
+            tailf:info "VM Service ID.";
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf unit-id {
+            tailf:info "Unit ID.";
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf current-time {
+            tailf:info "Current Time.";
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf uptime {
+            tailf:info "Up Time.";
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf version {
+            tailf:info "VM Software Version.";
+            type string;
+            tailf:display-groups "none detail";
+         }
+      } /* mme-sgsn-version */
+   }
+}

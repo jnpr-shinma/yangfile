@@ -1,0 +1,41 @@
+module databasechanges {
+   
+	namespace "http://juniper.net/ns/space/sesmgt/1.0";
+	
+	prefix dbchange;
+	
+	organization "Juniper Networks";
+
+    	description "Database change notification YANG module";
+
+    	revision "2014-11-25" {
+        	description "draft-ietf-netmod-yang-02 compatible.";
+    	}
+
+        notification databasechanges {
+
+             leaf event-time {
+                 type string;
+             }
+             leaf objName {
+                 type string;
+              }
+              leaf objType {
+                  type string;
+              }
+              leaf rowId {
+                   type int32;
+              }
+              leaf UUID {
+                    type string;
+              }
+              leaf entityCategory {
+                    type string;
+              }
+              leaf operation {
+                    type string;
+              }
+             
+	}
+
+}

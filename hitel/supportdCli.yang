@@ -1,0 +1,90 @@
+//////////////////////////////////////////////////////////////////////////
+/// @file supportdCli.yang
+/// @brief Yang definitions for operational commands.
+///        "request mme-sgsn support information"
+///
+/// Maintained by: HCTA
+/// History:
+///
+/// yyyymmmdd Changed by      Change Reason
+/// --------- --------------- --------------------------------------------
+/// 2014Jan15 Mike Lesko      AGW-21104 - Initial development
+/// 2014Feb03 Akshay Wani     AGW-21104 - Using grouping for output.
+/// 2014Feb28 Mike Lesko      AGW-21104 - Updated actionpoint names
+/// 2014May07 Terri Hennessy  AGW-21104 - Add info stmts & default.
+/// 2014Sep15 Lakshmi Priya   AGW-22082 - Schema upgrade
+/// 2014May14 Akshay Wani     AGW-21104 - Updated Info.
+///
+/// Copyright (c) 2014 HCTA. All Rights Reserved.
+///
+/// CONFIDENTIALITY AND LIMITED USE
+///
+/// This software, including any software of third parties embodied herein,
+/// contains information and concepts which are confidential to HCTA
+/// and such third parties. This software is licensed for use
+/// solely in accordance with the terms and conditions of the applicable
+/// license agreement with HCTA or its authorized distributor.
+//////////////////////////////////////////////////////////////////////////
+
+submodule supportdCli{
+
+  belongs-to hcta-epc {
+     prefix epc; 
+  }
+
+  import tailf-common {
+     prefix tailf;
+  }
+
+  include mmeSgsnConfig;
+  include fgwConfig;
+  include cmdCommonHcta;
+
+  typedef supportInfo-enum {
+    type enumeration {
+      enum min;
+      enum medium;
+      enum max;
+    }
+  }
+
+  augment "/mme-sgsn" {
+    container support {
+      tailf:info "Support commands.";
+      tailf:action information {
+        tailf:info "Support information.";
+        tailf:actionpoint cli-request-command;
+        input {
+          leaf level {
+            type supportInfo-enum;
+            tailf:info "Level of support info to save, default medium.";
+            mandatory true;
+          }
+        }
+        output {
+          uses request-cmd-output;
+        }
+      }
+    }
+  }
+
+  augment "/fgw" {
+    container support {
+      tailf:info "Support commands.";
+      tailf:action information {
+        tailf:info "Support information.";
+        tailf:actionpoint cli-request-command;
+        input {
+          leaf level {
+            type supportInfo-enum;
+            tailf:info "Level of support info to save, default medium.";
+            mandatory true;
+          }
+        }
+        output {
+          uses request-cmd-output;
+        }
+      }
+    }
+  }
+}

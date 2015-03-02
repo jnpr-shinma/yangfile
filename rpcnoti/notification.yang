@@ -1,0 +1,94 @@
+module notification {
+    yang-version 1;
+    namespace "http://juniper.net/ns/space/notification/1.0";
+    prefix noti;
+    import ietf-inet-types { prefix "inet"; }
+    import ietf-yang-types { prefix "yang"; }
+    import iq-ifmap-types { prefix "ifmap"; }
+    contact "JUNOS Space <jspace@juniper.net>";
+
+    organization "Juniper Networks";
+    description "Example YANG module for notification";
+    revision "2014-11-21" {
+        description "Initial version";
+    }
+
+    typedef operationEnum {
+        type enumeration {
+            enum CREATE;
+            enum MODIFY;
+            enum DELETE;
+            enum DOMAIN_CHANGED;
+        }
+    }
+
+    notification notification {
+        leaf timestamp {
+            type yang:timestamp;
+        }
+        leaf key {
+            type string;
+        }
+        leaf-list screenList {
+            type string;
+        }
+        // IFMAP 'has' links
+        list managedObjectInformation {
+            uses ifmap:HasLink;
+            key uuid;
+        }
+    }
+
+    list managed-object-information {
+        uses ifmap:Identity;
+
+        leaf operation {
+            type operationEnum;
+        }
+        leaf objName {
+            type string;
+        }
+        leaf objType {
+            type string;
+        }
+        leaf rowId {
+            type uint32;
+        }
+        leaf domainName {
+            type string;
+        }
+        leaf entityCategory {
+            type string;
+        }
+        leaf partitionName {
+            type string;
+        }
+        leaf currentPartition {
+            type string;
+        }
+        leaf status {
+            type uint32;
+        }
+        leaf uri {
+            type string;
+        }
+        leaf description {
+            type string;
+        }
+        leaf labelString {
+            type string;
+        }
+        leaf browserIdGenerateNotification {
+            type string;
+        }
+        leaf subObjDescription {
+            type string;
+        }
+        leaf parent {
+            type uint32;
+        }
+        leaf-list children {
+            type uint32;
+        }
+    }
+}

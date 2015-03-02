@@ -1,0 +1,220 @@
+//////////////////////////////////////////////////////////////////////////
+/// @file cslCli.yang
+/// @brief Yang definitions for operational commands.
+///        "show mme-sgsn csl profile"
+///        "show mme-sgsn csl streaming"
+///
+/// Maintained by: HCTA
+/// History:
+///
+/// yyyymmmdd Changed by      Change Reason
+/// --------- --------------- --------------------------------------------
+/// 2014Jan15 Hardik W        AGW-21104 - Initial development
+/// 2014Feb28 Mike Lesko      AGW-21104 - Updated callpoint info
+/// 2014Mar10 Hardik W        AGW-21104 - Added service-id in csl-streaming
+/// 2014Mar25 Sayali D        AGW-21104 - Updated the data type for csl.
+/// 2014Apr17 Adam Floyd      AGW-21104 - Add sort-flag to cp opaque data
+/// 2014Aug15 Adam Floyd      AGW-23534 - Remove fake-key kludge
+/// 2014Sep15 Lakshmi Priya   AGW-22082 - Schema upgrade
+///
+/// Copyright (c) 2014 HCTA. All Rights Reserved.
+///
+/// CONFIDENTIALITY AND LIMITED USE
+///
+/// This software, including any software of third parties embodied herein,
+/// contains information and concepts which are confidential to HCTA
+/// and such third parties. This software is licensed for use
+/// solely in accordance with the terms and conditions of the applicable
+/// license agreement with HCTA or its authorized distributor.
+//////////////////////////////////////////////////////////////////////////
+submodule cslCli{
+   belongs-to hcta-epc {
+      prefix epc;
+   }
+
+   import tailf-common {
+      prefix tailf;
+   }
+
+   include mmeSgsnConfig;
+   include cslConfig;
+
+   import ietf-inet-types {
+      prefix inet;
+   }
+
+   augment "/mme-sgsn/csl" {
+      list agw-csl-oper {
+         tailf:alt-name "profile";
+         config false;
+         ordered-by user; // not for use with keyed lists
+         tailf:info "Call Summary Log";
+         tailf:cli-no-key-completion;
+
+         tailf:callpoint cli_oper_show
+         {      
+           // Callpoint Opaque Data Format (255 chars max):
+           // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+           tailf:opaque '0:mme-sgsn csl profile::1';
+         }
+
+         leaf pdnconn-events-mme {
+            tailf:info "PDN connection events on MME.";
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf bearer-events-mme {
+            tailf:info "Bearer events on MME.";
+            type string;
+            tailf:display-groups "none detail";
+          }
+         leaf mobility-events-mme {
+            tailf:info "Mobility events on MME.";
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf radiobearer-events-mme {
+            tailf:info "Radio Bearer events on MME.";
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf file-creation-period {
+            tailf:info "Time interval to generate the output file.";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+         leaf file-retention-period {
+            tailf:info "Time to retain the old files.";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+         leaf max-records-per-file {
+            tailf:info "Maximum number of records to be written per file.";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+         leaf triggers-mme {
+            tailf:info "CSL log generation triggers.";
+            type string;
+            tailf:display-groups "detail";
+         }
+         leaf max-records-per-period {
+            tailf:info "Maximum records per period.";
+            type string;
+            tailf:display-groups "detail";
+         }
+         leaf records-dropped {
+            tailf:info "Records dropped.";
+            type uint32;
+            tailf:display-groups "detail";
+         }
+      } /* profile */
+        
+      list streaming-csl-oper {
+         tailf:alt-name "streaming";
+         config false;
+         ordered-by user; // not for use with keyed lists
+         tailf:info "Streaming Call Summary Log.";
+         tailf:cli-no-key-completion;
+
+         tailf:callpoint cli_oper_show
+         {      
+           // Callpoint Opaque Data Format (255 chars max):
+           // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+           tailf:opaque '0:mme-sgsn csl streaming::1';
+         }
+
+         leaf sctp-profile {
+            tailf:info "SCTP profile name used for CSL streaming.";
+            type string;
+            tailf:display-groups "detail";
+         }
+         leaf routing-instance {
+            tailf:info "";
+            type string;
+            tailf:display-groups "detail";
+         }
+         leaf local-ip-address {
+            tailf:info "Local IP address used for remote streaming by each SC CSL-Client instance.";
+            type inet:ip-address;
+            tailf:display-groups "detail";
+         }
+         leaf remote-ip-address1 {
+            tailf:info "Remote IP address for CSL server #1.";
+            type inet:ip-address;
+            tailf:display-groups "detail";
+         }
+         leaf remote-port1 {
+            tailf:info "Remote streaming port number for CSL server #1.";
+            type uint16;
+            tailf:display-groups "detail";
+         }
+         leaf remote-ip-address2 {
+            tailf:info "Remote IP address for CSL server #2.";
+            type inet:ip-address;
+            tailf:display-groups "detail";
+         }
+         leaf remote-port2 {
+            tailf:info "Remote streaming port number for CSL server #2.";
+            type uint16;
+            tailf:display-groups "detail";
+         }
+         leaf dscp-mark {
+            tailf:info "Differentiated Service (DS) Code Point.";
+            type string;
+            tailf:display-groups "detail";
+         }
+         leaf streaming-fallback {
+            tailf:info "Indicates if fallback to local file based mode should be used when the streaming interfaces to the remote CSL server are down.";
+            type string;
+            tailf:display-groups "detail";
+         }
+         leaf service-id {
+            tailf:info "";
+            type uint16;
+            tailf:display-groups "none detail";
+         }
+         leaf location {
+            tailf:info "";
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf local-port {
+            tailf:info "Local port number for this connection.";
+            type uint16;
+            tailf:display-groups "detail";
+         }
+         leaf remote-server-1 {
+            tailf:info "Remote server 1 connection status for this location.";
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf remote-server-2 {
+            tailf:info "Remote server 2 connection status for this location.";
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf tx-pkt {
+            tailf:info "Number of packets trasmitted.";
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf rx-pkt {
+            tailf:info "Number of packets received.";
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf tx-rec {
+            tailf:info "Number of CSL records trasmitted.";
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf drop-rec {
+            tailf:info "Number of CSL records dropped.";
+            type string;
+            tailf:display-groups "none detail";
+         }
+      } /* streaming */
+   }
+}
+    

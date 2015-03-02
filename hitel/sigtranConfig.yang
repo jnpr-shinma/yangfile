@@ -1,0 +1,809 @@
+/*
+//////////////////////////////////////////////////////////////////////////////
+/// @file sigtranConfig.yang
+/// @brief This file contains configuration related to agwMmeSigtran.
+///
+/// History:
+///
+/// yyyymmmdd Changed by      Change Reason
+/// --------- --------------- -------------------------------------------------
+/// 2014Oct10 Matt Kloppmann  AGW-24242 - Incorrect local port range
+/// 2014Oct15 Matt Kloppmann  AGW-24248 - Incorrect gtt-result must check
+/// 2014Oct31 Matt Kloppmann  AGW-24498 - mme-g-dest-peer-map key is incorrect
+///
+/// Copyright (c) 2014 Hitachi Limited. All Rights Reserved.
+///
+/// CONFIDENTIALITY AND LIMITED USE
+///
+/// This software, including any software of third parties embodied herein,
+/// contains information and concepts which are confidential to Hitachi
+/// and such third parties. This software is licensed for use
+/// solely in accordance with the terms and conditions of the applicable
+/// license agreement with Hitachi or its authorized distributor.
+///
+//////////////////////////////////////////////////////////////////////////////
+*/
+
+submodule sigtranConfig{
+
+belongs-to hcta-epc {
+    prefix epc;
+}
+
+import tailf-common {
+    prefix tailf;
+}
+
+include mmeSgsnConfig;
+
+include fgwConfig;
+
+include tcapConfig;
+include cmdCommonHcta;
+include s1MasterConfig;
+import ietf-inet-types {
+    prefix inet;
+}
+
+augment "/mme-sgsn/interface/ss7" {
+    container mme-sccp-profile {
+        tailf:alt-name "sccp";
+        presence ""; 
+        tailf:info "Global SCCP Profile.";
+        leaf stat-info-timer {
+            tailf:info "Period between subsystem status messages. Default 30";
+            type uint16 {
+                range "5..1200";
+            }
+            default 30;
+        }
+        leaf congestion-timer {
+            tailf:info "Delay in decrement of congestion level after abatement. Default 1";
+            type uint8 {
+                range "1..10";
+            }
+            default 1;
+        }
+        leaf attack-timer {
+            tailf:info "Time duration for MTP-STATUS primitive ignored. Default 60";
+            type uint16 {
+                range "60..600";
+            }
+            default 60;
+        }
+        leaf decay-timer {
+            tailf:info "Delay in decrement of MTP restriction level after abatement. Default 1";
+            type uint8 {
+                range "1..10";
+            }
+            default 1;
+        }
+        leaf unknown-destination-alarm {
+            tailf:info "Enable/disable SCCP unknown destination alarm. Default disable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-sccp-profile-unknown-destination-alarm-enable;}
+                enum "disable" {tailf:code-name mme-sccp-profile-unknown-destination-alarm-disable;}
+            }
+            default "disable";
+        }
+        leaf reassembly-timer {
+            must "((../../mme-ss7-profile/signaling-variant = 'ansi') or (current() >= 10))" {
+                error-message
+                "The value of 'reassembly-timer' must not less than 10,if 'mme-sgsn interface ss7 ss7 signaling-variant' configured as non ansi";
+            }
+            tailf:info "Wait for segments of message after first receive. Default 10";
+            type uint8 {
+                range "5..20";
+            }
+            default 10;
+        }
+    } /* mme-sccp-profile */
+    list mme-remote-destination {
+        tailf:alt-name "remote-destination";
+        tailf:validate remoteDestinationValidate {
+            tailf:call-once "true";
+        }
+        key "destination-point-code"; 
+        max-elements 2048;
+        tailf:info "Remote destination accessed by SCCP.";
+        leaf destination-point-code {
+            type string {
+                pattern '((([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])[.]){2}([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5]))|[1-9][0-9]{0,7}' {
+                    tailf:info "Valid values in pointcode format are: ITU 1..16383 or 0..7.0..255.0..7, ANSI 1..16777215 or 0-255.0-255.0-255";
+                }
+            }
+            must "current() != '0.0.0'" {
+                error-message
+                "The 'destination-point-code' must not be '0.0.0'";
+            }                     
+            tailf:info "Point code instance for each signaling node.";
+            mandatory true;
+        }
+        leaf xudt-option {
+            tailf:info "Enable/disable XUDT messages. Default enable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-remote-destination-xudt-option-enable;}
+                enum "disable" {tailf:code-name mme-remote-destination-xudt-option-disable;}
+            }
+            default "enable";
+        }
+        leaf ludt-option {
+            tailf:info "Enable/disable LUDT messages. Default disable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-remote-destination-ludt-option-enable;}
+                enum "disable" {tailf:code-name mme-remote-destination-ludt-option-disable;}
+            }
+            default "disable";
+        }
+        leaf remote-subsystems {
+            type string {
+                pattern '(unused-or-default|((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[2-9])(,(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[2-9])){0,7}))' {
+                    tailf:info "Valid values are: unused-or-default, 2..255";
+                }
+            }               
+            tailf:info "Subsystem number (SSN) names. Default unused-or-default";
+            default "unused-or-default";
+        }
+    } /* mme-remote-destination */
+    list mme-gtt-entry {
+        tailf:alt-name "gtt-entry";
+        tailf:validate gttEntryValidate {
+            tailf:call-once "true";
+        }
+        key "instance";
+        max-elements 1024;
+        tailf:info "GTT entry table based on E.214/E.164 numbers.";
+        leaf instance {
+            tailf:info "A unique identifier for this GTT entry.";
+            type uint16 {
+                range "1..1024";
+            }
+            mandatory true;
+        }
+        leaf lower-gtai {
+            type string {
+                pattern '[0-9]+#?' {
+                    tailf:info "Valid values are: digits and #";
+                }
+            }
+            tailf:info "Lower global title address information.";
+            mandatory true;
+        }
+        leaf upper-gtai {
+            type string {
+                pattern '[0-9]*' {
+                    tailf:info "Valid values are: digits";
+                }
+            }
+            tailf:info "Upper global title address information.";
+            mandatory true;
+        }
+        leaf primary-result {
+            tailf:info "Link to primary global title translation result.";
+            type leafref {
+                path "/mme-sgsn/interface/ss7/mme-gtt-result/instance";
+            }
+            mandatory true;
+        }
+        leaf secondary-result {
+            tailf:info "Link to secondary global title translation result.";
+            type uint16 {
+                range "1..1024";
+            }
+            mandatory true;
+        }
+        leaf global-title-indicator {
+            tailf:info "Global title indicator value based on signaling variant. Default gti0";
+            type enumeration {
+                enum "gti0" {tailf:code-name mme-gtt-entry-global-title-indicator-gti0;}
+                enum "gti1" {tailf:code-name mme-gtt-entry-global-title-indicator-gti1;}
+                enum "gti2" {tailf:code-name mme-gtt-entry-global-title-indicator-gti2;}
+                enum "gti3" {tailf:code-name mme-gtt-entry-global-title-indicator-gti3;}
+                enum "gti4" {tailf:code-name mme-gtt-entry-global-title-indicator-gti4;}
+            }
+            default "gti0";
+        }
+        leaf translation-type {
+            tailf:info "Translation type of global title. Default 0";
+            type uint8 {
+                range "0..255";
+            }
+            default 0;
+        }
+        leaf numbering-plan {
+            tailf:info "Numbering plan of global title. Default 0";
+            type uint8 {
+                range "0..15";
+            }
+            default 0;
+        }
+        leaf nature-of-addr-indicator {
+            tailf:info "Nature of address indicator of global title. Default 0";
+            type uint8 {
+                range "0..127";
+            }
+            default 0;
+        }
+    } /* mme-gtt-entry */
+    list mme-gtt-result {
+        tailf:alt-name "gtt-result";
+        tailf:validate gttResultValidate {
+            tailf:call-once "true";
+        }
+        key "instance";
+        max-elements 1024;
+        tailf:info "This entity contains the information to route a message to its final destination.";
+        leaf instance {
+            tailf:info "A unique identifier for this GTT result.";
+            type uint16 {
+                range "1..1024";
+            }
+            mandatory true;
+        }
+        leaf destination-point-code {
+            type string {
+                pattern '((([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])[.]){2}([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5]))|[1-9][0-9]{0,7}' {
+                    tailf:info "Valid values in pointcode format are: ITU 1..16383 or 0..7.0..255.0..7, ANSI 1..16777215 or 0-255.0-255.0-255";
+                }
+            }              
+            must "../destination-point-code != '0.0.0'" {
+                error-message
+                "The 'destination-point-code' must not be '0.0.0'";
+            }
+            tailf:info "Point code instance for each SS7 node.";
+            mandatory true;
+        }
+        leaf routing-indicator {
+            must "(((current() != 'route-on-gt') or (../use-original-gtai != 'disable')) or (../global-title-indicator != 'gti0'))" {
+                error-message
+                "Since 'routing-indicator' value is 'route-on-gt' and 'use-original-gtai' value is 'disable','global-title-indicator' value cannot be 'gti0'";
+            }
+            must "(((current() != 'route-on-gt') or (../use-original-gtai != 'disable')) or (../global-title-addr-info != 'none'))" {
+                error-message     
+                "Since 'routing-indicator' value is 'route-on-gt' and 'use-original-gtai' value is 'disable','global-title-addr-info' value cannot be 'none'";
+            }
+            tailf:info "Routing to global title or SSN.";
+            type enumeration {
+                enum "route-on-ssn" {tailf:code-name mme-gtt-result-routing-indicator-route-on-ssn;}
+                enum "route-on-gt" {tailf:code-name mme-gtt-result-routing-indicator-route-on-gt;}
+            }
+            mandatory true;
+        }
+        leaf use-original-gtai {
+            tailf:info "Enable/disable reuse of original GTAI value.";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-gtt-result-use-original-gtai-enable;}
+                enum "disable" {tailf:code-name mme-gtt-result-use-original-gtai-disable;}
+            }
+            mandatory true;
+        }
+        leaf subsystem {
+            type string {                
+            pattern '(unused-or-default|([2-9]|[1-9][0-9]|[1][0-9][0-9]|[2][0-4][0-9]|[2][5][0-5]))' {
+                tailf:info "Valid values are: unused-or-default, 2..255";
+            }
+        }
+        tailf:info "SSN of GTT result. Default unused-or-default";
+        default "unused-or-default";
+    }
+    leaf global-title-indicator {
+        tailf:info "Global title indicator value based on signaling variant. Default gti0";
+        type enumeration {
+            enum "gti0" {tailf:code-name mme-gtt-result-global-title-indicator-gti0;}
+            enum "gti1" {tailf:code-name mme-gtt-result-global-title-indicator-gti1;}
+            enum "gti2" {tailf:code-name mme-gtt-result-global-title-indicator-gti2;}
+            enum "gti3" {tailf:code-name mme-gtt-result-global-title-indicator-gti3;}
+            enum "gti4" {tailf:code-name mme-gtt-result-global-title-indicator-gti4;}
+        }
+        default "gti0";
+    }
+    leaf translation-type {
+        tailf:info "Translation type of global title. Default 0";
+        type uint8 {
+            range "0..255";
+        }
+        default 0;
+    }
+    leaf numbering-plan {
+        tailf:info "Numbering plan of global title. Default 0";
+        type uint8 {
+            range "0..15";
+        }
+        default 0;
+    }
+    leaf nature-of-addr-indicator {
+        tailf:info "Nature of address indicator of global title. Default 0";
+        type uint8 {
+            range "0..127";
+        }
+        default 0;
+    }
+    leaf global-title-addr-info {
+        tailf:info "Global title address info in Global Title Translation result. Default none";
+        type string {
+            length "1..15";
+        }
+        default "none";
+    }
+} /* mme-gtt-result */
+} /* ss7 */
+augment "/mme-sgsn/interface" {
+    list mme-m3ua {
+        tailf:alt-name "m3ua";
+        tailf:validate m3uaValidate {
+            tailf:call-once "true";
+        }
+        key "name";
+        max-elements 3;
+        tailf:info "SIGTRAN MTP-3 User Adaptation (M3UA) layer";
+        leaf name {
+            tailf:info "A unique m3ua-profile name.";
+            type string {
+                length "1..32";
+            }
+            mandatory true;
+        }
+        leaf sctp-profile {
+            tailf:info "SCTP profile name.";
+            type leafref {
+                path "/mme-sgsn/interface/mme-sctp-profile/name";
+            }
+            mandatory true;
+            must "((count(../../mme-sctp-profile[name = current()]) = 0) or (../../mme-sctp-profile/max-out-stream != '1'))" {
+                error-message
+                "The 'sctp-profile' is used by 'mme-sgsn interface m3ua' and cannot set 'max-out-stream' to 1";
+            }
+        }
+        leaf audit-interval {
+            tailf:info "Time interval to audit M3UA destinations. Default 30000";
+            type uint32 {
+                range "100..600000";
+            }
+            default 30000;
+        }
+        leaf multiple-network-appearances {
+            tailf:info "Enable/disable multiple network appearances. Default disable";
+            type enumeration {
+                enum "enable" {tailf:code-name mme-m3ua-multiple-network-appearances-enable;}
+                enum "disable" {tailf:code-name mme-m3ua-multiple-network-appearances-disable;}
+            }
+            default "disable";
+        }
+        leaf max-deactivate-attempts {
+            tailf:info "Maximum number of attempts to deactivate M3UA peer process. Default 3";
+            type uint8 {
+                range "1..10";
+            }
+            default 3;
+        }
+        leaf fsm-timeout {
+            tailf:info "Time interval before re-attempting FSM action. Default 2000";
+            type uint16 {
+                range "500..60000";
+            }
+            default 2000;
+        }
+        leaf network-indicator {
+            tailf:info "Specifies whether the network is a national network or an international network. Default intl";
+            type enumeration {
+                enum "intl" {tailf:code-name mme-m3ua-network-indicator-intl;}
+                enum "intl-spare" {tailf:code-name mme-m3ua-network-indicator-intl-spare;}
+                enum "natl" {tailf:code-name mme-m3ua-network-indicator-natl;}
+                enum "natl-spare" {tailf:code-name mme-m3ua-network-indicator-natl-spare;}
+            }
+            default "intl";
+        }
+        leaf cong-onset-level1 {
+            type string {
+                pattern '[1-9]|[1-9][0-9]|100|auto-configure' {
+                    tailf:info "Valid values are: 1..100, auto-configure";
+                }
+            }               
+            tailf:info "M3UA congestion onset level 1. Default auto-configure";
+            default "auto-configure";
+        }
+        leaf cong-abatement-level1 {
+            type string {
+                pattern '[1-9]|[1-9][0-9]|100|auto-configure' {
+                    tailf:info "Valid values are: 1..100, auto-configure";
+                }
+            }               
+            tailf:info "M3UA congestion abatement level 1. Default auto-configure";
+            default "auto-configure";
+        }
+        leaf cong-onset-level2 {
+            type string {
+                pattern '([1-9]|[1-9][0-9]|100|auto-configure|unused)' {
+                    tailf:info "Valid values are: 1..100, auto-configure, unused";
+                }
+            }
+            must "((../cong-onset-level2 != 'unused') or (../cong-abatement-level2 = 'unused'))" {
+                error-message
+                "For congestion levels 2 and 3, if either the onset attribute or abatement attribute for a level is set to 'unused', the other attribute for the same level must also be 'unused'";
+            }
+            must "((../cong-onset-level2 != 'unused') or (../cong-abatement-level2 != 'unused') or (../cong-onset-level3 = 'unused') or (../cong-abatement-level3 != 'unused'))" {
+                error-message
+                "For congestion levels 2 and 3, if either the onset attribute or abatement attribute for a level is set to 'unused', the other attribute for the same level must also be 'unused'";
+            }
+            tailf:info "M3UA congestion onset level 2. Default auto-configure";
+            default "auto-configure";
+        }
+        leaf cong-abatement-level2 {
+            type string {
+                pattern '([1-9]|[1-9][0-9]|100|auto-configure|unused)' {
+                    tailf:info "Valid values are: 1..100, auto-configure, unused";
+                }
+            }               
+            tailf:info "M3UA congestion abatement level 2. Default auto-configure";
+            default "auto-configure";
+        }
+        leaf cong-onset-level3 {
+            type string {
+                pattern '([1-9]|[1-9][0-9]|100|auto-configure|unused)' {
+                    tailf:info "Valid values are: 1..100, auto-configure, unused";
+                }
+            }
+            must "((../cong-onset-level3 != 'unused') or (../cong-abatement-level3 = 'unused'))" {
+                error-message
+                "For congestion levels 2 and 3, if either the onset attribute or abatement attribute for a level is set to 'unused', the other attribute for the same level must also be 'unused'";
+            }             
+            tailf:info "M3UA congestion onset level 3. Default auto-configure";
+            default "auto-configure";
+        }
+        leaf cong-abatement-level3 {
+            type string {
+                pattern '([1-9]|[1-9][0-9]|100|auto-configure|unused)' {
+                    tailf:info "Valid values are: 1..100, auto-configure, unused";
+                }
+            }               
+            tailf:info "M3UA congestion abatement level 3. Default auto-configure";
+            default "auto-configure";
+        }
+        leaf cong-report-frequency {
+            tailf:info "M3UA congestion report frequency. Default 8";
+            type uint8 {
+                range "1..16";
+            }
+            default 8;
+        }
+        leaf reconnect-timer {
+            tailf:info "SCTP reconnect delay Default 10";
+            type uint8 {
+                range "1..120";
+            }
+            default 10;
+        }
+    } /* mme-m3ua */
+} /* interface */
+augment "/mme-sgsn/interface/ss7" {
+    list mme-g-m3ua {
+        tailf:alt-name "m3ua";
+        tailf:validate m3uaSs7Validate; 
+        key "local-point-code";
+        max-elements 1;
+        tailf:info "This entity represents the destination address mapping with the m3ua profile for interacting on g-interface.";
+        leaf local-point-code {
+            type string {
+                pattern '((([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])[.]){2}([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5]))|[1-9][0-9]{0,7}' {
+                    tailf:info "Valid values in pointcode format are: ITU 1..16383 or 0..7.0..255.0..7, ANSI 1..16777215 or 0-255.0-255.0-255";
+                }
+            }
+            must "current() != '0.0.0'" {
+                error-message
+                "The 'local-point-code' must not be '0.0.0'";
+            }
+            tailf:info "Point code instance.";
+            mandatory true;
+        }
+        leaf m3ua-prof-name {
+            tailf:info "A unique m3ua-profile name.";
+            type leafref {
+                path "/mme-sgsn/interface/mme-m3ua/name";
+            }
+            mandatory true;
+            must "(count(../../../iu/mme-iu-m3ua) = 0) or (../../../iu/mme-iu-m3ua/m3ua-profile != current())" {
+                error-message
+                "The 'm3ua-prof-name' must not be same as 'mme-sgsn interface iu m3ua m3ua-profile'";
+            }
+        }
+    } /* mme-g-m3ua */
+    list mme-g-asp-instance {
+        tailf:alt-name "asp-instance";
+        key "unit-id";
+        max-elements 32;
+        unique "routing-instance ip-address port";
+        must "count(../mme-g-m3ua) != 0" {
+            error-message
+            "If 'asp-instance' object exists then 'mme-sgsn interface ss7 m3ua' must be configured";
+        }
+        tailf:info "This entity represents a particular SIGTRAN ASP.";
+        leaf unit-id {
+            tailf:alt-name "unit";
+            tailf:info "Signaling VM unit identifier associated with ASP instance.";
+            type leafref {
+                path "/mme-sgsn/system/sig/unit/unit-id";
+            } 
+            mandatory true;
+        }
+        uses routing-instance-name;
+        leaf ip-address {
+            tailf:info "Local IP address.";
+            type inet:ip-address;
+            mandatory true;
+        }
+        leaf app-server-name {
+            tailf:info "Unique application server name.";
+            type leafref {
+                path "/mme-sgsn/interface/ss7/mme-app-server/name";
+            }
+            mandatory true;
+        }
+        leaf port {
+            tailf:info "Local port number.";
+            type uint16 {
+                range "1..65534";
+            }
+            mandatory true;
+        }
+    } /* mme-g-asp-instance */
+    list mme-g-peer {
+        tailf:alt-name "peer";
+        key "g-peer-name";
+        max-elements 512;                       
+        tailf:info "This entity represents SIGTRAN M3UA layer peer process.";
+        leaf g-peer-name {
+            type string {
+                pattern '[0-9A-Za-z_]+' {
+                    tailf:info "Valid values are: alphabetical characters, digits and underscore";
+                }
+            }
+            tailf:info "Peer process name.";
+            mandatory true;
+        }
+        leaf app-server-name {
+            tailf:info "Unique application server name.";
+            type leafref {
+                path "/mme-sgsn/interface/ss7/mme-app-server/name";
+            }
+            mandatory true;
+        }
+        leaf ip-address1 {
+            tailf:info "Unique primary IP address of peer process.";
+            type inet:ipv4-address;
+            mandatory true;
+        }
+        leaf ip-address2 {
+            tailf:info "Secondary IP address of peer process to support multihoming. Default 0.0.0.0";
+            type inet:ipv4-address;
+            default 0.0.0.0;
+        }
+        leaf peer-type {
+            tailf:info "Type of the M3UA peer process.";
+            type enumeration {
+                enum "sgp" {tailf:code-name mme-g-peer-peer-type-sgp;}
+                enum "ipspSe" {tailf:code-name mme-g-peer-peer-type-ipspSe;}
+            }
+            mandatory true;
+        }
+        leaf association-creation {
+            tailf:info "SCTP association status with the peer process.";
+            type enumeration {
+                enum "initiate" {tailf:code-name mme-g-peer-association-creation-initiate;}
+                enum "accept" {tailf:code-name mme-g-peer-association-creation-accept;}
+            }
+            mandatory true;
+        }
+        leaf port-str {
+            tailf:alt-name "port";
+            type string {
+                pattern '(auto-discovery|[1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])' {
+                    tailf:info "Valid values are: auto-discovery, 1..65535";
+                }
+            }
+            tailf:info "Port number of the peer process. Default 2905";
+            default "2905";
+        }
+        leaf compat-mode {
+            tailf:info "Compatible mode with peer process. Default standard";
+            type enumeration {
+                enum "standard" {tailf:code-name mme-g-peer-compat-mode-standard;}
+                enum "usp" {tailf:code-name mme-g-peer-compat-mode-usp;}
+            }
+            default "standard";
+        }
+        leaf network-appearance {
+            type string {
+                pattern 'unused|([0-9]|[1-9][0-9])' {
+                    tailf:info "Valid values are: unused, 0..99";
+                }
+            }
+            tailf:info "Network appearance of M3UA peer process. Default unused";
+            default "unused";
+        }
+    } /* mme-g-peer */
+    list mme-g-dest-peer-map {
+        tailf:alt-name "dest-peer-map";
+        key "destination-point-code g-peer-name";
+        max-elements 10240;
+        tailf:info "This entity represents 1-1 mapping between a destination point code and peer process.";
+        leaf destination-point-code {
+            tailf:info "Point code instance for each signaling node.";
+            type leafref {
+                path "/mme-sgsn/interface/ss7/mme-remote-destination/destination-point-code";
+            }                
+            must "current() != '0.0.0'" {
+                error-message
+                "The 'destination-point-code' must not be '0.0.0'";
+            }
+            mandatory true;
+        }
+        leaf g-peer-name {
+            tailf:info "Peer process name.";
+            type leafref {
+                path "/mme-sgsn/interface/ss7/mme-g-peer/g-peer-name";
+            }
+            mandatory true;
+        }
+    } /* mme-g-dest-peer-map */
+    list mme-app-server {
+        tailf:alt-name "app-server";
+        key "name";
+        max-elements 2;
+        tailf:info "This entity represents the partitioning of ASPs between different servers.";
+        leaf name {
+            tailf:info "Name of the application server.";
+            type string {
+                length "1..32";
+            }
+            mandatory true;
+        }
+    } /* mme-app-server */
+    container mme-ss7-profile {
+        tailf:alt-name "ss7";
+        tailf:validate ss7Validate; 
+        presence "";
+        tailf:info "Global SS7 profile.";
+        leaf sgsn-number {
+            type string {
+                pattern '[0-9]{1,17}' {
+                    tailf:info "Valid values are: digits of length 1..17";
+                }
+            }
+            tailf:info "E.164 SGSN number.";
+            mandatory true;
+        }
+        leaf signaling-variant {
+            tailf:info "Signaling Variant based on E.212/E.214. Default itu";
+            type enumeration {
+                enum "itu" {tailf:code-name mme-sgsn-interface-ss7-signaling-variant-itu;}
+                enum "ansi" {tailf:code-name mme-sgsn-interface-ss7-signaling-variant-ansi;}
+                enum "itu-chinese" {tailf:code-name mme-sgsn-interface-ss7-signaling-variant-itu-chinese;}
+                enum "etsi" {tailf:code-name mme-sgsn-interface-ss7-signaling-variant-etsi;}
+            }
+            default "itu";
+            must "((current() != 'ansi') or (count(../../mme-gtt-entry[global-title-indicator = 'gti3']) = 0) and (count(../../mme-gtt-entry[global-title-indicator = 'gti4']) = 0))" {
+                error-message
+                "Value of 'ansi' conflicts with 'mme-sgsn interface ss7 gtt-entry global-title-indicator' values";
+            }
+            must "((current() != 'ansi') or (count(../../mme-gtt-result[global-title-indicator = 'gti3']) = 0) and (count(../../mme-gtt-result[global-title-indicator = 'gti4']) = 0))" {
+                error-message
+                "Value of 'ansi' conflicts with 'mme-sgsn interface ss7 gtt-result global-title-indicator' values";
+            }
+            must "((current() != 'etsi') or (count(../../mme-gtt-entry[global-title-indicator = 'gti1']) = 0) and (count(../../mme-gtt-entry[global-title-indicator = 'gti2']) = 0) and (count(../../mme-gtt-entry[global-title-indicator = 'gti3']) = 0))" {
+                error-message
+                "Value of 'etsi' conflicts with 'mme-sgsn interface ss7 gtt-entry global-title-indicator' values";
+            }
+            must "((current() != 'etsi') or (count(../../mme-gtt-result[global-title-indicator = 'gti1']) = 0) and (count(../../mme-gtt-result[global-title-indicator = 'gti2']) = 0) and (count(../../mme-gtt-result[global-title-indicator = 'gti3']) = 0))" {
+                error-message
+                "Value of 'etsi' conflicts with 'mme-sgsn interface ss7 gtt-result global-title-indicator' values";
+            }
+        }
+        
+        
+        leaf map-cgpa-routing-indicator {
+            tailf:info "Routing to global title or SSN. Default global-title";
+            type enumeration {
+                enum "global-title" {tailf:code-name mme-ss7-profile-map-cgpa-routing-indicator-global-title;}
+                enum "point-code" {tailf:code-name mme-ss7-profile-map-cgpa-routing-indicator-point-code;}
+            }
+            default "global-title";
+        }
+        leaf version {
+            tailf:info "3GPP spec applicable to this interface is TS29.272. Default 10.8.0";
+            type enumeration {
+                enum "9.4.0" {tailf:code-name ss7-version-9_4_0;}
+                enum "10.8.0" {tailf:code-name ss7-version-10_8_0;}
+            }
+            default "10.8.0";
+            must "((current() != '9.4.0') or (count(../../../../feature/mme-feature-control[name = 'femto-cell-support' and status-field = 'on']) = 0))" {
+                error-message
+                "If 'version' is '9.4.0' 'mme-sgsn feature control femto-cell-support' must not be 'on' ";
+            }
+        }
+        uses dscp;
+        leaf map-importance-level {
+            tailf:info "Importance level for MAP messages(1::6 for ITU, 1::3 for ANSI). Default auto-configure";
+            type enumeration {
+                enum "1" {tailf:code-name mme-ss7-profile-map-importance-level-1;}
+                enum "2" {tailf:code-name mme-ss7-profile-map-importance-level-2;}
+                enum "3" {tailf:code-name mme-ss7-profile-map-importance-level-3;}
+                enum "4" {tailf:code-name mme-ss7-profile-map-importance-level-4;}
+                enum "5" {tailf:code-name mme-ss7-profile-map-importance-level-5;}
+                enum "6" {tailf:code-name mme-ss7-profile-map-importance-level-6;}
+                enum "auto-configure" {tailf:code-name mme-ss7-profile-map-importance-level-auto-configure;}
+            }
+            default "auto-configure";
+        }
+        leaf bssap-importance-level {
+            tailf:info "Importance level for BSSAP messages(1::6 for ITU, 1::3 for ANSI). Default auto-configure";
+            type enumeration {
+                enum "1" {tailf:code-name mme-ss7-profile-bssap-importance-level-1;}
+                enum "2" {tailf:code-name mme-ss7-profile-bssap-importance-level-2;}
+                enum "3" {tailf:code-name mme-ss7-profile-bssap-importance-level-3;}
+                enum "4" {tailf:code-name mme-ss7-profile-bssap-importance-level-4;}
+                enum "5" {tailf:code-name mme-ss7-profile-bssap-importance-level-5;}
+                enum "6" {tailf:code-name mme-ss7-profile-bssap-importance-level-6;}
+                enum "auto-configure" {tailf:code-name mme-ss7-profile-bssap-importance-level-auto-configure;}
+            }
+            default "auto-configure";
+        }
+        leaf cap-importance-level {
+            tailf:info "Importance level for CAP messages(1::6 for ITU, 1::3 for ANSI). Default auto-configure";
+            type enumeration {
+                enum "1" {tailf:code-name mme-ss7-profile-cap-importance-level-1;}
+                enum "2" {tailf:code-name mme-ss7-profile-cap-importance-level-2;}
+                enum "3" {tailf:code-name mme-ss7-profile-cap-importance-level-3;}
+                enum "4" {tailf:code-name mme-ss7-profile-cap-importance-level-4;}
+                enum "5" {tailf:code-name mme-ss7-profile-cap-importance-level-5;}
+                enum "6" {tailf:code-name mme-ss7-profile-cap-importance-level-6;}
+                enum "auto-configure" {tailf:code-name mme-ss7-profile-cap-importance-level-auto-configure;}
+            }
+            default "auto-configure";
+        }
+        leaf map-subsystem-number {
+            type string {
+                pattern '((unused)|(standard)|[2-9]|[1-9][0-9]|[1][0-9][0-9]|[2][0-4][0-9]|[2][5][0-5])' {
+                    tailf:info "Valid values are: 2..255, standard, unused";
+                }
+            }
+            tailf:info "Local MAP subsystem number. Default standard";
+            default "standard";
+        }
+        leaf bssap-subsystem-number {
+            tailf:info "Local BSSAP subsystem number. Default unused";
+            type string {
+                pattern '((unused)|(standard)|[2-9]|[1-9][0-9]|[1][0-9][0-9]|[2][0-4][0-9]|[2][5][0-5])' {
+                    tailf:info "Valid values are: 2..255, standard, unused";
+                }
+            }
+            must "((current() = 'unused') or (count(../../../gs/mme-gs-if) != 0))" {
+                error-message
+                "The 'mme-sgsn interface gs gs-if' must exist for 'bssap-subsystem-number' to have value other than 'unused'"; 
+            }
+            default "unused";
+        }
+        leaf cap-subsystem-number {
+            tailf:info "Local CAP subsystem number. Default unused";
+            type string {
+                pattern '((unused)|(standard)|[2-9]|[1-9][0-9]|[1][0-9][0-9]|[2][0-4][0-9]|[2][5][0-5])' {
+                    tailf:info "Valid values are: 2..255, standard, unused";
+                }
+            }
+            must "((current() = 'unused') or (count(../../../ge/mme-ge-if) != 0))" {
+                error-message
+                "The 'mme-sgsn interface ge ge-if' must exist for 'cap-subsystem-number' to have value other than 'unused'"; 
+            }
+            default "unused";
+        }
+        leaf cap-cgpa-routing-indicator {
+            tailf:info "SCCP routing indicator used for SGSN Calling Party Addresses (CgPA) for CAP. Default global-title";
+            type enumeration {
+                enum "global-title" {tailf:code-name mme-ss7-profile-cap-cgpa-routing-indicator-global-title;}
+                enum "point-code" {tailf:code-name mme-ss7-profile-cap-cgpa-routing-indicator-point-code;}
+            }
+            default "global-title";
+        }
+    } /* mme-ss7-profile */
+} /* ss7 */
+} /*submodule*/
+

@@ -1,0 +1,259 @@
+//////////////////////////////////////////////////////////////////////////
+/// @file fgwScCli.yang
+/// @brief Yang definitions for operational commands.
+///        "show fgw connection henb"
+///        "show fgw connection context"
+///        "show fgw status summary"
+///
+/// Maintained by: HCTA
+/// History:
+///
+/// yyyymmmdd Changed by      Change Reason
+/// --------- --------------- --------------------------------------------
+/// 2014Jan15 Akshay Wani     AGW-21104 - Initial development
+/// 2014Feb28 Adam Floyd      AGW-21104 - Updated callpoint info
+/// 2014Apr17 Adam Floyd      AGW-21104 - Add sort-flag; block global show-all
+/// 2014Aug15 Adam Floyd      AGW-23534 - Remove fake-key kludge
+/// 2014Sep15 Lakshmi Priya   AGW-22082 - Schema upgrade
+///
+/// Copyright (c) 2014 HCTA. All Rights Reserved.
+///
+/// CONFIDENTIALITY AND LIMITED USE
+///
+/// This software, including any software of third parties embodied herein,
+/// contains information and concepts which are confidential to HCTA
+/// and such third parties. This software is licensed for use
+/// solely in accordance with the terms and conditions of the applicable
+/// license agreement with HCTA or its authorized distributor.
+//////////////////////////////////////////////////////////////////////////
+submodule fgwScCli {
+   belongs-to hcta-epc {
+      prefix epc;
+   }
+
+   include fgwConfig;
+   include cmdCommonHcta;
+   include s1MasterConfig;
+
+   import tailf-common {
+      prefix tailf;
+   }
+
+   import ietf-inet-types {
+      prefix inet;
+   }
+
+   augment "/fgw" {
+     container connection {
+       tailf:info "Connection commands";
+       tailf:cli-incomplete-show-path;
+       list henb {
+         tailf:info "Current connections on eNodeB";
+         config false;
+//         ordered-by user; // not for use with keyed lists
+
+         tailf:cli-no-key-completion;
+         key "plmn-id enodeb-id";
+
+         tailf:cli-incomplete-show-path
+         {
+            tailf:cli-min-keys "2";
+         }
+
+         tailf:callpoint cli_oper_show
+         {
+            // Callpoint Opaque Data Format (255 chars max):
+            // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+            tailf:opaque '2:fgw connection henb:plmn-id/string enodeb-id/uint32:1';
+         }
+
+         leaf plmn-id {
+            type string;
+            tailf:display-groups "none detail";
+            tailf:info "PLMN identifier";
+         }
+         leaf enodeb-id {
+            type uint32;
+            tailf:display-groups "none detail";
+            tailf:info "ENodeB identifier";
+         }
+         leaf sc-service {
+            type string;
+            tailf:display-groups "detail";
+            tailf:info "";
+         }
+         leaf enodeb-name {
+            type string;
+            tailf:display-groups "none detail";
+            tailf:info "ENodeB name";
+         }
+         leaf connection-id-list {
+            type string;
+            tailf:display-groups "none detail";
+            tailf:info "FGW identity of connection to eNodeB and MME";
+         }
+         leaf sc-process-location {
+            type string;
+            tailf:display-groups "none detail";
+            tailf:info "Location of FGW SC process";
+         }
+         leaf s1enb-process-location {
+            type string;
+            tailf:display-groups "none detail";
+            tailf:info "Location of FGW S1 ENB process";
+         }
+       }
+     
+       list context {
+         tailf:info "Connection context information";
+         config false;
+//         ordered-by user; // not for use with keyed lists
+
+         tailf:cli-no-key-completion;
+         key "fgw-ue-s1ap-id";
+
+         tailf:cli-incomplete-show-path
+         {
+            tailf:cli-min-keys "1";
+         }
+
+         tailf:callpoint cli_oper_show
+         {
+            // Callpoint Opaque Data Format (255 chars max):
+            // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+            tailf:opaque '1:fgw connection context:fgw-ue-s1ap-id/string:1';
+         }
+
+         leaf fgw-ue-s1ap-id {
+            type string;
+            tailf:display-groups "none detail";
+            tailf:info "FGW identity of connection to eNodeB and MME";
+         }
+         leaf connection-duration {
+            type uint32;
+            tailf:display-groups "none detail";
+            tailf:info "Connection duration";
+         }
+         leaf service {
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf unit-id {
+            type uint32;
+            tailf:display-groups "none detail";
+         }
+         leaf sc-instance {
+            type uint32;
+            tailf:display-groups "none detail";
+            tailf:info "SC instance";
+         }
+         leaf location {
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf sc-pid {
+            type uint32;
+            tailf:display-groups "none detail";
+            tailf:info "SC process identifier";
+         }
+         leaf enodeb-ue-s1ap-id {
+            type uint32;
+            tailf:display-groups "none detail";
+            tailf:info "ENodeB identity of connection to FGW";
+         }
+         leaf enodeb-name {
+            type string;
+            tailf:display-groups "none detail";
+            tailf:info "ENodeB name";
+         }
+         leaf enodeb-plmn-id {
+            type string;
+            tailf:display-groups "none detail";
+            tailf:info "ENodeB PLMN Identifier";
+         }
+         leaf enodeb-id {
+            type uint32;
+            tailf:display-groups "none detail";
+            tailf:info "ENodeB identifier";
+         }
+         leaf enodeb-type {
+            type string;
+            tailf:display-groups "none detail";
+            tailf:info "ENodeB type";
+         }
+         leaf enodeb-ip {
+            type inet:ip-address;
+            tailf:display-groups "none detail";
+            tailf:info "ENodeB IP";
+         }
+         leaf last-known-tai {
+            type string;
+            tailf:display-groups "none detail";
+            tailf:info "Last known Tracking Area ID";
+         }
+         leaf eutran-cell-id {
+            type uint32;
+            tailf:display-groups "none detail";
+            tailf:info "Eutran cell id";
+         }
+         leaf s1-mme-peer-index {
+            type uint32;
+            tailf:display-groups "none detail";
+            tailf:info "S1 MME peer index";
+         }
+         leaf mme-ue-s1ap-id {
+            type uint32;
+            tailf:display-groups "none detail";
+            tailf:info "MME identity of connection to FGW";
+         }
+         leaf csg-id {
+            type uint8;
+            tailf:display-groups "none detail";
+            tailf:info "Closed Subscriber Group identity";
+         }
+         leaf rrc-cause {
+            type string;
+            tailf:display-groups "none detail";
+            tailf:info "Radio Resource Control establishment cause";
+         }
+       }
+     }
+   }
+
+   augment "/fgw/status" {
+      list summary {
+         tailf:info "Health status for FGW";
+         config false;
+         ordered-by user; // not for use with keyed lists
+
+         tailf:cli-no-key-completion;
+         //key "service";
+
+         tailf:callpoint cli_oper_show
+         {
+            // Callpoint Opaque Data Format (255 chars max):
+            // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+            tailf:opaque '0:fgw status summary::1';
+         }
+
+         leaf service {
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf location {
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf current-connections {
+            type uint32;
+            tailf:display-groups "none detail";
+            tailf:info "Current FGW connections";
+         }
+         leaf connection-success-rate-network {
+            type uint32;
+            tailf:display-groups "none detail";
+            tailf:info "Success network KPI";
+         }
+      } /* summary */
+   } /* status */
+}

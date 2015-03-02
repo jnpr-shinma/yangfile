@@ -1,0 +1,536 @@
+/* gtlConfig.yang generated from gtlConfig.xml */
+submodule gtlConfig{
+
+belongs-to hcta-epc {
+    prefix epc;
+}
+
+import tailf-common {
+    prefix tailf;
+}
+
+include mmeSgsnConfig;
+
+include fgwConfig;
+
+include cmdCommonHcta;
+import ietf-inet-types {
+    prefix inet;
+}
+augment "/mme-sgsn/interface" {
+    container gb {
+        presence ""; 
+        tailf:info "Gb interface to GPRS access (PCU)";
+        container mme-bssgp {
+            tailf:alt-name "bssgp";
+            presence ""; 
+            tailf:info "SGSN transport layer BSSGP interface.";
+            leaf inter-nse-rerouting {
+                tailf:info "Negotiate inter NSE rerouting functionality with PCU. Default enable";
+                type enumeration {
+                    enum "disable" {tailf:code-name mme-bssgp-inter-nse-rerouting-disable;}
+                    enum "enable" {tailf:code-name mme-bssgp-inter-nse-rerouting-enable;}
+                }
+                default "enable";
+            }
+            leaf current-bucket-level {
+                tailf:info "Negotiate current bucket level functionality with PCU. Default enable";
+                type enumeration {
+                    enum "disable" {tailf:code-name mme-bssgp-current-bucket-level-disable;}
+                    enum "enable" {tailf:code-name mme-bssgp-current-bucket-level-enable;}
+                }
+                default "enable";
+            }
+            leaf gigabit-interface {
+                tailf:info "Negotiate gigabit interface functionality with PCU. Default enable";
+                type enumeration {
+                    enum "disable" {tailf:code-name mme-bssgp-gigabit-interface-disable;}
+                    enum "enable" {tailf:code-name mme-bssgp-gigabit-interface-enable;}
+                }
+                default "enable";
+            }
+            leaf bvc-reset-timer {
+                tailf:info "BVC-RESET guard timer. Default 60";
+                type uint8 {
+                    range "1..120";
+                }
+                default 60;
+            }
+            leaf bvc-reset-retry {
+                tailf:info "Retries of the BVC-RESET message. Default 3";
+                type uint8 {
+                    range "0..6";
+                }
+                default 3;
+            }
+            leaf bvc-blocked-timer {
+                tailf:info "Time BVC is blocked before alarming. Default 10";
+                type uint8 {
+                    range "1..200";
+                }
+                default 10;
+            }
+            leaf bvc-bmax-timer {
+                tailf:info "Time BVC bmax is 0 before alarming. Default 10";
+                type uint8 {
+                    range "1..200";
+                }
+                default 10;
+            }
+            leaf bvc-leak-rate-timer {
+                tailf:info "Time BVC leak rate is 0 before alarming. Default 10";
+                type uint8 {
+                    range "1..200";
+                }
+                default 10;
+            }
+            leaf bvc-blocked-alarm-threshold {
+                must "current() > ../bvc-blocked-clear-threshold" {
+                    error-message
+                    "The value of 'bvc-blocked-alarm-threshold must be greater than the value of 'bvc-blocked-clear-threshold'";
+                }
+                tailf:info "Number of BVCs unavailable before alarming. Default 10";
+                type uint16 {
+                    range "1..600";
+                }
+                default 10;
+            }
+            leaf bvc-blocked-clear-threshold {
+                tailf:info "Number of BVCs unavailable to clear the alarm. Default 5";
+                type uint16 {
+                    range "1..600";
+                }
+                default 5;
+            }
+        } /* mme-bssgp */
+        container mme-gb-if {
+            tailf:alt-name "gb-if";
+            presence "";
+            must "(count(../../../service-area/mme-plmn) != 0)" {
+                error-message
+                "If 'gb-if' exists then 'service-area plmn' must exist";
+            }
+            tailf:info "Gb interface.";
+            must "((count(../../s1/mme-s1-interface) = 0) or (count(../../../feature/mme-feature-control[name = 's4-sgsn' and status-field = 'on']) != 0))" {
+                error-message
+                "If 'mme-sgsn interface s1 s1-if' exists then 'mme-sgsn feature control s4-sgsn' must be 'on'";
+            }
+            leaf fr-local-routing-instance {
+                tailf:info "Routing instance associated with the 'fr-local-ip-address";
+                type string {
+                    length "1 .. 64";
+                }
+            }
+            leaf fr-local-ip-address {
+                must "((count(../../../fxa/mme-fxa-if) = 0) or (../../../fxa/mme-fxa-if/ip-address != current()) or (../fr-local-ip-address = '0.0.0.0'))" {
+                    error-message
+                    "The 'fr-local-ip-address' and 'mme-sgsn interface fxa fxa-if ip-address' must be different";
+                }
+                tailf:info "Frame Relay local IP address. Default 0.0.0.0";
+                type inet:ipv4-address;
+                default 0.0.0.0;
+            }
+            leaf payload-compression-override {
+                tailf:info "Payload compression override functionality. Default disable";
+                type enumeration {
+                    enum "disable" {tailf:code-name mme-gb-if-payload-compression-override-disable;}
+                    enum "enable" {tailf:code-name mme-gb-if-payload-compression-override-enable;}
+                }
+                default "disable";
+            }
+            leaf rim-addr-err-pdu-status-cause {
+                tailf:info "RIM routing address PDU status error cause. Default invalid-mandatory-information";
+                type enumeration {
+                    enum "invalid-mandatory-information" {tailf:code-name mme-gb-if-rim-addr-err-pdu-status-cause-invalid-mandatory-information;}
+                    enum "unknown-destination-address" {tailf:code-name mme-gb-if-rim-addr-err-pdu-status-cause-unknown-destination-address;}
+                }
+                default "invalid-mandatory-information";
+            }
+            leaf ms-flow-control-th-timer {
+                type string {
+                    pattern '(disable|[5-9]|[1-9][0-9]|[1-9][0-9][0-9]|[1-5][0-9][0-9][0-9]|6000)' {
+                        tailf:info "Valid values are: disable, 5..6000";
+                    }
+                }               
+                tailf:info "Interval for which the SGSN uses the flow control parameters of the Mobile Station. Default disable";
+                default "disable";
+            }
+            leaf cancel-th-on-ms-move-to-standby {
+                tailf:info "Specifies whether the timer specified by the ms-flow-control-th-timer attribute is cancelled when the MS moves into the Standby state. Default disable";
+                type enumeration {
+                    enum "disable" {tailf:code-name mme-gb-if-cancel-th-on-ms-move-to-standby-disable;}
+                    enum "enable" {tailf:code-name mme-gb-if-cancel-th-on-ms-move-to-standby-enable;}
+                }
+                default "disable";
+            }
+            leaf alternative-bmax {
+                tailf:info "Alternative MS bucket size (Bmax) that the SD can use for MS flow control. Default 0";
+                type uint16;
+                default 0;
+            }
+            leaf version {
+                tailf:info "3GPP specs applicable to this interface are TS48.016, TS48.108, TS44.064, TS44.065. Default 10";
+                type enumeration {
+                    enum "9" {tailf:code-name mme-sgsn-interface-gb-gb-if-version_9;}
+                    enum "10" {tailf:code-name mme-sgsn-interface-gb-gb-if-version_10;}
+                }
+                default "10";
+            }
+            uses dscp; 
+        } /* mme-gb-if */
+        container mme-ns {
+            tailf:alt-name "ns";
+            presence "";
+            tailf:info "SGSN transport layer NS interface.";
+            leaf sns-config-retry {
+                tailf:info "Retries of the SNS-CONFIG message. Default 3";
+                type uint8 {
+                    range "3..10";
+                }
+                default 3;
+            }
+            leaf sns-delete-retry {
+                tailf:info "Retries of the SNS-DELETE message. Default 3";
+                type uint8 {
+                    range "3..10";
+                }
+                default 3;
+            }
+            leaf sns-guard-timer {
+                tailf:info "Interval between SNS message and SNS-ACK. Default 3";
+                type uint8 {
+                    range "1..10";
+                }
+                default 3;
+            }
+            leaf ns-test-timer {
+                tailf:info "Timer for NSVC test procedure. Default 30";
+                type uint8 {
+                    range "1..60";
+                }
+                default 30;
+            }
+            leaf ns-alive-timer {
+                tailf:info "Interval between NS-ALIVE and NS-ALIVE ACK. Default 3";
+                type uint8 {
+                    range "1..10";
+                }
+                default 3;
+            }
+            leaf ns-alive-retry {
+                tailf:info "Retries of NS-ALIVE message. Default 10";
+                type uint8 {
+                    range "3..10";
+                }
+                default 10;
+            }
+        } /* mme-ns */
+        container mme-ns-fr {
+            tailf:alt-name "ns-fr";
+            presence "";
+            tailf:info "SGSN transport layer NS Frame Relay interface.";
+            leaf ns-alive-retry {
+                tailf:info "Retries of NS-ALIVE message. Default 10";
+                type uint8 {
+                    range "3..10";
+                }
+                default 10;
+            }
+            leaf ns-alive-timer {
+                tailf:info "Interval between NS-ALIVE and NS-ALIVE ACK. Default 3";
+                type uint8 {
+                    range "1..10";
+                }
+                default 3;
+            }
+            leaf ns-block-retries {
+                tailf:info "Retries of the NS-BLOCK message. Default 3";
+                type uint8 {
+                    range "0..10";
+                }
+                default 3;
+            }
+            leaf ns-block-timer {
+                tailf:info "Guard time for NS BLOCK and UNBLOCK procedures. Default 5";
+                type uint8 {
+                    range "1..120";
+                }
+                default 5;
+            }
+            leaf ns-fr-max-segment-size {
+                tailf:info "Frame Relay maximum segment size. Default 1496";
+                type uint16 {
+                    range "512..1496";
+                }
+                default 1496;
+            }
+            leaf ns-nsvc-alarm-condition {
+                type string {
+                    pattern '(idle|block|dead|idle,block|idle,dead|block,idle|block,dead|dead,idle|dead,block|idle,block,dead|idle,dead,block|block,idle,dead|block,dead,idle|dead,idle,block|dead,block,idle)' {
+                        tailf:info "Valid values in any order or combination are: idle, block, dead";
+                    }
+                }
+                tailf:info "Conditions for raising NSVC troubled connection alarm. Valid values in any order or combination are: idle,block,dead. Default idle,block,dead";
+                default "idle,block,dead";
+            }
+            leaf ns-reset-retry {
+                tailf:info "Retries of NS-RESET message. Default 3";
+                type uint8 {
+                    range "3..10";
+                }
+                default 3;
+            }
+            leaf ns-reset-timer {
+                tailf:info "Timer for NSVC reset procedure. Default 5";
+                type uint8 {
+                    range "1..120";
+                }
+                default 5;
+            }
+            leaf ns-test-timer {
+                tailf:info "Timer for NSVC test procedure. Default 30";
+                type uint8 {
+                    range "1..60";
+                }
+                default 30;
+            }
+            leaf ns-unblock-retries {
+                tailf:info "Retries of the NS-UNBLOCK message. Default 3";
+                type uint8 {
+                    range "3..15";
+                }
+                default 3;
+            }
+        } /* mme-ns-fr */
+        list mme-nse {
+            tailf:alt-name "nse";
+            key "nse-id";
+            max-elements 600;
+            tailf:info "Network Service Entity (NSE).";
+            leaf nse-id {
+                tailf:info "A unique NSE identifier.";
+                type uint16 {
+                    range "1..65535";
+                }
+                mandatory true;
+            }
+            leaf transport-type {
+                must "((../transport-type != 'fr') or ((count(../../mme-gb-if) != 0) and (../../mme-gb-if/fr-local-ip-address != '0.0.0.0')))" {
+                    error-message
+                    "If 'transport-type' is 'fr' then 'mme-sgsn interface gb gb-if' and 'mme-sgsn interface gb gb-if fr-local-ip-address' must be configured";
+                }
+                tailf:info "Type of transport used for this NSE. Valid values are: fr, ip.";
+                type enumeration {
+                    enum "fr" {tailf:code-name mme-nse-transport-type-fr;}
+                    enum "ip" {tailf:code-name mme-nse-transport-type-ip;}
+                }
+                mandatory true;
+            }
+            leaf port {
+                must "((../transport-type != 'fr') or (current() mod 2 = 0))" {
+                    error-message
+                    "If the value of 'transport-type' is 'fr' then 'port' should be an even number";
+                }
+                tailf:info "Local UDP port.";
+                type uint16 {
+                    range "1..65535";
+                }
+                mandatory true;
+            }
+            leaf nsvl-group-id {
+                tailf:alt-name "nsvl-group";
+                tailf:info "The nsvl-group identifier";
+                type leafref {
+                    path "/mme-sgsn/interface/gb/mme-nsvl-group/nsvl-group-instance";
+                }
+                mandatory true;
+            }
+        } /* mme-nse */
+        list mme-static-nse-remote-endpoint {
+            tailf:alt-name "static-nse-remote-endpoint";
+            key "remote-ip-address";
+            max-elements 4800;
+            tailf:validate staticNseRemoteEndpointValidate {
+                tailf:call-once "true";
+            }
+            tailf:info "Static configuration NSE remote endpoint.";
+            leaf remote-ip-address {
+                tailf:info "The IP address of the remote endpoint.";
+                type inet:ipv4-address;
+                mandatory true;
+            }
+            leaf port {
+                tailf:info "The UDP port of the remote endpoint.";
+                type uint16 {
+                    range "1..65535";
+                }
+                mandatory true;
+            }
+            leaf nse-id {
+                tailf:info "A unique NSE identifier.";
+                type leafref {
+                    path "/mme-sgsn/interface/gb/mme-nse/nse-id";
+                }
+                mandatory true;
+            }
+            leaf signaling-weight {
+                tailf:info "Weight assigned to signaling traffic. Default 1";
+                type uint16 {
+                    range "0..255";
+                }
+                default 1;
+            }
+            leaf data-weight {
+                tailf:info "Weight assigned to data traffic. Default 1";
+                type uint16 {
+                    range "0..255";
+                }
+                default 1;
+            }
+        } /* mme-static-nse-remote-endpoint */
+        list mme-nsvc-fr {
+            tailf:alt-name "nsvc-fr";
+            key "nse-id nsvc-id";
+            max-elements 4800;
+            tailf:validate nsvcFrValidate {
+                tailf:call-once "true";
+            } 
+            tailf:info "Static Frame Relay interface configuration.";
+            leaf nse-id {
+                tailf:info "A unique NSE identifier."; 
+                type leafref {
+                    path "/mme-sgsn/interface/gb/mme-nse/nse-id";
+                }
+                mandatory true;
+                must "((count(../../mme-nse[nse-id = current()]) = 0) or (count(../../mme-nse[nse-id = current() and transport-type = 'fr']) != 0))" {
+                    error-message
+                    "The associated NSE entry in 'mme-sgsn interface gb nse' should be provisioned with 'transport-type' as 'fr'";
+                }
+            }    
+            leaf nsvc-id {
+                tailf:info "A NSVC identifier.";
+                type uint16 {
+                    range "1..65535";
+                }
+                mandatory true;
+            }
+            leaf dlci {
+                tailf:info "The DLCI used for this NSVC.";
+                type uint16 {
+                    range "16..991";
+                }
+                mandatory true;
+            }
+            leaf fr-tunnel {
+                must "((count(../../mme-fr-tunnel[name = current()]) != 0))" {
+                    error-message 
+                    "There is no 'mme-sgsn interface gb fr-tunnel' with this 'fr-tunnel'";        
+                } 
+                tailf:info "Frame Relay tunnel to use.";
+                type string {
+                    length "1..32";
+                }
+                mandatory true;
+            }
+            leaf remote-port {
+                must "(current() mod 2 = 0)" {
+                    error-message
+                    "The 'remote-port' value must be an even number";
+                }
+                tailf:info "Remote UDP port used for this DLCI.";
+                type uint16 {
+                    range "1794..65534";
+                }
+                mandatory true;
+            }
+            leaf nsvl-group {
+                tailf:info "The nsvl-group identifier";
+                type uint16 {
+                    range 0..15;  
+                }                                                                               
+                mandatory true;
+            }
+            
+            leaf nsvl {
+                tailf:info "The NSVL instance within the NSVL group";
+                type uint16 {
+                    range 0..1;  
+                } 
+                mandatory true;
+            }
+        } /* mme-nsvc-fr */
+        list mme-fr-tunnel {
+            tailf:alt-name "fr-tunnel";
+            key "name";
+            unique remote-ip-address;
+            max-elements 128;
+            tailf:info "Frame Relay tunnel configuration.";
+            leaf name {
+                tailf:info "A unique name.";
+                type string {
+                    length "1..32";
+                }
+                mandatory true;
+            }
+            leaf remote-ip-address {
+                tailf:info "Remote IP address.";
+                type inet:ipv4-address;
+                mandatory true;
+            }
+        } /* mme-fr-tunnel */
+        list mme-nsvl-group  {
+            tailf:alt-name "nsvl-group";
+            key "nsvl-group-instance";
+            max-elements 16;
+            
+            leaf nsvl-group-instance {
+                tailf:info "The nsvl-group instance number";
+                type uint16 {
+                    range "1..15";
+                }
+                mandatory true;
+            }
+            
+            list nsvl {
+                tailf:alt-name "nsvl";
+                key "nsvl-id";
+                max-elements 2;
+                
+                leaf nsvl-id {
+                    tailf:info "The NSVL identifier";
+                    type uint16 {
+                        range "0..1";
+                    }
+                    mandatory true;
+                }
+                
+                leaf unit-id { 
+                tailf:info "Data VM unit identifier";
+                type leafref {
+                    path "/mme-sgsn/system/data/unit/unit-id";
+                }
+                mandatory true;
+            }
+            
+            uses routing-instance-name;
+            
+            leaf local-ip-address { 
+            tailf:info "Local IP address";
+            type inet:ipv4-address;
+            mandatory true;
+        }
+        
+        leaf local-port { 
+        tailf:info "Local UDP port";
+        type uint16 {
+            range "1 .. 65535";
+        }
+        mandatory true;
+    }
+} /* mme-nsvl */
+} /* mme-nsvl-group */
+} /* gb */
+} /* interface */
+
+} /*submodule*/
+

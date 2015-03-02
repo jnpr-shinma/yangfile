@@ -1,0 +1,12 @@
+submodule ems {
+    belongs-to "juniper" {
+        prefix "juniper";
+    }
+    include device;
+    include image;
+    organization "juniper";
+    revision "2015-01-01" {
+        description "Initial revision. ";
+    }
+    // definitions follow. . .
+}

@@ -1,0 +1,148 @@
+//////////////////////////////////////////////////////////////////////////
+/// @file upsmCli.yang
+/// @brief Yang definitions for operational commands.
+///        "show mme-sgsn interface radius peer"
+///        "request mme-sgsn interface radius peer relocate"
+///        "request mme-sgsn interface radius peer unassign"
+///
+/// Maintained by: HCTA
+/// History:
+///
+/// yyyymmmdd Changed by      Change Reason
+/// --------- --------------- --------------------------------------------
+/// 2014Jan15 Akshay Wani     AGW-21104 - Initial development
+/// 2014Feb28 Adam Floyd      AGW-21104 - Updated callpoint info
+/// 2014Jun12 Sujay R         AGW-22082 - Added relocate/unassign command
+/// 2014Aug15 Adam Floyd      AGW-23534 - Remove fake-key kludge
+/// 2014Sep18 Lakshmi Priya   AGW-22082 - Schema upgrade
+/// 2014Sep24 Irina Pershwitz AGW-23781 - Radius peer container conflict
+///
+/// Copyright (c) 2014 HCTA. All Rights Reserved.
+///
+/// CONFIDENTIALITY AND LIMITED USE
+///
+/// This software, including any software of third parties embodied herein,
+/// contains information and concepts which are confidential to HCTA
+/// and such third parties. This software is licensed for use
+/// solely in accordance with the terms and conditions of the applicable
+/// license agreement with HCTA or its authorized distributor.
+//////////////////////////////////////////////////////////////////////////
+submodule upsmCli {
+   belongs-to hcta-epc {
+      prefix epc;
+   }
+
+   import tailf-common {
+      prefix tailf;
+   }
+
+   include mmeSgsnConfig;
+   include cmdCommonHcta;
+   include upsmConfig;
+
+   import ietf-inet-types {
+      prefix inet;
+   }
+
+   augment "/mme-sgsn/interface/radius" {
+      list radius-peer-oper {
+         tailf:alt-name "peer";
+         tailf:info "Peer";
+         config false;
+         ordered-by user; // not for use with keyed lists
+
+         tailf:cli-no-key-completion;
+         //key ip-address;
+
+         tailf:callpoint cli_oper_show
+         {
+            // Callpoint Opaque Data Format (255 chars max):
+            // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+            tailf:opaque '0:mme-sgsn interface radius peer::1';
+         }
+
+         leaf ip-address {
+            tailf:info "IP address of peer.";
+            type inet:ip-address;
+            tailf:display-groups "none detail";
+         }
+         leaf port-number {
+            tailf:info "Port number to connect to.";
+            type uint16;
+            tailf:display-groups "none detail";
+         }
+         leaf application-identifier {
+            tailf:info "Type of application.";
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf status-str {
+            tailf:alt-name "status";
+            tailf:info "Status.";
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf location {
+            tailf:info "Location in MME reporting this peer.";
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf inc-pdu {
+            tailf:info "Incoming PDU count.";
+            type uint32;
+            tailf:display-groups "none detail";
+         }
+         leaf out-pdu {
+            tailf:info "Outgoing PDU count.";
+            type uint32;
+            tailf:display-groups "none detail";
+         }
+         leaf pending-trans {
+            tailf:info "Pending transactions.";
+            type uint32;
+            tailf:display-groups "none detail";
+         }
+      } 
+   }
+
+   augment "/mme-sgsn/interface/radius" {
+      container peer-action {
+         tailf:info "Peer.";
+         tailf:alt-name "peer";
+         tailf:action relocate {
+            tailf:info "Relocate radius peer.";
+            tailf:actionpoint cli-request-command;
+            input {
+               leaf ip-address {
+                  type inet:ip-address;
+                  tailf:info "IP address of the peer to relocate.";
+                  mandatory true;
+               }
+               leaf location {
+                  type string;
+                  tailf:info "Destination location.";
+                  mandatory true;
+               }
+            }
+            output {
+               uses request-cmd-output;
+            }
+         }          
+         tailf:action unassign {
+            tailf:info "Unassign radius peer.";
+            tailf:actionpoint cli-request-command;
+            input {
+               leaf ip-address {
+               type inet:ip-address;
+               tailf:info "IP address of the peer to unassign.";
+               mandatory true;
+               } 
+            }
+            output {
+             uses request-cmd-output;
+            }
+         }
+      }
+   }
+}
+

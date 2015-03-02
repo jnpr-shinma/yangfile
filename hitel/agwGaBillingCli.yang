@@ -1,0 +1,154 @@
+//////////////////////////////////////////////////////////////////////////
+/// @file agwGaBillingCli.yang
+/// @brief Yang definitions for operational commands.
+///        "request mme-sgsn interface ga cgf lock" and
+///        "request mme-sgsn interface ga cgf unlock" and
+///        "request mme-sgsn interface ga cgf switchover" 
+///        "show mme-sgsn interface ga cgf" 
+///
+/// Maintained by: HCTA
+/// History:
+///
+/// yyyymmmdd Changed by      Change Reason
+/// --------- --------------- --------------------------------------------
+/// 2014Jan15 Mike Lesko      AGW-21104 - Initial development
+/// 2014Jan25 Haritha Kasi    AGW-21103 - augmented container ga and it is 
+///                           defined in config.yang file
+/// 2014Jan27 Akshay Wani     AGW-21104 - Added yang model for CGF show.
+/// 2014Feb28 Mike Lesko      AGW-21104 - Updated action/callpoint info
+/// 2014Apr17 Adam Floyd      AGW-21104 - Add sort-flag to cp opaque data
+/// 2014May23 Nimesh D        AGW-22459 - Fixed node name conflict issues
+/// 2014Aug15 Adam Floyd      AGW-23534 - Remove fake-key kludge
+/// 2014Sep15 Lakshmi Priya   AGW-22082 - Schema upgrade
+///
+/// Copyright (c) 2014 HCTA. All Rights Reserved.
+///
+/// CONFIDENTIALITY AND LIMITED USE
+///
+/// This software, including any software of third parties embodied herein,
+/// contains information and concepts which are confidential to HCTA
+/// and such third parties. This software is licensed for use
+/// solely in accordance with the terms and conditions of the applicable
+/// license agreement with HCTA or its authorized distributor.
+//////////////////////////////////////////////////////////////////////////
+submodule agwGaBillingCli{
+  belongs-to hcta-epc {
+     prefix epc; 
+  }
+
+  import tailf-common {
+     prefix tailf;
+  }
+
+  include mmeSgsnConfig;
+  include fgwConfig;
+  include agwGaBillingConfig;
+  include cmdCommonHcta;
+
+  import ietf-inet-types {
+    prefix inet;
+  }
+
+  augment "/mme-sgsn/interface/ga" {
+    container cgf-action {
+      tailf:alt-name "cgf";
+      tailf:action lock {
+        tailf:actionpoint cli-request-command;
+        input {
+           leaf ip-address {
+             type inet:ip-address;
+             mandatory true;
+           }
+           leaf port {
+             type uint16;
+             mandatory true;
+           }
+        }
+        output {
+           uses request-cmd-output;
+        }
+      }
+        
+      tailf:action unlock {
+        tailf:actionpoint cli-request-command;
+        input {
+          leaf ip-address {
+            type inet:ip-address;
+            mandatory true;
+          }
+          leaf port {
+            type uint16;
+            mandatory true;
+          }
+        }
+        output {
+          uses request-cmd-output;
+        }
+      }
+
+      tailf:action switchover {
+        tailf:actionpoint cli-request-command;
+        input {
+          leaf ip-address {
+            type inet:ip-address;
+            mandatory true;
+          }
+          leaf port {
+            type uint16;
+            mandatory true;
+          }
+        }
+        output {
+          uses request-cmd-output;
+        }
+      }
+    }
+
+    list cgf-oper {
+       tailf:alt-name "cgf";
+       config false;
+       ordered-by user; // not for use with keyed lists
+       tailf:info "Charging Gateway Function";
+       tailf:cli-no-key-completion;
+
+       tailf:callpoint cli_oper_show
+       {      
+         // Callpoint Opaque Data Format (255 chars max):
+         // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+         tailf:opaque '0:mme-sgsn interface ga cgf::1';
+       }
+       //key "ip-address port";
+
+       leaf ip-address {
+          tailf:info "CGF IP address.";
+          type inet:ip-address;
+          tailf:display-groups "none detail";
+       }
+       leaf port {
+          tailf:info "CGF Port number.";
+          type uint16;
+          tailf:display-groups "none detail";
+       }
+       leaf configured-role {
+          tailf:info "Specifies the role of the CGF";
+          type string;
+          tailf:display-groups "none detail";
+       }
+       leaf admin-state {
+          tailf:info "Administrative State of the CGF server.";
+          type string;
+          tailf:display-groups "none detail";
+       }
+       leaf oper-state {
+          tailf:info "Operational State of the CGF server.";
+          type string;
+          tailf:display-groups "none detail";
+       }
+       leaf operating-role {
+          tailf:info "Specifies the role the CGF is currently acting as.";
+          type string;
+          tailf:display-groups "none detail";
+       }
+    }
+  }
+}

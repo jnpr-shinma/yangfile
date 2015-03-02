@@ -1,0 +1,165 @@
+/* sgsConfig.yang generated from sgsConfig.xml */
+submodule sgsConfig{
+
+belongs-to hcta-epc {
+    prefix epc;
+}
+
+import tailf-common {
+    prefix tailf;
+}
+
+include mmeSgsnConfig;
+
+include fgwConfig;
+
+include s1MasterConfig;
+include cmdCommonHcta;
+import ietf-inet-types {
+    prefix inet;
+}
+
+augment "/mme-sgsn/interface" {
+    container sgs {
+        tailf:info "SGs interface to VLR";
+        container mme-sgs-if {
+            tailf:alt-name "sgs-if";
+            tailf:validate sgsIfValidate;
+            presence "";
+            must "count(../../../service-area/mme-vlr) != 0" {
+                error-message
+                "At least one 'mme-sgsn service-area vlr' must exist before configuring 'sgs-if' object";
+            }
+            must "count(../../../feature/mme-feature-control[name = 'sgs' and status-field = 'on']) != 0" {
+                error-message
+                "If 'sgs-if' object exists then 'mme-sgsn feature control sgs status' must be 'on'";
+            }
+            tailf:info "This is the interface between MME and MSC/VLR.";
+            uses routing-instance-name-multiple;
+            leaf ip-address {
+                must "../ip-address != ../ip-address2 " {
+                    error-message
+                    "The 'ip-address' and 'ip-address2' configured must not be same";  
+                }
+                must "../ip-address != '0.0.0.0'" {
+                    error-message
+                    "The 'ip-address' must not be configured as '0.0.0.0'";
+                }
+                tailf:info "Local IP address for connection to VLRs.";
+                type inet:ip-address;
+                mandatory true;
+            }
+            leaf sctp-profile {
+                tailf:info "SCTP profile name.";
+                type leafref {
+                    path "/mme-sgsn/interface/mme-sctp-profile/name";
+                }
+                mandatory true;
+            }  
+            leaf loc-upd-guard-ts6-1 {
+                tailf:info "Location update message timer. Default 10";
+                type uint8 {
+                    range "10..90";
+                }
+                default 10;
+            }
+            leaf eps-detach-guard-ts8 {
+                tailf:info "Guards explicit IMSI detach from EPS services. Default 4";
+                type uint8 {
+                    range "1..30";
+                }
+                default 4;
+            }
+            leaf explicit-imsi-detach-guard-ts9 {
+                tailf:info "Guards explicit IMSI detach from non-EPS services. Default 4";
+                type uint8 {
+                    range "1..30";
+                }
+                default 4;
+            }
+            leaf implicit-imsi-detach-guard-ts10 {
+                tailf:info "Guards implicit IMSI detach from non-EPS services. Default 4";
+                type uint8 {
+                    range "1..30";
+                }
+                default 4;
+            }
+            leaf mme-reset-ind-guard-ts12-2 {
+                tailf:info "Guards the MME reset procedure. Default 4";
+                type uint8 {
+                    range "1..120";
+                }
+                default 4;
+            }
+            leaf loc-upd-retry-ns6 {
+                tailf:info "Location update retry. Default 2";
+                type uint8 {
+                    range "0..5";
+                }
+                default 2;
+            }
+            leaf eps-detach-retry-ns8 {
+                tailf:info "EPS detach retry. Default 2";
+                type uint8 {
+                    range "0..5";
+                }
+                default 2;
+            }
+            leaf explicit-imsi-detach-retry-ns9 {
+                tailf:info "Explicit IMSI detach retry. Default 2";
+                type uint8 {
+                    range "0..5";
+                }
+                default 2;
+            }
+            leaf implicit-imsi-detach-retry-ns10 {
+                tailf:info "Implicit IMSI detach retry. Default 2";
+                type uint8 {
+                    range "0..5";
+                }
+                default 2;
+            }
+            leaf mme-reset-ind-retry-ns12 {
+                tailf:info "MME reset indication retry. Default 2";
+                type uint8 {
+                    range "0..5";
+                }
+                default 2;
+            }
+            leaf sms-only {
+                tailf:info "SMS only status. Default false";
+                type boolean;
+                default false;
+            }
+            leaf mme-reset-paging-type {
+                tailf:info "MME reset paging type. Default cs-paging";
+                type enumeration {
+                    enum "cs-paging" {tailf:code-name mme-sgs-if-mme-reset-paging-type-cs-paging;}
+                    enum "ps-paging" {tailf:code-name mme-sgs-if-mme-reset-paging-type-ps-paging;}
+                }
+                default "cs-paging";
+            }
+            leaf mme-reset-indication {
+                tailf:info "MME reset indication. Default true";
+                type boolean;
+                default true;
+            }
+            leaf version {
+                tailf:info "3GPP spec applicable to this interface is TS29.118. Default 10.9.0";
+                type enumeration {
+                    enum "9.3.0" {tailf:code-name mme-sgs-if-version-9-3-0;}
+                    enum "10.9.0" {tailf:code-name mme-sgs-if-version-10-9-0;}
+                }
+                default "10.9.0";
+            }
+            uses dscp;
+            leaf ip-address2 {
+                tailf:info "Secondary IP address. Default 0.0.0.0";
+                type inet:ip-address;
+                default 0.0.0.0;
+            }
+        } /* mme-sgs-if */
+    } /* sgs*/
+} /* interface*/
+} /*submodule*/
+

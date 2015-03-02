@@ -1,0 +1,217 @@
+/* upsmConfig.yang generated from upsmConfig.xml */
+submodule upsmConfig{
+
+belongs-to hcta-epc {
+    prefix epc;
+}
+
+import tailf-common {
+    prefix tailf;
+}
+
+include mmeSgsnConfig;
+
+include fgwConfig;
+
+include cmdCommonHcta;
+import ietf-inet-types {
+    prefix inet;
+}
+
+augment "/mme-sgsn/interface" {
+    container radius {
+        tailf:info "RADIUS protocol used by FXA";
+        
+        container mme-radius-profile {
+            tailf:alt-name "profile";
+            presence "";  	    
+            tailf:info "Radius profile.";
+            leaf user-password {
+                tailf:info "Radius user password.";
+                type string {
+                    length "16..128";
+                }
+                mandatory true;
+            }
+            leaf max-num-peer-retry {
+                tailf:info "Maximum number of peer retries. Default 2";
+                type uint8 {
+                    range "0..5";
+                }
+                default 2;
+            }
+            leaf peer-down-state-timer {
+                tailf:info "Peer down state timer. Default 30";
+                type uint8 {
+                    range "5..60";
+                }
+                default 30;
+            }
+        } /* mme-radius-profile */
+        list mme-radius-peer {
+            tailf:alt-name "peer";
+            key "ip-address"; 
+            max-elements 128;
+            tailf:info "Peer.";
+            leaf ip-address {
+                tailf:info "IP address of peer.";
+                type inet:ip-address;
+                mandatory true;
+            }
+            leaf port-number {
+                tailf:info "Port number to connect to. Default 1812";
+                type uint16 {
+                    range "1..65535";
+                }
+                default 1812;
+            }
+            leaf application-identifier {
+                tailf:info "Type of application. Default fxa";
+                type enumeration {
+                    enum "fxa" {tailf:code-name mme-radius-peer-application-identifier-fxa;}
+                }
+                default "fxa";
+            }
+        } /* mme-radius-peer */
+    } /* radius */
+} /* interface */
+
+augment "/mme-sgsn/interface" {
+    container fxa {
+        tailf:info "FXA interface to external AAA server";
+        list mme-fxa-apn {
+            tailf:alt-name "fxa-apn";
+            tailf:validate fxaApnValidate {
+                tailf:call-once "true";
+            }
+            key "apn-name"; 
+            max-elements 4096;
+            tailf:info "Fxa apn.";
+            leaf apn-name {
+                type string {
+                    pattern '[a-zA-Z0-9*]([.-]|[A-Za-z0-9*])*' {
+                        tailf:info "Valid values are: APN-NI label comprised of alphabetical characters, digits, and hyphen";
+                    }  
+                }
+                tailf:info "APN NI name.";
+                mandatory true;
+            }
+        } /* mme-fxa-apn */
+        container mme-fxa-if {
+            tailf:alt-name "fxa-if";
+            tailf:validate fxaIfValidate;
+            presence "";	    
+            tailf:info "Fxa interface.";
+            uses routing-instance-name;
+            leaf ip-address {
+                must "../ip-address != '0.0.0.0'" {
+                    error-message "The 'ip-address' must not be configured as '0.0.0.0'";
+                }
+                must "(count(../../../s1/mme-s1-interface) = 0) or (../../../s1/mme-s1-interface/ip-address1-v4 != ../ip-address)" {   
+                error-message "The 'ip-address' must not be same as 'mme-sgsn interface s1 s1-interface ip-address1-v4'";
+            } 
+            must "(count(../../../s1/mme-s1-interface) = 0) or (../../../s1/mme-s1-interface/ip-address2-v4 != ../ip-address)" {   
+            error-message "The 'ip-address' must not be same as 'mme-sgsn interface s1 s1-interface ip-address2-v4'";
+        }
+        must "(count(../../../sbc/mme-sbc-if) = 0) or (../../../sbc/mme-sbc-if/ip-address1 != ../ip-address)" {   
+        error-message "The 'ip-address' must not be same as 'mme-sgsn interface sbc sbc-if ip-address1'";
+    }             
+    must "(count(../../../sbc/mme-sbc-if) = 0) or (../../../sbc/mme-sbc-if/ip-address2 != ../ip-address)" {   
+    error-message "The 'ip-address' must not be same as 'mme-sgsn interface sbc sbc-if ip-address2'";
+}
+must "(count(../../../gtp/mme-gtp-profile) = 0) or (../../../gtp/mme-gtp-profile/ip-address-v4 != ../ip-address)" {   
+error-message "The 'ip-address' must not be same as 'mme-sgsn interface gtp gtp-profile ip-address-v4'";
+}
+must "(count(../../../diameter/mme-diameter-client-instance) = 0) or (../../../diameter/mme-diameter-client-instance/ip-address1 != ../ip-address)" {   
+error-message "The 'ip-address' must not be same as 'mme-sgsn interface diameter diameter-client-instance ip-address1'";
+}
+must "(count(../../../diameter/mme-diameter-client-instance) = 0) or (../../../diameter/mme-diameter-client-instance/ip-address2 != ../ip-address)" {   
+error-message "The 'ip-address' must not be same as 'mme-sgsn interface diameter diameter-client-instance ip-address2'";
+}
+tailf:info "Local IP address.";
+type inet:ip-address;
+mandatory true;
+}
+leaf ports {
+    type string {
+        pattern '[0-9,]*' {
+            tailf:info "Valid values are: comma separated numbers";
+        }  
+    }
+    tailf:info "List of local IP ports.";
+    mandatory true;
+}
+leaf path-mgmt-user-name {
+    tailf:info "User name for fxa path management messages.";
+    type string {
+        length "1..32";
+    }
+    mandatory true;
+}
+leaf path-mgmt-user-password {
+    tailf:info "User password for fxa path management messages.";
+    type string {
+        length "16..128";
+    }
+    mandatory true;
+}
+leaf path-mgmt-imsi {
+    type string {
+        pattern '[0-9]{1,15}' {
+            tailf:info "Valid values are: digits";
+        }  
+    }
+    tailf:info "Calling-station-id for fxa path management messages.";
+    mandatory true;
+}
+leaf req-timer {
+    tailf:info "Request timer. Default 10";
+    type uint8 {
+        range "1..30";
+    }
+    default 10;
+}
+leaf req-retry {
+    tailf:info "Number of retries. Default 2";
+    type uint8 {
+        range "1..5";
+    }
+    default 2;
+}
+leaf path-mgmt-interval {
+    type string {
+        pattern '((disable)|([1][5-9])|([2-9][0-9])|([1-2][0-9][0-9])|(300))' {
+            tailf:info "Valid values are: disable, 15..300";
+        }  
+    }
+    tailf:info "Timer Value for periodic path management message in sec. Default 60";
+    default "60";
+}
+leaf path-mgmt-retry-timer {
+    tailf:info "Timer value for retransmission of path management message in sec. Default 15";
+    type uint8 {
+        range "1..30";
+    }
+    default 15;
+}
+leaf path-mgmt-retry-value {
+    tailf:info "Number of retransmission of path management message. Default 8";
+    type uint8 {
+        range "1..20";
+    }
+    default 8;
+}
+leaf path-mgmt-success-indicator {
+    tailf:info "Path management success indicator message. Default accept-AA-only";
+    type enumeration {
+        enum "accept-AA-only" {tailf:code-name mme-fxa-if-path-mgmt-success-indicator-accept-AA-only;}
+        enum "accept-AA-AR" {tailf:code-name mme-fxa-if-path-mgmt-success-indicator-accept-AA-AR;}
+    }
+    default "accept-AA-only";
+}
+uses dscp;
+} /* mme-fxa-if */
+} /* fxa */
+} /* interface */
+} /*submodule*/
+

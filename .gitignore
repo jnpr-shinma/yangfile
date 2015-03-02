@@ -1,0 +1,22 @@
+# Ignore following directories and file types
+/.idea/*
+/.classpath/*
+/.project/*
+/.settings/*
+/JNC/*
+/project/project/*
+**/target
+/examples/hello-world/project/project/*
+/examples/hello-world/project/target/*
+/examples/hello-world/rest-api-server/target/*
+/examples/hello-world/src/*
+/examples/hello-world/target/*
+/examples/target/*
+*.class
+*.iml
+*.sc
+/.classpath/*
+/.project/*
+/.settings/*
+/examples/sample-proj/.idea
+DummyDB

@@ -1,0 +1,108 @@
+/* sbcConfig.yang generated from sbcConfig.xml */
+submodule sbcConfig{
+
+belongs-to hcta-epc {
+    prefix epc;
+}
+
+import tailf-common {
+    prefix tailf;
+}
+
+include mmeSgsnConfig;
+
+include fgwConfig;
+
+include s1MasterConfig;
+include cmdCommonHcta;
+import ietf-inet-types {
+    prefix inet;
+}
+
+augment "/mme-sgsn/interface" {
+    container sbc {
+        tailf:info "SBc interface to CBC";
+        container mme-sbc-if {
+            tailf:alt-name "sbc-if";
+            presence "";     
+            must "(count(../../../feature/mme-feature-control[name = 'sbc' and status-field = 'on']) != 0)" {   
+            error-message "If 'sbc-if' object exists then 'mme-sgsn feature control sbc' must be 'on'";
+        }
+        tailf:info "SBc interface.";
+        leaf sctp-profile {
+            tailf:info "The name of the sctp-profile used by sbc-if.";
+            type leafref {
+                path "/mme-sgsn/interface/mme-sctp-profile/name";
+            }
+            mandatory true;
+        }  
+        uses routing-instance-name-multiple;
+        leaf ip-address1 {
+            must "../ip-address1 != '0.0.0.0'" {
+                error-message 
+                "The 'ip-address1' must not be configured as '0.0.0.0'";
+            }
+            must "(count(../../../fxa/mme-fxa-if) = 0) or (../../../fxa/mme-fxa-if/ip-address != ../ip-address1)" {   
+            error-message "The 'ip-address1' and 'mme-sgsn interface fxa fxa-if ip-address' must be different";
+        }
+        tailf:info "IP address.";
+        type inet:ip-address;
+        mandatory true;
+    }
+    leaf ip-address2 {
+        must "(count(../../../fxa/mme-fxa-if) = 0) or (../../../fxa/mme-fxa-if/ip-address != ../ip-address2)" {   
+        error-message "The 'ip-address2' and 'mme-sgsn interface fxa fxa-if ip-address' must be different";
+    }
+    tailf:info "IP address. Default 0.0.0.0";
+    type inet:ip-address;
+    default 0.0.0.0;
+}
+leaf port {
+    tailf:info "Port number. Default 29168";
+    type uint16 {
+        range "1..65535";
+    }
+    default 29168;
+}
+leaf max-outstanding-requests {
+    tailf:info "Maximum outstanding ETWS secondary Write-Replace Warning Requests allowed. Default 5";
+    type uint8 {
+        range "0..255";
+    }
+    default 5;
+}
+uses dscp; 
+leaf sbc-type {
+    tailf:info "The type of SBC. Default pws";
+    type enumeration {
+        enum "pws" { 
+            tailf:info "Public Warning System"; 
+            tailf:code-name mme-sbc-if-sbc-type-pws;
+        }
+        enum "etws" {
+             tailf:info "Earthquake Tsunami Warning System"; 
+             tailf:code-name mme-sbc-if-sbc-type-etws;
+        }
+    }
+    default "pws";
+}
+leaf warning-message-ttl {
+    tailf:info "Priority warning message time-to-live in minutes. Default 1";
+    type uint8 {
+        range "1..30";
+    }
+    default "1";
+}
+leaf version {
+    tailf:info "3GPP spec applicable to this interface is TS29.168. Default 10.2.0";
+    type enumeration {
+        enum "9.3.0" {tailf:code-name mme-sbc-if-version-9-3-0;}
+        enum "10.2.0" {tailf:code-name mme-sbc-if-version-10-2-0;}
+    }
+    default "10.2.0";
+}
+} /* mme-sbc-if */
+} /* sbc*/
+} /* interface*/
+} /*submodule*/
+

@@ -1,0 +1,170 @@
+//////////////////////////////////////////////////////////////////////////
+/// @file scOperCli.yang
+/// @brief Yang definitions for operational commands.
+///        "request mme-sgsn subscriber info save"
+///        "show mme-sgsn subscriber info"
+///
+/// Maintained by: HCTA
+/// History:
+///
+/// yyyymmmdd Changed by      Change Reason
+/// --------- --------------- --------------------------------------------
+/// 2014Jan15 Mike Lesko      AGW-21104 - Initial development
+/// 2014Jan17 Sayali Dani     AGW-21104 - Added show command.
+/// 2014Feb28 Terri Hennessy  AGW-21104 - Updated action/callpoint info and
+///                                       changed some types for sub info
+/// 2014Apr17 Adam Floyd      AGW-21104 - Add sort-flag to cp opaque data
+/// 2014Aug15 Adam Floyd      AGW-23534 - Remove fake-key kludge; add
+///                                       table footer for summary string
+/// 2014Sep15 Lakshmi Priya   AGW-22082 - Schema upgrade
+/// 2014Aug27 Ajit Singh      AGW-23337 - Added description for missing fields.
+/// 2014Oct31 Adam Floyd      AGW-24110 - Remove unused summary-str leaf
+///
+/// Copyright (c) 2014 HCTA. All Rights Reserved.
+///
+/// CONFIDENTIALITY AND LIMITED USE
+///
+/// This software, including any software of third parties embodied herein,
+/// contains information and concepts which are confidential to HCTA
+/// and such third parties. This software is licensed for use
+/// solely in accordance with the terms and conditions of the applicable
+/// license agreement with HCTA or its authorized distributor.
+//////////////////////////////////////////////////////////////////////////
+submodule scOperCli{
+  belongs-to hcta-epc {
+     prefix epc; 
+  }
+
+  import tailf-common {
+     prefix tailf;
+  }
+
+  include mmeSgsnConfig;
+  include fgwConfig;
+  include cmdCommonHcta;
+
+  augment "/mme-sgsn/subscriber" {
+    container info {
+      tailf:info "MME subscriber info";
+      tailf:action save {
+        tailf:info "Save existing entries of subscriber info";
+        tailf:actionpoint cli-request-command;
+        input {
+           container csv {
+             presence "";
+           }
+           leaf service {
+             type string;
+             mandatory true;
+           }
+           container standby {
+             presence "";
+           }
+        }
+        output {
+           uses request-cmd-output;
+        }
+      }
+    }
+
+    list subscriber-info-oper {
+      tailf:alt-name "info";
+      tailf:info "MME subscriber info";
+      config false;
+//      ordered-by user; // not for use with keyed lists
+
+      tailf:cli-no-key-completion;
+      key "service imsi";
+
+      tailf:cli-incomplete-show-path
+      {
+        tailf:cli-min-keys "1";
+      }
+
+      tailf:callpoint cli_oper_show
+      {
+        // Callpoint Opaque Data Format (255 chars max):
+        // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+        tailf:opaque '1:mme-sgsn subscriber info:service/string imsi/imsi-t:1';
+      }
+
+      tailf:cli-table-footer "$(/mme-sgsn/summary)";
+
+      leaf service {
+        tailf:info "";
+        type string;
+        tailf:display-groups "none detail";
+      }
+      leaf imsi {
+        tailf:info "IMSI.";
+        type imsi-t;
+        tailf:display-groups "none detail";
+      }
+      leaf imeisv {
+        tailf:info "IMEISV.";
+        type imeisv-t;
+        tailf:display-groups "none detail";
+      }
+      leaf msisdn {
+        tailf:info "MSISDN.";
+        type msisdn-t;
+        tailf:display-groups "none detail";
+      }
+      leaf system-type {
+        tailf:info "System type.";
+        type string;
+        tailf:display-groups "none detail";
+      }
+      leaf access-node {
+        tailf:info "For LTE: enb-id, for UMTS: rnc-id, for GPRS: nse-id.";
+        type uint32;
+        tailf:display-groups "none detail";
+      }
+      leaf mm-state {
+        tailf:info "Mobility management state.";
+        type string;
+        tailf:display-groups "none detail";
+      }
+      leaf attach-duration {
+        tailf:info "Attached duration in seconds.";
+        type uint32;
+        tailf:display-groups "none detail";
+      }
+      leaf subscriber-type {
+        tailf:info "Subscriber type.";
+        type string;
+        tailf:display-groups "none detail";
+      }
+      leaf sessions {
+        tailf:info "Number of sessions.";
+        type uint16;
+        tailf:display-groups "none detail";
+      }
+      leaf sc-id {
+        tailf:info "SC instance id.";
+        type uint32;
+        tailf:display-groups "detail";
+      }
+      leaf pid {
+        tailf:info "SC pid.";
+        type uint32;
+        tailf:display-groups "detail";
+      }
+      leaf apns {
+        tailf:info "Number of apn-profiles used.";
+        type uint16;
+        tailf:display-groups "detail";
+      }
+      leaf dts {
+        tailf:info "Number of direct-tunnel sessions.";
+        type uint16;
+        tailf:display-groups "detail";
+      }
+      leaf first-ip-address {
+        tailf:info "IP address of first PDN.";
+        type string;
+        tailf:display-groups "detail";
+      }
+    } /* subscriber-info-oper */
+  }
+}

@@ -1,0 +1,445 @@
+/* sdConfig.yang generated from sdConfig.xml */
+submodule sdConfig{
+
+belongs-to hcta-epc {
+    prefix epc;
+}
+
+import tailf-common {
+    prefix tailf;
+}
+
+include mmeSgsnConfig;
+
+include fgwConfig;
+
+include gtlConfig;
+
+import ietf-inet-types {
+    prefix inet;
+}
+
+augment "/mme-sgsn/engineering" {        
+container mme-sd-engineering {
+    tailf:alt-name "sd-engineering";
+    presence ""; 
+    tailf:info "Sd-engineering configuration.";
+    leaf dl-percent-buffered-sessions {
+        tailf:info "Percent sessions that can use PDU downlink buffering resources. Default 10";
+        type uint8 {
+            range "1..50";
+        }
+        default 10;
+    }
+    leaf dl-buff-max-pdu-per-session {
+        tailf:info "Maximum number of downlink PDUs that may be buffered for a single session. Default 12";
+        type uint8 {
+            range "1..100";
+        }
+        default 12;
+    }
+    leaf dl-buff-max-bytes-per-session {
+        tailf:info "Maximum number of bytes that may be buffered for a single session. Default 10240";
+        type uint32 {
+            range "1502..102400";
+        }
+        default 10240;
+    }
+    leaf dl-buff-total-bytes-reserved {
+        tailf:info "Maximum number of bytes that can be used for downlink buffering. Default 545259520";
+        type uint32 {
+            range "0..1105199104";
+        }
+        default 545259520;
+    }
+    leaf irau-percent-buffered-sessions {
+        tailf:info "Percent of sessions that can use PDU buffering resources for IRAU on the new SGSN. Default 5";
+        type uint8 {
+            range "1..10";
+        }
+        default 5;
+    }
+    leaf irau-buff-max-pdu-per-session {
+        tailf:info "Maximum number of IRAU PDUs that may be buffered for a single session at any given time. Default 12";
+        type uint8 {
+            range "1..100";
+        }
+        default 12;
+    }
+    leaf irau-buff-max-bytes-per-session {
+        tailf:info "Maximum number of bytes that may be buffered for a single session at any given time. Default 10240";
+        type uint32 {
+            range "1502..102400";
+        }
+        default 10240;
+    }
+    leaf irau-buff-total-bytes-reserved {
+        tailf:info "Maximum number of bytes that can be buffered during IRAU. Default 54525952";
+        type uint32 {
+            range "0..110519910";
+        }
+        default 54525952;
+    }
+    leaf buff-check-interval {
+        must "(current() <= (../pdu-lifetime-in-buff * 10))" {
+            error-message 
+            "The value of 'buff-check-interval' should be less than 10 * 'pdu-lifetime-in-buff'";
+        } 
+        tailf:info "Periodic time interval which triggers the SGSN to attempt to transmit buffered PDUs to a mobile data session. Default 10";
+        type uint16 {
+            range "1..200";
+        }
+        default 10;
+    }
+    leaf pdu-lifetime-in-buff {
+        must "(count(/mme-sgsn/interface/gb/mme-llc) = 0) or (current() >= ../../../interface/gb/mme-llc/flush-logical-link-timer)" {
+            error-message
+            "The 'pdu-lifetime-in-buff' is less than 'mme-sgsn interface gb llc flush-logical-link-timer'";
+        } 
+        tailf:info "Maximum amount of time that a single PDU may be buffered. Default 5";
+        type uint16 {
+            range "1..120";
+        }
+        default 5;
+    }
+    leaf percent-umts-buff {
+        tailf:info "Percentage of total buffer resources for 3G. Default 80";
+        type uint8 {
+            range "0..100";
+        }
+        default 80;
+    }
+    leaf lle-to-mobile-ratio {
+        must "(count(/mme-sgsn/interface/gb/mme-llc) = 0) or (current() >= ../../../interface/gb/mme-llc/abm-mode-lle-to-mobile-ratio)" {
+            error-message
+            "The 'lle-to-mobile-ratio' is less than 'mme-sgsn interface gb llc abm-mode-lle-to-mobile-ratio'";
+        } 
+        tailf:info "An average the ratio of the Logical Link Entity (LLE) that a mobile can support. Default 15";
+        type uint16 {
+            range "5..50";
+        }
+        default 15;
+    }
+} /* mme-sd-engineering */
+} /* engineering */
+augment "/mme-sgsn/interface/gb" {
+    container mme-llc {
+        tailf:alt-name "llc";
+        presence "";   
+        tailf:info "Logical Link Control (LLC) configuration.";
+        leaf abm-mode-lle-to-mobile-ratio {
+            tailf:info "An average the ratio of LLEs per mobile that can be in ABM. Default 15";
+            type uint8 {
+                range "0..40";
+            }
+            default 15;
+        }
+        leaf flush-logical-link-timer {
+            tailf:info "Flush LLC timer. Default 5";
+            type uint8 {
+                range "1..60";
+            }
+            default 5;
+        }
+        leaf xid-during-irau-adm-mode {
+            tailf:info "Exchange Identification during IRAU ADM mode. Default during-irau";
+            type enumeration {
+                enum "disable" {tailf:code-name mme-llc-xid-during-irau-adm-mode-disable;}
+                enum "during-irau" {tailf:code-name mme-llc-xid-during-irau-adm-mode-during-irau;}
+                enum "after-irau" {tailf:code-name mme-llc-xid-during-irau-adm-mode-after-irau;}
+            }
+            default "during-irau";
+        }
+        leaf alternate-llc-xid-negotiation {
+            tailf:info "Alternate LLC XID negotiation. Default disable";
+            type enumeration {
+                enum "disable" {tailf:code-name mme-llc-alternate-llc-xid-negotiation-disable;}
+                enum "enable" {tailf:code-name mme-llc-alternate-llc-xid-negotiation-enable;}
+            }
+            default "disable";
+        }
+    } /* mme-llc */
+    list mme-llc-sapi {
+        tailf:alt-name "llc-sapi";
+        key "service-access-point-identifier"; 
+        max-elements 6;
+        tailf:validate llcSapiValidate {
+            tailf:call-once "true";
+        }
+        tailf:info "LLC SAPI";
+        leaf service-access-point-identifier {
+            tailf:info "Service Access Point Identifier (SAPI) of the Logical Link Control (LLC) protocol layer.";
+            type enumeration {
+                enum "1" {tailf:code-name mme-llc-sapi-service-access-point-identifier-1;}
+                enum "3" {tailf:code-name mme-llc-sapi-service-access-point-identifier-3;}
+                enum "5" {tailf:code-name mme-llc-sapi-service-access-point-identifier-5;}
+                enum "7" {tailf:code-name mme-llc-sapi-service-access-point-identifier-7;}
+                enum "9" {tailf:code-name mme-llc-sapi-service-access-point-identifier-9;}
+                enum "11" {tailf:code-name mme-llc-sapi-service-access-point-identifier-11;}
+            }
+            mandatory true;
+        }
+        leaf t200-retransmit-timer {
+            tailf:info "T200 retransmit timer. Default 50";
+            type uint16 {
+                range "1..4095";
+            }
+            default 50;
+        }
+        leaf n200-max-retransmits {
+            tailf:info "N200 maximum retransmits. Default 3";
+            type uint8 {
+                range "1..15";
+            }
+            default 3;
+        }
+        leaf n201-max-uinfo-field-length {
+            tailf:info "N201 maximum number of octets. Default 400";
+            type uint16 {
+                range "140..1520";
+            }
+            default 400;
+        }
+        leaf n201-max-iinfo-field-length {
+            tailf:info "Maximum number of octets allowed in Unnumbered (U) and Unconfirmed Information (UI) frames for that Service Access Point (SAP). Default 1503";
+            type uint16 {
+                range "140..1520";
+            }
+            default 1503;
+        }
+        leaf k-window-size-downlink {
+            tailf:info "Maximum number of outstanding unacknowledged sequenced Information (I) frames from the SGSN to the mobile for that SAP. Default 16";
+            type uint8 {
+                range "1..255";
+            }
+            default 16;
+        }
+        leaf k-window-size-uplink {
+            tailf:info "Maximum number of outstanding unacknowledged sequenced Information (I) frames from the mobile to the SGSN for that SAP. Default 16";
+            type uint8 {
+                range "1..255";
+            }
+            default 16;
+        }
+        leaf pdu-unconfirmed-info-lifetime {
+            tailf:info "PDU unconfirmed information lifetime. Default 100";
+            type uint16 {
+                range "1..6000";
+            }
+            default 100;
+        }
+    } /* mme-llc-sapi */
+    container mme-sndcp {
+        tailf:alt-name "sndcp";
+        presence "";
+        tailf:info "SubNetwork Data Convergence Protocol (SNDCP) layer configuration.";
+        leaf max-header-compression-entities {
+            tailf:info "Maximum number of header compression entities that can be allocated for the SD as a percentage of sd-capacity subs-per-su. Default 0";
+            type uint16 {
+                range "0..100";
+            }
+            default 0;
+        }
+        leaf allowable-compression-alg {
+            must "((current() != 'rfc1144') or (../max-header-compression-entities != '0'))" { 
+            error-message
+            "The 'max-header-compression-entities' attribute should be set to non-zero value if 'allowable-compression-alg' attribute is set to 'rfc1144'";
+        }
+        tailf:info "Supported header compression algorithms. Default none";
+        type enumeration {
+            enum "none" {tailf:code-name mme-sndcp-allowable-compression-alg-none;}
+            enum "rfc1144" {tailf:code-name mme-sndcp-allowable-compression-alg-rfc1144;}
+        }
+        default "none";
+    }
+    leaf compression-algorithms-in-irau {
+        type string {
+            pattern 'none|rfc1144|v42bis|rfc1144,v42bis|v42bis,rfc1144' {
+                tailf:info "Valid values are: one or both of rfc1144, v42bis, or none";
+            }
+        }
+        must "((contains(current(),'rfc1144') = 0) or (../max-header-compression-entities != '0'))" {
+            error-message
+            "The 'max-header-compression-entities' attribute should be set to non-zero value if 'compression-algorithms-in-irau' includes 'rfc1144'";
+        }
+        must "((contains(current(),'v42bis') = 0) or (../max-v42bis-entities != '0'))" {
+            error-message
+            "The 'max-v42bis-entities' attribute should be set to non-zero value if 'compression-algorithms-in-irau' includes 'v42bis'";
+        }
+        tailf:info "Compression algorithms that are proposed during IRAU. Valid values are: one or both of rfc1144,v42bis or none. Default none";
+        default "none";
+    }
+    leaf max-v42bis-entities {
+        tailf:info "Maximum number of V.42bis compression entities as a percentage of sd-capacity subs-per-su. Default 0";
+        type uint16 {
+            range "0..100";
+        }
+        default 0;
+    }
+    leaf v42bis-compression-direction {
+        tailf:info "V.42bis data compression direction. Default both";
+        type enumeration {
+            enum "none" {tailf:code-name mme-sndcp-v42bis-compression-direction-none;}
+            enum "from-ms" {tailf:code-name mme-sndcp-v42bis-compression-direction-from-ms;}
+            enum "to-ms" {tailf:code-name mme-sndcp-v42bis-compression-direction-to-ms;}
+            enum "both" {tailf:code-name mme-sndcp-v42bis-compression-direction-both;}
+        }
+        default "both";
+    }
+    leaf rfc1144-slots {
+        tailf:info "Number of TCP state slots used for the RFC 1144 header compression. Default 16";
+        type uint16 {
+            range "1..256";
+        }
+        default 16;
+    }
+    leaf v42bis-dictionary {
+        tailf:info "Maximum number of V.42bis codewords the SGSN supports. Default 512";
+        type enumeration {
+            enum "512" {tailf:code-name mme-sndcp-v42bis-dictionary-512;}
+            enum "1024" {tailf:code-name mme-sndcp-v42bis-dictionary-1024;}
+            enum "2048" {tailf:code-name mme-sndcp-v42bis-dictionary-2048;}
+            enum "4096" {tailf:code-name mme-sndcp-v42bis-dictionary-4096;}
+        }
+        default 512;
+    }
+    leaf v42bis-max-string-size {
+        tailf:info "Maximum number of characters allowed in a string represented by a codeword that the SGSN supports. Default 20";
+        type uint8 {
+            range "6..250";
+        }
+        default 20;
+    }
+    leaf sn-pdu-timer {
+        tailf:info "Timing when a complete N-PDU is received by SNDCP. Default 60";
+        type uint16 {
+            range "1..300";
+        }
+        default 60;
+    }
+} /* mme-sndcp */
+container mme-packet-flow-management {
+    tailf:alt-name "packet-flow-management";
+    presence "";
+    tailf:info "Packet Flow Management (PFM).";
+    leaf packet-flow-context {
+        tailf:info "Packet flow context functionality (PFC). Default disable";
+        type enumeration {
+            enum "disable" {tailf:code-name mme-packet-flow-management-packet-flow-context-disable;}
+            enum "enable" {tailf:code-name mme-packet-flow-management-packet-flow-context-enable;}
+        }
+        default "disable";
+    }
+    leaf pfc-flow-control {
+        tailf:info "Packet flow context flow control. Default disable";
+        type enumeration {
+            enum "disable" {tailf:code-name mme-packet-flow-management-pfc-flow-control-disable;}
+            enum "enable" {tailf:code-name mme-packet-flow-management-pfc-flow-control-enable;}
+        }
+        default "disable";
+    }
+    leaf pfc-flow-control-tf-timer {
+        tailf:info "PFC tf timer. Default 5";
+        type uint16 {
+            range "5..6000";
+        }
+        default 5;
+    }
+    leaf average-pfcs-per-mobile {
+        tailf:info "Average PFCs per mobile in tenths. Default 10";
+        type uint8 {
+            range "10..60";
+        }
+        default 10;
+    }
+    leaf t7-timer {
+        type string {
+            pattern '([0]([.][1-9])?|[1-9]([.][0-9])?|10([.]0)?)' {
+                tailf:info "Valid values are: 0.1 .. 10.0";
+            }
+        }
+        tailf:info "CREATE-BSS-PFC procedures timer. Default 5";
+        default "5";
+    }
+    leaf t7-retries {
+        tailf:info "CREATE-BSS-PFC retries. Default 3";
+        type uint32 {
+            range "0..6";
+        }
+        default 3;
+    }
+    leaf packet-flow-timer {
+        type string {
+            pattern '(([6-9])|([1-9][0-9]{1,3})|([1][0][0-9]{3})|([1][1][0][0-9]{2})|([1][1][1][0-5][0-9])|(11160)|(disable))' {
+                tailf:info "Valid values are: disable, 6..11160";
+            }
+        }
+        tailf:info "PFC timer. Default 40";
+        default "40";
+    }
+} /* mme-packet-flow-management */
+} /* gb */
+augment "/mme-sgsn/engineering" {           
+container mme-sd-capacity {
+    tailf:alt-name "sd-capacity";
+    presence "";
+    tailf:info "Sd-capacity configuration.";
+    leaf subs-per-su {
+        tailf:info "SD capacity per service-unit in thousand of subscribers. Default 1664";
+        type uint16 {
+            range "64..1664";
+        }
+        default 1664;
+    }
+} /* mme-sd-capacity */
+} /* engineering */     
+augment "/mme-sgsn/interface" {
+    container mme-gtp-u {
+        tailf:alt-name "gtp-u";
+        tailf:info "GTP user plane";
+        presence "";
+        
+        leaf iu-data-routing-instance {
+            tailf:info "Routing Instance associated with 'iu-data-ipaddress'";
+            type string {
+                length "1 .. 64";
+            }
+            mandatory true;
+        }
+        
+        leaf gn-data-routing-instance {
+            tailf:info "Routing Instance associated with 'gn-data-ipaddress'";
+            type string {
+                length "1 .. 64";
+            }
+            mandatory true;
+        }
+        
+        list unit {
+            key "unit-id"; 
+            max-elements 32;
+            
+            leaf unit-id {
+                tailf:info "GTP-U unit identifier";
+                type leafref {
+                    path "/mme-sgsn/system/data/unit/unit-id";
+                } 
+                mandatory true;
+            }  
+            
+            leaf iu-data-ipaddress {
+                tailf:info "IP address for Iu data plane";
+                type inet:ipv4-address;
+                mandatory true;
+            }  
+            
+            leaf gn-data-ipaddress {
+                tailf:info "IP address for Gn data plane";
+                type inet:ipv4-address;
+                mandatory true;
+            }  
+        } /* unit */
+    } /* gtp-u */
+} /* interface */
+} /*submodule*/
+

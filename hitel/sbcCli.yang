@@ -1,0 +1,177 @@
+//////////////////////////////////////////////////////////////////////////
+/// @file sbcCli.yang
+/// @brief Yang definitions for operational commands.
+///        "show mme-sgsn interface sbc cbc"
+///        "show mme-sgsn interface sbc sbc-if"
+///
+/// Maintained by: HCTA
+/// History:
+///
+/// yyyymmmdd Changed by      Change Reason
+/// --------- --------------- --------------------------------------------
+/// 2014Jan15 Hardik W        AGW-21104 - Initial development
+/// 2014Feb19 Akshay Wani     AGW-21104 - Added routing instance 2. 
+/// 2014Feb28 Adam Floyd      AGW-21104 - Updated callpoint info
+/// 2014Mar06 Sayali D        AGW-21104 - Sbc Reordering
+/// 2014Apr17 Adam Floyd      AGW-21104 - Add sort-flag to cp opaque data
+/// 2014Jun20 Vineeth Kumar   AGW-21834 - Moved message-logging to s1-if
+///                           and added sbc-type,warning-msg-ttl to sbc-if
+///                           and updated details for max-outstanding-requests
+/// 2014Aug15 Adam Floyd      AGW-23534 - Remove fake-key kludge
+/// 2014Sep15 Lakshmi Priya   AGW-22082 - Schema upgrade
+///
+/// Copyright (c) 2014 HCTA. All Rights Reserved.
+///
+/// CONFIDENTIALITY AND LIMITED USE
+///
+/// This software, including any software of third parties embodied herein,
+/// contains information and concepts which are confidential to HCTA
+/// and such third parties. This software is licensed for use
+/// solely in accordance with the terms and conditions of the applicable
+/// license agreement with HCTA or its authorized distributor.
+//////////////////////////////////////////////////////////////////////////
+submodule sbcCli{
+   belongs-to hcta-epc {
+      prefix epc;
+   }
+
+   import tailf-common {
+      prefix tailf;
+   }
+
+   include mmeSgsnConfig;
+   include sbcConfig;
+
+   import ietf-inet-types {
+      prefix inet;
+   }
+
+   augment "/mme-sgsn/interface/sbc" { 
+      list cbc {
+         tailf:info "CBC node status";
+         config false;
+         ordered-by user; // not for use with keyed lists
+
+         tailf:cli-no-key-completion;
+
+         tailf:callpoint cli_oper_show
+         {
+            // Callpoint Opaque Data Format (255 chars max):
+            // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+            tailf:opaque '0:mme-sgsn interface sbc cbc::1';
+         }
+
+         leaf ip-address1 {
+            type inet:ipv4-address;
+            tailf:display-groups "none detail";
+            tailf:info "IP Address.";
+         }
+         leaf ip-address2 {
+            type inet:ipv4-address;
+            tailf:display-groups "none detail";
+            tailf:info "IP Address.";
+         }
+         leaf port{
+            type uint16;
+            tailf:display-groups "none detail";
+            tailf:info "Port number.";
+         }
+      } /* list cbc */
+    
+      list sbc-if-oper {
+         tailf:alt-name "sbc-if";
+         tailf:info "SBc interface";
+         config false;
+         ordered-by user; // not for use with keyed lists
+
+         tailf:cli-no-key-completion;
+
+         tailf:callpoint cli_oper_show
+         {
+            // Callpoint Opaque Data Format (255 chars max):
+            // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+            tailf:opaque '0:mme-sgsn interface sbc sbc-if::1';
+         }
+
+         leaf sctp-profile {
+            type string;
+            tailf:display-groups "none detail";
+            tailf:info "The name of the sctp-profile used by sbc-if.";
+         }
+         leaf routing-instance1 {
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf routing-instance2 {
+            type string;
+            tailf:display-groups "none detail";
+         }
+         leaf ip-address1 {
+            type inet:ip-address;
+            tailf:display-groups "none detail";
+            tailf:info "IP address.";
+         }
+         leaf ip-address2 {
+            type inet:ip-address;
+            tailf:display-groups "none detail";
+            tailf:info "IP address.";
+         }
+         leaf port {
+            type uint16;
+            tailf:display-groups "none detail";
+            tailf:info "Port number.";
+         }
+         leaf dscp-mark {
+            type string;
+            tailf:display-groups "detail";
+            tailf:info "DSCP marking for the SBc Interface.";
+         }
+         leaf max-outstanding-requests {
+            type uint16;
+            tailf:display-groups "detail";
+            tailf:info "Maximum outstanding ETWS secondary Write-Replace Warning Requests allowed.";
+         }
+         leaf sbc-type {
+            type string;
+            tailf:display-groups "detail";
+            tailf:info "The type of SBC.";
+         }
+         leaf warning-message-ttl {
+            type uint8;
+            tailf:display-groups "detail";
+            tailf:info "Priority warning message time-to-live in minutes.";
+         }
+         leaf version {
+            type string;
+            tailf:display-groups "none detail";
+            tailf:info "3GPP spec applicable to this interface is TS29.168.";
+         }
+         leaf outstanding-requests {
+            type uint32;
+            tailf:display-groups "detail";
+            tailf:info "Number of ETWS secondary Write-Replace Warning Requests currently pending.";
+         }
+         leaf status-str {
+            tailf:alt-name "status";
+            type string;
+            tailf:display-groups "detail";
+            tailf:info "SBc interface status.";
+         }
+         leaf most-recent-serial-number {
+            type uint16;
+            tailf:display-groups "detail";
+            tailf:info "Most recent Write-Replace Warning Request serial number.";
+         }
+         leaf most-recent-timestamp {
+            type string;
+            tailf:display-groups "detail";
+            tailf:info "Most recent Write-Replace Warning Request timestamp.";
+         }
+         leaf nbr-cbc-assoc {
+            type uint8;
+            tailf:display-groups "none detail";
+            tailf:info "The number of CBCs associated with the sbc-if.";
+         }
+      } /* sbc-if-oper */ 
+   }
+}

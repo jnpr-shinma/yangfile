@@ -1,0 +1,94 @@
+/* agwLiConfig.yang generated from agwLiConfig.xml */
+submodule agwLiConfig{
+
+belongs-to hcta-epc {
+    prefix epc;
+}
+
+import tailf-common {
+    prefix tailf;
+}
+
+include mmeSgsnConfig;
+
+include fgwConfig;
+
+include cmdCommonHcta;
+import ietf-inet-types {
+    prefix inet;
+}
+augment "/mme-sgsn/interface" {
+    container x {
+        tailf:info "Legal Intercept Interface";
+        presence ""; 
+        container agw-x {
+            tailf:alt-name "x-if";
+            tailf:validate liValidate;
+            presence "";
+            must "count(../../../feature/mme-feature-control[name = 'lawful-intercept' and status-field = 'on']) != 0" {
+                error-message
+                "If 'x-if' object exists then 'mme-sgsn feature control lawful-intercept' must be 'on'";
+            }
+            must "count(../agw-lig) != 0" {
+                error-message
+                "If 'x-if' object exists then 'mme-sgsn interface x lig' must be configured";
+            }
+            tailf:info "LI X interface.";
+            uses routing-instance-name;
+            leaf ip-address {
+                tailf:info "VR IP address.";
+                type inet:ip-address;
+                mandatory true;
+            }
+            leaf max-active-targets {
+                tailf:info "Maximum number of simultaneously monitored targets .";
+                type uint16 {
+                    range "256..32000";
+                }
+                mandatory true;
+            }
+            leaf version {
+                tailf:info "3GPP spec applicable to this interface is TS33.107. Default 10.4.0";
+                type enumeration {
+                    enum "7" {tailf:code-name mme-sgsn-interface-x-x-if-version_7 ;}
+                    enum "9" {tailf:code-name mme-sgsn-interface-x-x-if-version_9;}
+                    enum "10.4.0" {tailf:code-name mme-sgsn-interface-x-x-if-version_10_4_0;}         
+                }
+                default "10.4.0";
+                must "((current() != '7') or (count(../../../s1/mme-s1-interface) = 0) or (count(../../../gb/mme-gb-if) != 0) or (count(../../../iu/mme-iu-if) != 0))" {
+                    error-message
+                    "If 'mme-sgsn interface s1 s1-if' is configured and there is no 'mme-sgsn interface gb gb-if' or 'mme-sgsn interface iu iu-if' configured, the system is in standalone MME mode then 'version' must be '9' or greater";
+                }
+            }                                                                       
+            uses dscp;
+        } /* agw-x */
+        container agw-lig {
+            tailf:alt-name "lig";
+            tailf:validate liValidate;
+            presence "";
+            must "count(../agw-x) != 0" {
+                error-message
+                "If 'lig' object exists then 'mme-sgsn interface x x-if' must be configured";
+            }
+            must "count(../../../feature/mme-feature-control[name = 'lawful-intercept' and status-field = 'on']) != 0" {
+                error-message
+                "If 'lig' object exists then 'mme-sgsn feature control lawful-intercept' must be 'on'";
+            }
+            tailf:info "LIG.";
+            leaf admf-ip-address {
+                tailf:info "ADMF IP address.";
+                type inet:ip-address;
+                mandatory true;
+            }
+            leaf admf-port {
+                tailf:info "ADMF TCP port. Default 2000";
+                type uint16 {
+                    range "1..65535";
+                }
+                default 2000;
+            }
+        } /* agw-lig */
+    } /* x */
+} /* interface */
+} /*submodule*/
+

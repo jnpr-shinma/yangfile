@@ -1,0 +1,248 @@
+/* fgwS1MmeConfig.yang generated from fgwS1MmeConfig.xml */
+submodule fgwS1MmeConfig{
+
+belongs-to hcta-epc {
+    prefix epc;
+}
+
+import tailf-common {
+    prefix tailf;
+}
+
+include mmeSgsnConfig;
+
+include fgwConfig;
+
+
+include s1MasterConfig;
+include cmdCommonHcta; 
+import ietf-inet-types {
+    prefix inet;
+}
+
+augment "/fgw/interface/s1" {
+    container mme-s1-mme-if {
+        tailf:alt-name "s1-mme-if";
+        presence "";	  
+        tailf:info "S1 interface towards MME - local endpoint";
+        uses routing-instance-name-multiple;	    
+        leaf sctp-profile {
+            must "count(../../../mme-sctp-profile[name = current()]) != 0" {
+                error-message
+                "There is no 'fgw interface sctp' object with this 'sctp-profile'.";  
+                tailf:dependency "../../../mme-sctp-profile";
+            }
+            tailf:info "SCTP protocol layer used by S1";
+            type string {
+                length "1..32";
+            }
+            mandatory true;
+        }
+        leaf ip-address1 {
+            /*yang fixme
+            must "../ip-address1 != 0.0.0.0 " {
+                error-message
+                "The 'The 'ip-address1' must not be '0.0.0.0'";  
+                tailf:dependency ".";
+            }
+            must "../ip-address1 != 0:0:0:0:0:0:0:0" {
+                error-message
+                "The 'ip-address1' must not be '0:0:0:0:0:0:0:0'";  
+                tailf:dependency ".";
+            }
+            must "../ip-address2 != ../ip-address1" {
+                error-message
+                "The 'The 'ip-address1' and 'ip-address2' configured must not be same";  
+                tailf:dependency "../";
+            }
+            */
+            tailf:info "IP address1.";
+            type inet:ip-address;
+            mandatory true;
+        }
+        leaf ip-address2 {
+            tailf:info "IP address2. Default 0.0.0.0";
+            type inet:ip-address;
+            default 0.0.0.0;
+        }
+        leaf initial-ue-response-timer {
+            tailf:info "Intial UE response timer. Default 5";
+            type uint8 {
+                range "1..30";
+            }
+            default 5;
+        }
+        leaf s1-setup-response-timer {
+            tailf:info "S1 setup response timer. Default 5";
+            type uint8 {
+                range "1..30";
+            }
+            default 5;
+        }
+        leaf ho-cancel-ack-timer {
+            tailf:info "HO cancel ack timer. Default 5";
+            type uint8 {
+                range "1..30";
+            }
+            default 5;
+        }
+        leaf path-switch-response-timer {
+            tailf:info "Path switch response timer. Default 5";
+            type uint8 {
+                range "1..30";
+            }
+            default 5;
+        }
+        leaf time-to-wait {
+            tailf:info "Time to wait. Default 60";
+            type enumeration {
+                enum "1" {tailf:code-name mme-s1-mme-if-time-to-wait-1;}
+                enum "2" {tailf:code-name mme-s1-mme-if-time-to-wait-2;}
+                enum "5" {tailf:code-name mme-s1-mme-if-time-to-wait-5;}
+                enum "10" {tailf:code-name mme-s1-mme-if-time-to-wait-10;}
+                enum "20" {tailf:code-name mme-s1-mme-if-time-to-wait-20;}
+                enum "60" {tailf:code-name mme-s1-mme-if-time-to-wait-60;}
+            }
+            default 60;
+        }
+        uses dscp;
+        leaf version {
+            tailf:info "Standard version of interface. Default 10.6.0";
+            type enumeration {
+                enum "10.6.0" {tailf:code-name mme-s1-mme-if-version-10-6-0;}
+            }
+            default "10.6.0";
+        }
+    } /* mme-s1-mme-if */
+    list mme-s1-mme-peer {
+        tailf:alt-name "s1-mme-peer";
+        key "index";	
+        max-elements 100;    
+        tailf:info "S1 interface towards MME - remote peer";
+        leaf index {
+            tailf:info "Unique numeric identifier for MME peer of FGW.";
+            type uint8 {
+                range "1..100";
+            }
+            mandatory true;
+        }
+        uses fgw-callp-service-identifier; 
+        leaf ip-address1 {
+            tailf:info "IP address of S1 MME peer.";
+            type inet:ip-address;
+            mandatory true;
+        }
+        leaf ip-address2 {
+            tailf:info "IP address2 of S1 MME peer. Default 0.0.0.0";
+            type inet:ip-address;
+            default 0.0.0.0;
+        }
+        leaf initial-ue-setup-rate {
+            tailf:info "Initial UE setup rate. Default 400";
+            type uint16 {
+                range "10..1000";
+            }
+            default 400;
+        }
+        leaf remote-port {
+            tailf:info "Port of S1 MME peer. Default 36412";
+            type uint16 {
+                range "1..65535";
+            }
+            default 36412;
+        }
+    } /* mme-s1-mme-peer */
+    list mme-s1-mme-association {
+        tailf:alt-name "s1-mme-association";
+        key "index";	
+        max-elements 1000;
+        unique local-port;    
+        tailf:info "S1-MME peer association";
+        leaf index {
+            tailf:info "Unique numeric identifier for MME peer association of FGW";
+            type uint16 {
+                range "1..1000";
+            }
+            mandatory true;
+        }
+        leaf s1-mme-peer-index {
+            must "count(../../mme-s1-mme-peer[index = current()]) != 0" {
+                error-message
+                "There is no 'fgw interface s1 s1-mme-peer' object with this 's1-mme-peer-index'.";  
+                tailf:dependency "../../mme-s1-mme-peer";
+            }
+            tailf:info "S1 MME peer index.";
+            type uint8 {
+                range "1..100";
+            }
+            mandatory true;
+        }
+        leaf s1-mme-assoc-profile-index {
+            must "count(../../mme-s1-mme-association-profile[index = current()]) != 0" {
+                error-message
+                "There is no 'fgw interface s1 s1-mme-association-profile' object with this 's1-mme-assoc-profile-index'.";  
+                tailf:dependency "../../mme-s1-mme-association-profile";
+            }
+            tailf:info "S1 MME association profile index.";
+            type uint8 {
+                range "1..10";
+            }
+            mandatory true;
+        }
+        leaf mme-area-index {
+            must "count(../../../../service-area/mme-mme-area[index = current()]) != 0" {
+                error-message
+                "There is no 'fgw service-area mme-area' object with this 'mme-area-index'.";  
+                tailf:dependency "../../../../service-area/mme-mme-area";
+            }
+            tailf:info "MME area that this association services.";
+            type uint8 {
+                range "1..100";
+            }
+            mandatory true;
+        }
+        leaf local-port {
+            tailf:info "Local port used in s1ap assoc.";
+            type uint16 {
+                range "3000..65534";
+            }
+            mandatory true;
+        }
+    } /* mme-s1-mme-association */
+    list mme-s1-mme-association-profile {
+        tailf:alt-name "s1-mme-association-profile";
+        key "index";	
+        max-elements 10;    
+        tailf:info "S1-MME profile info for MME to differentiate FGW associations.";
+        leaf index {
+            tailf:info "Unique identifier for this profile.";
+            type uint8 {
+                range "1..10";
+            }
+            mandatory true;
+        }
+        leaf plmn-id {
+            type string {
+                pattern '[0-9]*' {
+                    tailf:info "Valid values are: digits";
+                }  
+            }
+            tailf:info "PLMN presented to MME from FGW.";
+            mandatory true;
+        }
+        leaf enodeb-id {
+            tailf:info "ENodeB identifier.";
+            type uint32;
+            mandatory true;
+        }
+        leaf enodeb-name {
+            tailf:info "ENodeB name.";
+            type string {
+                length "1..24";
+            }
+            mandatory true;
+        }
+    } /* mme-s1-mme-association-profile */
+} /* interface*/
+} /*submodule*/
+

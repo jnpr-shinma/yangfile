@@ -1,0 +1,89 @@
+//////////////////////////////////////////////////////////////////////////
+/// @file slsCli.yang
+/// @brief Yang definitions for operational commands.
+///        "show mme-sgsn interface sls e-smlc"
+///
+/// Maintained by: HCTA
+/// History:
+///
+/// yyyymmmdd Changed by      Change Reason
+/// --------- --------------- --------------------------------------------
+/// 2014Jun10 Trecila F       AGW-16101 - Initial creation
+/// 2014Aug15 Adam Floyd      AGW-23534 - Remove fake-key kludge
+/// 2014Sep15 Lakshmi Priya   AGW-22082 - Schema upgrade
+///
+/// Copyright (c) 2014 HCTA. All Rights Reserved.
+///
+/// CONFIDENTIALITY AND LIMITED USE
+///
+/// This software, including any software of third parties embodied herein,
+/// contains information and concepts which are confidential to HCTA
+/// and such third parties. This software is licensed for use
+/// solely in accordance with the terms and conditions of the applicable
+/// license agreement with HCTA or its authorized distributor.
+//////////////////////////////////////////////////////////////////////////
+submodule slsCli{
+   belongs-to hcta-epc {
+      prefix epc;
+   }
+
+   import tailf-common {
+       prefix tailf;
+   }
+   import ietf-inet-types {
+      prefix inet;
+   }
+
+   include mmeSgsnConfig;
+   include slsConfig;
+
+   augment "/mme-sgsn/interface/sls" {
+      list e-smlc-oper {
+         tailf:alt-name "e-smlc";
+         tailf:info "E-SMLC";
+         config false;
+         ordered-by user; // not for use with keyed lists
+
+         tailf:cli-no-key-completion;
+
+         tailf:callpoint cli_oper_show
+         {
+            // Callpoint Opaque Data Format (255 chars max):
+            // 'min-keys:command path:keyName/keyType keyName/keyType ...:sort-flag(0|1)';
+            tailf:opaque '0:mme-sgsn interface sls e-smlc::1';
+         }
+
+         leaf e-smlc-id {
+            type uint16;
+            tailf:display-groups "none detail";
+            tailf:info "Index of the E-SMLC, char";
+         }
+         leaf callp-service-id {
+            type uint16;
+            tailf:display-groups "none detail";
+            tailf:info "Call Processing VM identifier.";
+         }
+         leaf e-smlc-pool {
+            type string;
+            tailf:display-groups "none detail";
+            tailf:info "The E-SMLC pool name.";
+         }
+         leaf ip-address1 {
+            type inet:ip-address;
+            tailf:display-groups "none detail";
+            tailf:info "The IP address of the E-SMLC";
+         }
+         leaf ip-address2 {
+            type inet:ip-address;
+            tailf:display-groups "none detail";
+            tailf:info "Secondary IP address";
+         }
+         leaf status-str {
+            tailf:alt-name "connection-status";
+            type string;
+            tailf:display-groups "none detail";
+            tailf:info "Connection status";
+         }
+      }
+   }
+}
