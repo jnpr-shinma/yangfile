@@ -1,0 +1,1 @@
+pyang -f tree common-module.yang  --tree-depth=2 --tree-path device/image

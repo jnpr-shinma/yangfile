@@ -1,0 +1,82 @@
+submodule template-management {
+    yang-version 1;
+    belongs-to "common-module" {
+        prefix "common-module";
+    }
+    //  import ietf-inet-types { prefix "inet"; }
+    import ietf-yang-types { prefix "yang"; }
+    import iq-ifmap-types { prefix "ifmap"; }
+    include device-management;
+    contact "JUNOS Space <jspace@juniper.net>";
+    organization "Juniper Networks";
+    description "YANG definition for the template-management";
+    revision "2015-02-05" {
+        description "Initial revision";
+    }
+
+    list template {
+        description "Device template";
+        uses ifmap:Identity;
+        key uuid;
+        leaf description {
+            type string;
+            description "Description";
+        }
+        leaf last-updated-by {
+            type uint32;
+            description "Last updated by";
+        }
+        leaf display-state {
+            type uint32;
+            description "Display state";
+        }
+        leaf last-upload-time {
+            type yang:timestamp;
+            description "last upload time";
+        }
+        leaf config-type {
+            type configTypeEnum;
+            description "Config type";
+        }
+
+        list device {
+            uses ifmap:RefLink;
+            key to;
+            leaf to {
+                type deviceIdRef;
+            }
+
+            leaf deployment-status {
+                type string;
+                description "Deployment Status";
+            }
+        }
+    }
+
+    augment "/device" {
+        list template {
+            uses ifmap:RefLink;
+            key to;
+            leaf to {
+                type templateIdRef;
+            }
+            leaf deployment-status {
+                type string;
+                description "Deployment Status";
+            }
+        }
+    }
+
+    typedef configTypeEnum {
+        type enumeration {
+            enum PRIMARY {
+                description "Primary";
+            }
+        }
+    }
+    typedef templateIdRef {
+        type leafref {
+            path "/template/uuid";
+        }
+    }
+}
